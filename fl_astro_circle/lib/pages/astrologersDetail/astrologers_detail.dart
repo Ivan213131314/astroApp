@@ -107,8 +107,9 @@ class _AstrologerDetailScreenState extends State<AstrologerDetailScreen> {
           ),
           heightSpace,
           heightSpace,
-          similarTitle(),
-          astrologersListContent(size),
+          // Секция похожих астрологов убрана
+          // similarTitle(),
+          // astrologersListContent(size),
         ],
       ),
       bottomNavigationBar: bottomButtonBar(size),

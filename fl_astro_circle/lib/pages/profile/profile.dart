@@ -33,10 +33,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         children: [
           userDetail(size),
           heightSpace,
-          iconListTile(CupertinoIcons.person_3,
-              getTranslation(context, 'profile.astrologers'), () {
-            Navigator.pushNamed(context, '/astrologers');
-          }),
+          // Пункт меню "Astrologers" убран
+          // iconListTile(CupertinoIcons.person_3,
+          //     getTranslation(context, 'profile.astrologers'), () {
+          //   Navigator.pushNamed(context, '/astrologers');
+          // }),
           imageListTile("assets/profile/compare.png",
               getTranslation(context, 'profile.compatibility'), () {
             Navigator.pushNamed(context, '/compatibility');

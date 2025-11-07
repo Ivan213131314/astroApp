@@ -181,12 +181,13 @@ class _HomeScreenState extends State<HomeScreen> {
           horoscopeListContent(),
           heightSpace,
           heightSpace,
-          titleWidget(getTranslation(context, 'home.top_astrologers'), () {
-            Navigator.pushNamed(context, '/astrologers');
-          }),
-          heightSpace,
-          astrologersListContent(size),
-          heightSpace,
+          // Секция астрологов убрана
+          // titleWidget(getTranslation(context, 'home.top_astrologers'), () {
+          //   Navigator.pushNamed(context, '/astrologers');
+          // }),
+          // heightSpace,
+          // astrologersListContent(size),
+          // heightSpace,
           otherServicesTitle(),
           otherServicesListContent(),
           heightSpace,
