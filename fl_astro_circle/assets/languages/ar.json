@@ -1,0 +1,254 @@
+{
+    "exit_app": {
+        "exit_text": "اضغط مرة أخرى للخروج"
+    },
+    "astrologers": {
+        "astrologers": "المنجمين",
+        "charge": "تكلفة"
+    },
+    "astrologer_detail": {
+        "about_me": "ْعَنِّي",
+        "chat": "محادثة",
+        "call": "يتصل",
+        "video_call": "مكالمة فيديو",
+        "min": "دقيقة",
+        "connect": "يتصل",
+        "title": "مستشارون مماثلون",
+        "review": "مراجعة",
+        "see_all": "اظهار الكل",
+        "charge": "تكلفة"
+    },
+    "login": {
+        "text": "*نرسل OTP للتحقق",
+        "mobile_number": "رقم الهاتف المحمول",
+        "login": "تسجيل الدخول",
+        "enter_number": "أدخل رقم هاتفك المحمول"
+    },
+    "register": {
+        "register": "يسجل",
+        "email_address": "عنوان البريد الإلكتروني",
+        "enter_email": "أدخل عنوان بريدك الالكتروني",
+        "mobile_number": "رقم الهاتف المحمول",
+        "enter_number": "أدخل رقم هاتفك المحمول",
+        "user_name": "اسم المستخدم",
+        "enter_name": "أدخل أسمك",
+        "welcome_text": "مرحبًا بك ، يرجى إنشاء حسابك لمتابعة استخدام هذا التطبيق"
+    },
+    "verification": {
+        "resend": "إعادة إرسال",
+        "verify": "يؤكد",
+        "please_wait": "انتظر من فضلك",
+        "confirm": "تم إرسال رمز التأكيد إليك على هاتفك المحمول رقم +91 1234567890",
+        "verification": "تَحَقّق"
+    },
+    "chat": {
+        "active_now": "نشط الان",
+        "type_here": "اكتب النص هنا...."
+    },
+    "compatibility": {
+        "go": "يذهب",
+        "text": "تحقق من الحب وتوافق الأعمال",
+        "compatibility": "التوافق"
+    },
+    "compatibility_detail": {
+        "love": "حب",
+        "business": "عمل",
+        "health": "صحة",
+        "compatibility": "التوافق",
+        "overall_horoscope": "برجك العام",
+        "love_passion": "عاطفة الحب",
+        "business_career": "العمل الوظيفي",
+        "libra": "الميزان",
+        "aries": "بُرْجُ الحَمَل"
+    },
+    "horoscope_list": {
+        "aries": "بُرْجُ الحَمَل",
+        "taurus": "برج الثور",
+        "gemini": "تَوأَم",
+        "cancer": "سرطان",
+        "leo": "ليو",
+        "virgo": "بُرْجُ العَذْراء",
+        "libra": "الميزان",
+        "scorpio": "العقرب",
+        "sagittarius": "برج القوس",
+        "capricorn": "بُرْجُ الجَدْي",
+        "aquarius": "برج الدلو",
+        "pisces": "برج الحوت"
+    },
+    "home": {
+        "hello_user": "مرحبا المستخدم",
+        "welcome_text": "مرحبا بك في",
+        "horoscope": "خريطة الابراج",
+        "top_astrologers": "أفضل المنجمين",
+        "other_services": "خدمات أخرى",
+        "connect": "يتصل",
+        "see_all": "اظهار الكل",
+        "talk_to_astrology": "تحدث إلى علم التنجيم",
+        "change_life": "غير حياتك كما تريد",
+        "start_now": "ابدأ الآن"
+    },
+    "horoscope": {
+        "horoscope": "خريطة الابراج"
+    },
+    "horoscope_detail": {
+        "today": "اليوم",
+        "tomorrow": "غداً",
+        "this_week": "هذا الاسبوع",
+        "love": "حب",
+        "business": "عمل",
+        "health": "صحة",
+        "horoscope": "خريطة الابراج",
+        "overall_horoscope": "برجك العام",
+        "love_passion": "عاطفة الحب",
+        "business_career": "العمل الوظيفي",
+        "virgo": "بُرْجُ العَذْراء"
+    },
+    "master_card": {
+        "payment_method": "طريقة الدفع او السداد",
+        "continue": "يكمل",
+        "enter_cardholder_name": "أدخل اسم حامل البطاقة",
+        "name_on_card": "الاسم على البطاقة",
+        "enter_number": "أدخل رقم البطاقة",
+        "card_number": "رقم البطاقة",
+        "expire_date": "تاريخ انتهاء الصلاحية",
+        "cvv": "cvv",
+        "credit_card": "بطاقة إئتمان"
+    },
+    "message": {
+        "message": "رسالة",
+        "search": "يبحث"
+    },
+    "natal_chart": {
+        "natal_chart": "الولادة الرسم البياني",
+        "title": "حساب الرسم البياني الولادة",
+        "calculate": "حساب",
+        "birth_location": "موقع الميلاد",
+        "enter_birth_location": "أدخل موقع ميلادك",
+        "time_of_birth": "وقت الميلاد",
+        "select_time": "حدد وقت الولادة",
+        "time": "وقت",
+        "date_birth": "تاريخ الميلاد",
+        "select_date": "حدد تاريخ الميلاد",
+        "date": "تاريخ",
+        "cancel": "يلغي",
+        "proceed": "يتابع",
+        "name": "اسم",
+        "enter_name": "أدخل أسمك"
+    },
+    "natal_chart_detail": {
+        "planets": "الكواكب",
+        "position_degree": "موقف درجة",
+        "sign": "لافتة",
+        "position_hour": "موقف الساعة",
+        "natal_chart": "الولادة الرسم البياني",
+        "title1": "الشمس في علامة السرطان",
+        "title2": "منتصف السماء في علامة الميزان",
+        "title3": "الصعود في علامة ليو",
+        "show_less": "تظهر أقل",
+        "read_more": "اقرأ أكثر"
+    },
+    "notification": {
+        "notification": "إشعار",
+        "no_notification": "لا يوجد إشعار جديد",
+        "remove_notification": "تمت إزالته من الإخطار"
+    },
+    "numorology": {
+        "number_effect": "تعرف كيف تأثير العدد",
+        "numorology": "الأعداد",
+        "select_date": "حدد تاريخ الميلاد الخاص بك",
+        "go": "يذهب"
+    },
+    "numorology_detail": {
+        "funny": "مضحك",
+        "obedient": "مطيع",
+        "honest": "أمين",
+        "responsible": "مسؤول",
+        "hard_working": "العمل الجاد",
+        "smart": "ذكي",
+        "numorology": "الأعداد",
+        "about_character": "حول الطابع",
+        "about_behavior": "حول السلوك",
+        "lucky_number": "رقمك المحظوظ"
+    },
+    "onboarding": {
+        "content_text": "برجك الشخصي في هاتفك المحمول. تعرف على المزيد عن نفسك بحساب الخبراء لدينا.",
+        "the_astrology": "علم التنجيم",
+        "get_started": "البدء"
+    },
+    "payment_method": {
+        "payment_method": "طريقة الدفع او السداد",
+        "continue": "يكمل"
+    },
+    "plam_reader": {
+        "take_photo_hand": "التقط صورة يدك",
+        "take_photo": "تصوير"
+    },
+    "plam_reader_detail": {
+        "horoscope": "خريطة الابراج",
+        "life_line": "خط الحياة",
+        "heart_line": "خط القلب",
+        "money_line": "خط المال",
+        "health_line": "خط الصحة",
+        "show_less": "تظهر أقل",
+        "read_more": "اقرأ أكثر",
+        "personal_analysis": "تحليلك الشخصي"
+    },
+    "about": {
+        "about_us": "معلومات عنا"
+    },
+    "edit_profile": {
+        "edit_profile": "تعديل الملف الشخصي",
+        "update": "تحديث",
+        "email_address": "عنوان البريد الإلكتروني",
+        "enter_email": "أدخل عنوان البريد الالكتروني",
+        "mobile_number": "رقم الهاتف المحمول",
+        "enter_number": "أدخل رقم الهاتف المحمول",
+        "user_name": "اسم المستخدم",
+        "enter_name": "أدخل أسمك",
+        "change_profile_Photo": "تغيير صورة الملف الشخصي",
+        "camera": "آلة تصوير",
+        "gallery": "صالة عرض",
+        "remove_image": "إزالة الصورة"
+    },
+    "language": {
+        "language": "لغة",
+        "update": "تحديث"
+    },
+    "profile": {
+        "profile": "حساب تعريفي",
+        "astrologers": "المنجمين",
+        "compatibility": "التوافق",
+        "numorology": "الأعداد",
+        "plam_reader": "قارئ النخيل",
+        "netal_chart": "الولادة الرسم البياني",
+        "language": "لغة",
+        "about_us": "معلومات عنا",
+        "subscribe": "يشترك",
+        "logout": "تسجيل خروج",
+        "logout_text": "هل أنت متأكد أنك تريد تسجيل الخروج؟",
+        "no": "لا",
+        "yes": "نعم"
+    },
+    "subscribe": {
+        "content_text": "أنت لا تشترك.حدد خطتك واحصل على المزيد من الفوائد.",
+        "subscribe_plans": "اشترك في الخطط",
+        "month": "شهر",
+        "subscribe": "يشترك",
+        "detail_horoscope": "تفاصيل برجك",
+        "numorology_feature": "مستقبل الأعداد",
+        "compatibility_feature": "ميزة التوافق",
+        "plam_feature": "ميزة قارئ النخيل"
+    },
+    "review": {
+        "review": "مراجعة"
+    },
+    "search": {
+        "search": "يبحث",
+        "recent_search": "البحث الأخير",
+        "clear_all": "امسح الكل"
+    },
+    "success": {
+        "congratulation_text": "تهنئة خطة شهر واحد نشطة بنجاح",
+        "back_to_home": "العودة إلى المنزل"
+    }
+}

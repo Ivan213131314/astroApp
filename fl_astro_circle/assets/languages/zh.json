@@ -1,0 +1,254 @@
+{
+    "exit_app": {
+        "exit_text": "再次向后退出"
+    },
+    "astrologers": {
+        "astrologers": "占星家",
+        "charge": "收费"
+    },
+    "astrologer_detail": {
+        "about_me": "关于我",
+        "chat": "聊天",
+        "call": "称呼",
+        "video_call": "视频电话",
+        "min": "最小",
+        "connect": "连接",
+        "title": "类似的顾问",
+        "review": "审查",
+        "see_all": "查看全部",
+        "charge": "收费"
+    },
+    "login": {
+        "text": "*我们正在发送OTP进行验证",
+        "mobile_number": "手机号码",
+        "login": "登录",
+        "enter_number": "输入你的手机号码"
+    },
+    "register": {
+        "register": "登记",
+        "email_address": "电子邮件地址",
+        "enter_email": "输入你的电子邮箱地址",
+        "mobile_number": "手机号码",
+        "enter_number": "输入你的手机号码",
+        "user_name": "用户名",
+        "enter_name": "输入你的名字",
+        "welcome_text": "欢迎创建您的帐户以继续使用此应用"
+    },
+    "verification": {
+        "resend": "重发",
+        "verify": "核实",
+        "please_wait": "请稍等",
+        "confirm": "确认代码已在您的手机NO +91 1234567890上发送给您",
+        "verification": "确认"
+    },
+    "chat": {
+        "active_now": "现在激活",
+        "type_here": "在此输入文字...."
+    },
+    "compatibility": {
+        "go": "去",
+        "text": "查看爱情和业务兼容性",
+        "compatibility": "兼容性"
+    },
+    "compatibility_detail": {
+        "love": "爱",
+        "business": "商业",
+        "health": "健康",
+        "compatibility": "兼容性",
+        "overall_horoscope": "整体星座",
+        "love_passion": "爱与激情",
+        "business_career": "商业和职业",
+        "libra": "天秤座",
+        "aries": "白羊座"
+    },
+    "horoscope_list": {
+        "aries": "白羊座",
+        "taurus": "金牛座",
+        "gemini": "双子座",
+        "cancer": "癌症",
+        "leo": "狮子座",
+        "virgo": "处女座",
+        "libra": "天秤座",
+        "scorpio": "天蝎座",
+        "sagittarius": "射手座",
+        "capricorn": "摩ri座",
+        "aquarius": "水瓶座",
+        "pisces": "双鱼座"
+    },
+    "home": {
+        "hello_user": "您好用户",
+        "welcome_text": "欢迎来到",
+        "horoscope": "星座",
+        "top_astrologers": "顶级占星家",
+        "other_services": "其他服务",
+        "connect": "连接",
+        "see_all": "查看全部",
+        "talk_to_astrology": "与占星术交谈",
+        "change_life": "改变自己的生活",
+        "start_now": "现在开始"
+    },
+    "horoscope": {
+        "horoscope": "星座"
+    },
+    "horoscope_detail": {
+        "today": "今天",
+        "tomorrow": "明天",
+        "this_week": "本星期",
+        "love": "爱",
+        "business": "商业",
+        "health": "健康",
+        "horoscope": "星座",
+        "overall_horoscope": "整体星座",
+        "love_passion": "爱与激情",
+        "business_career": "商业和职业",
+        "virgo": "处女座"
+    },
+    "master_card": {
+        "payment_method": "付款方式",
+        "continue": "继续",
+        "enter_cardholder_name": "输入卡持有人名称",
+        "name_on_card": "卡片上的名字",
+        "enter_number": "输入卡号",
+        "card_number": "卡号",
+        "expire_date": "到期日期",
+        "cvv": "cvv",
+        "credit_card": "信用卡"
+    },
+    "message": {
+        "message": "信息",
+        "search": "搜索"
+    },
+    "natal_chart": {
+        "natal_chart": "出生图",
+        "title": "出生图计算",
+        "calculate": "计算",
+        "birth_location": "出生地",
+        "enter_birth_location": "输入您的出生地",
+        "time_of_birth": "出生时间",
+        "select_time": "选择出生时间",
+        "time": "时间",
+        "date_birth": "出生日期",
+        "select_date": "选择出生日期",
+        "date": "日期",
+        "cancel": "取消",
+        "proceed": "继续",
+        "name": "姓名",
+        "enter_name": "输入你的名字"
+    },
+    "natal_chart_detail": {
+        "planets": "行星",
+        "position_degree": "学位的位置",
+        "sign": "符号",
+        "position_hour": "小时的位置",
+        "natal_chart": "出生图",
+        "title1": "癌症迹象的太阳",
+        "title2": "天秤座标志的天空中间",
+        "title3": "狮子座的标志上升",
+        "show_less": "显示较少",
+        "read_more": "阅读更多"
+    },
+    "notification": {
+        "notification": "通知",
+        "no_notification": "没有新的通知",
+        "remove_notification": "从通知中删除"
+    },
+    "numorology": {
+        "number_effect": "知道数字效果如何",
+        "numorology": "命理学",
+        "select_date": "选择您的生日",
+        "go": "去"
+    },
+    "numorology_detail": {
+        "funny": "有趣的",
+        "obedient": "听话",
+        "honest": "诚实的",
+        "responsible": "负责任的",
+        "hard_working": "任劳任怨",
+        "smart": "聪明的",
+        "numorology": "命理学",
+        "about_character": "关于角色",
+        "about_behavior": "关于行为",
+        "lucky_number": "您的幸运号码"
+    },
+    "onboarding": {
+        "content_text": "您在手机中的个人星座。通过我们的专家计算，了解更多有关自己的信息。",
+        "the_astrology": "占星术",
+        "get_started": "开始"
+    },
+    "payment_method": {
+        "payment_method": "付款方式",
+        "continue": "继续"
+    },
+    "plam_reader": {
+        "take_photo_hand": "拍照",
+        "take_photo": "拍照"
+    },
+    "plam_reader_detail": {
+        "horoscope": "星座",
+        "life_line": "生命线",
+        "heart_line": "心线",
+        "money_line": "钱线",
+        "health_line": "健康线",
+        "show_less": "显示较少",
+        "read_more": "阅读更多",
+        "personal_analysis": "您的个人分析"
+    },
+    "about": {
+        "about_us": "关于我们"
+    },
+    "edit_profile": {
+        "edit_profile": "编辑个人资料",
+        "update": "更新",
+        "email_address": "电子邮件地址",
+        "enter_email": "请输入电邮地址",
+        "mobile_number": "手机号码",
+        "enter_number": "输入手机号码",
+        "user_name": "用户名",
+        "enter_name": "输入你的名字",
+        "change_profile_Photo": "更改个人资料照片",
+        "camera": "相机",
+        "gallery": "画廊",
+        "remove_image": "删除图像"
+    },
+    "language": {
+        "language": "语言",
+        "update": "更新"
+    },
+    "profile": {
+        "profile": "轮廓",
+        "astrologers": "占星家",
+        "compatibility": "兼容性",
+        "numorology": "命理学",
+        "plam_reader": "手相师",
+        "netal_chart": "出生图",
+        "language": "语言",
+        "about_us": "关于我们",
+        "subscribe": "订阅",
+        "logout": "登出",
+        "logout_text": "您确定要注销吗？",
+        "no": "不",
+        "yes": "是的"
+    },
+    "subscribe": {
+        "content_text": "您不是订阅。选择您的计划并获得更多好处。",
+        "subscribe_plans": "订阅计划",
+        "month": "月",
+        "subscribe": "订阅",
+        "detail_horoscope": "细节星座",
+        "numorology_feature": "命理学的未来",
+        "compatibility_feature": "兼容功能",
+        "plam_feature": "棕榈读取器功能"
+    },
+    "review": {
+        "review": "审查"
+    },
+    "search": {
+        "search": "搜索",
+        "recent_search": "最近的搜索",
+        "clear_all": "清除全部"
+    },
+    "success": {
+        "congratulation_text": "祝贺您的一个月计划成功地计划",
+        "back_to_home": "回到家"
+    }
+}

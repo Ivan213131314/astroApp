@@ -1,0 +1,254 @@
+{
+    "exit_app": {
+        "exit_text": "बाहर निकलने के लिए एक बार फिर से दबाएं"
+    },
+    "astrologers": {
+        "astrologers": "ज्योतिषियों",
+        "charge": "शुल्क"
+    },
+    "astrologer_detail": {
+        "about_me": "मेरे बारे मेँ",
+        "chat": "बात करना",
+        "call": "पुकारना",
+        "video_call": "वीडियो कॉल",
+        "min": "मिन",
+        "connect": "जोड़ना",
+        "title": "इसी तरह के सलाहकार",
+        "review": "समीक्षा",
+        "see_all": "सभी देखें",
+        "charge": "शुल्क"
+    },
+    "login": {
+        "text": "*हम सत्यापन के लिए ओटीपी भेज रहे हैं",
+        "mobile_number": "मोबाइल नंबर",
+        "login": "लॉग इन करें",
+        "enter_number": "अपना मोबाइल संख्या दर्ज करे"
+    },
+    "register": {
+        "register": "पंजीकरण करवाना",
+        "email_address": "मेल पता",
+        "enter_email": "अपना ईमेल पता दर्ज करें",
+        "mobile_number": "मोबाइल नंबर",
+        "enter_number": "अपना मोबाइल संख्या दर्ज करे",
+        "user_name": "उपयोगकर्ता नाम",
+        "enter_name": "अपना नाम दर्ज करें",
+        "welcome_text": "आपका स्वागत है कृपया इस ऐप का उपयोग जारी रखने के लिए अपना खाता बनाएं"
+    },
+    "verification": {
+        "resend": "पुन: भेजें",
+        "verify": "सत्यापित करना",
+        "please_wait": "कृपया प्रतीक्षा करें",
+        "confirm": "आपके मोबाइल नंबर +91 1234567890 पर आपको पुष्टिकरण कोड भेजा गया है",
+        "verification": "सत्यापन"
+    },
+    "chat": {
+        "active_now": "अब सक्रिय",
+        "type_here": "यहां अपना पाठ लिखें...."
+    },
+    "compatibility": {
+        "go": "जाना",
+        "text": "प्यार और व्यावसायिक संगतता की जाँच करें",
+        "compatibility": "अनुकूलता"
+    },
+    "compatibility_detail": {
+        "love": "प्यार",
+        "business": "व्यवसाय",
+        "health": "स्वास्थ्य",
+        "compatibility": "अनुकूलता",
+        "overall_horoscope": "समग्र कुंडली",
+        "love_passion": "प्यार का जुनून",
+        "business_career": "व्यापार और कैरियर",
+        "libra": "तुला",
+        "aries": "एआरआईएस"
+    },
+    "horoscope_list": {
+        "aries": "मेष",
+        "taurus": "वृषभ",
+        "gemini": "मिथुन",
+        "cancer": "कर्क",
+        "leo": "लियो",
+        "virgo": "कन्या",
+        "libra": "तुला",
+        "scorpio": "वृश्चिक",
+        "sagittarius": "धनु",
+        "capricorn": "मकर",
+        "aquarius": "कुंभ",
+        "pisces": "मीन"
+    },
+    "home": {
+        "hello_user": "हैलो उपयोगकर्ता",
+        "welcome_text": "आपका स्वागत है",
+        "horoscope": "राशिफल",
+        "top_astrologers": "शीर्ष ज्योतिषी",
+        "other_services": "अन्य सेवाएं",
+        "connect": "जोड़ना",
+        "see_all": "सभी देखें",
+        "talk_to_astrology": "ज्योतिष से बात करें",
+        "change_life": "अपनी पसंद के अनुसार अपना जीवन बदलें",
+        "start_now": "शुरू करें"
+    },
+    "horoscope": {
+        "horoscope": "राशिफल"
+    },
+    "horoscope_detail": {
+        "today": "आज",
+        "tomorrow": "आने वाला कल",
+        "this_week": "इस सप्ताह",
+        "love": "प्यार",
+        "business": "व्यवसाय",
+        "health": "स्वास्थ्य",
+        "horoscope": "राशिफल",
+        "overall_horoscope": "समग्र कुंडली",
+        "love_passion": "प्यार का जुनून",
+        "business_career": "व्यापार और कैरियर",
+        "virgo": "कन्या"
+    },
+    "master_card": {
+        "payment_method": "भुगतान विधि",
+        "continue": "जारी रखना",
+        "enter_cardholder_name": "कार्ड धारक का नाम दर्ज करें",
+        "name_on_card": "कार्ड पर नाम",
+        "enter_number": "कार्ड नंबर दर्ज करें",
+        "card_number": "कार्ड संख्या",
+        "expire_date": "समाप्त होने की तिथि",
+        "cvv": "सीवीवी",
+        "credit_card": "क्रेडिट कार्ड"
+    },
+    "message": {
+        "message": "संदेश",
+        "search": "खोज"
+    },
+    "natal_chart": {
+        "natal_chart": "नट चार्ट",
+        "title": "नट चार्ट गणना",
+        "calculate": "गणना",
+        "birth_location": "जन्म स्थान",
+        "enter_birth_location": "अपना जन्म स्थान दर्ज करें",
+        "time_of_birth": "जन्म का समय",
+        "select_time": "जन्म के समय का चयन करें",
+        "time": "समय",
+        "date_birth": "जन्म की तारीख",
+        "select_date": "जन्म तिथि का चयन करें",
+        "date": "तारीख",
+        "cancel": "रद्द करना",
+        "proceed": "आगे बढ़ना",
+        "name": "नाम",
+        "enter_name": "अपना नाम दर्ज करें"
+    },
+    "natal_chart_detail": {
+        "planets": "ग्रहों",
+        "position_degree": "डिग्री की स्थिति",
+        "sign": "संकेत",
+        "position_hour": "घंटे की स्थिति",
+        "natal_chart": "नट चार्ट",
+        "title1": "कैंसर के संकेत में सूरज",
+        "title2": "तुला के संकेत में आकाश के मध्य",
+        "title3": "लियो के संकेत में आरोही",
+        "show_less": "कम दिखाएं",
+        "read_more": "और पढ़ें"
+    },
+    "notification": {
+        "notification": "अधिसूचना",
+        "no_notification": "कोई नई अधिसूचना नहीं",
+        "remove_notification": "अधिसूचना से हटा दिया गया"
+    },
+    "numorology": {
+        "number_effect": "पता है कि संख्या प्रभाव कैसे",
+        "numorology": "अंक ज्योतिष",
+        "select_date": "अपनी जन्मतिथि का चयन करें",
+        "go": "जाना"
+    },
+    "numorology_detail": {
+        "funny": "मज़ेदार",
+        "obedient": "आज्ञाकारी",
+        "honest": "ईमानदार",
+        "responsible": "जवाबदार",
+        "hard_working": "मेहनती",
+        "smart": "बुद्धिमान",
+        "numorology": "अंक ज्योतिष",
+        "about_character": "चरित्र के बारे में",
+        "about_behavior": "व्यवहार के बारे में",
+        "lucky_number": "आपका लकी नंबर"
+    },
+    "onboarding": {
+        "content_text": "आपके मोबाइल में आपका व्यक्तिगत कुंडली। हमारे विशेषज्ञ गणना के साथ अपने बारे में अधिक जानकारी।",
+        "the_astrology": "ज्योतिष विज्ञान",
+        "get_started": "शुरू हो जाओ"
+    },
+    "payment_method": {
+        "payment_method": "भुगतान विधि",
+        "continue": "जारी रखना"
+    },
+    "plam_reader": {
+        "take_photo_hand": "अपने हाथ की तस्वीर ले लो",
+        "take_photo": "फोटो लो"
+    },
+    "plam_reader_detail": {
+        "horoscope": "राशिफल",
+        "life_line": "जीवन -रेखा",
+        "heart_line": "ह्रदय रेखा",
+        "money_line": "धन पंक्ति",
+        "health_line": "स्वास्थ्य रेखा",
+        "show_less": "कम दिखाएं",
+        "read_more": "और पढ़ें",
+        "personal_analysis": "आपका व्यक्तिगत विश्लेषण"
+    },
+    "about": {
+        "about_us": "हमारे बारे में"
+    },
+    "edit_profile": {
+        "edit_profile": "प्रोफ़ाइल संपादित करें",
+        "update": "अद्यतन",
+        "email_address": "मेल पता",
+        "enter_email": "ईमेल पता दर्ज करें",
+        "mobile_number": "मोबाइल नंबर",
+        "enter_number": "मोबाइल नंबर दर्ज करें",
+        "user_name": "उपयोगकर्ता नाम",
+        "enter_name": "अपना नाम दर्ज करें",
+        "change_profile_Photo": "प्रोफ़ाइल फोटो बदलें",
+        "camera": "कैमरा",
+        "gallery": "गेलरी",
+        "remove_image": "छवि निकालें"
+    },
+    "language": {
+        "language": "भाषा",
+        "update": "अद्यतन"
+    },
+    "profile": {
+        "profile": "प्रोफ़ाइल",
+        "astrologers": "ज्योतिषियों",
+        "compatibility": "अनुकूलता",
+        "numorology": "अंक ज्योतिष",
+        "plam_reader": "हस्तरेखा विद्वान",
+        "netal_chart": "नट चार्ट",
+        "language": "भाषा",
+        "about_us": "हमारे बारे में",
+        "subscribe": "सदस्यता लें",
+        "logout": "लॉग आउट",
+        "logout_text": "क्या आप लॉग आउट करना चाहते हैं?",
+        "no": "नहीं",
+        "yes": "हाँ"
+    },
+    "subscribe": {
+        "content_text": "आप सदस्यता नहीं ले रहे हैं।अपनी योजना का चयन करें और अधिक लाभ प्राप्त करें।",
+        "subscribe_plans": "योजनाओं की सदस्यता लें",
+        "month": "महीना",
+        "subscribe": "सदस्यता लें",
+        "detail_horoscope": "विवरण कुंडली",
+        "numorology_feature": "अंक विज्ञान भविष्य",
+        "compatibility_feature": "संगतता सुविधा",
+        "plam_feature": "पाम रीडर फीचर"
+    },
+    "review": {
+        "review": "समीक्षा"
+    },
+    "search": {
+        "search": "खोज",
+        "recent_search": "हाल ही में खोज",
+        "clear_all": "सभी साफ करें"
+    },
+    "success": {
+        "congratulation_text": "अपने एक महीने की योजना को सफलतापूर्वक बधाई",
+        "back_to_home": "घर वापिस जा रहा हूँ"
+    }
+}

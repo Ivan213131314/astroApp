@@ -1,0 +1,274 @@
+import 'package:fl_astro_circle/localization/localization_const.dart';
+import 'package:flutter/material.dart';
+
+import '../../theme/theme.dart';
+
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
+
+  @override
+  State<RegisterScreen> createState() => _RegisterScreenState();
+}
+
+class _RegisterScreenState extends State<RegisterScreen> {
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    return Scaffold(
+      body: Container(
+        height: size.height,
+        width: size.width,
+        decoration: BoxDecoration(
+          color: scaffoldBgColor.withValues(alpha: 0.5),
+          image: const DecorationImage(
+            image: AssetImage("assets/auth/bgImage.png"),
+            fit: BoxFit.cover,
+            opacity: 0.5,
+          ),
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                scaffoldBgColor,
+                const Color(0xFF301B87).withValues(alpha: 0),
+              ],
+            ),
+          ),
+          child: SafeArea(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                backButton(context),
+                Expanded(
+                  child: ListView(
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: fixPadding * 2.0),
+                    children: [
+                      registerTitle(),
+                      heightSpace,
+                      welcomeText(),
+                      heightSpace,
+                      heightSpace,
+                      usernameField(),
+                      heightSpace,
+                      heightSpace,
+                      moblieNumberField(),
+                      heightSpace,
+                      heightSpace,
+                      emailField(),
+                      heightSpace,
+                      heightSpace,
+                      heightSpace,
+                      heightSpace,
+                      heightSpace,
+                      registerButton(),
+                      heightSpace,
+                      heightSpace,
+                    ],
+                  ),
+                )
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  registerButton() {
+    return InkWell(
+      onTap: () {
+        Navigator.pushNamed(context, '/verification');
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          vertical: fixPadding * 1.2,
+          horizontal: fixPadding * 2.0,
+        ),
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10.0),
+            color: primaryColor,
+            boxShadow: [
+              BoxShadow(
+                color: primaryColor.withValues(alpha: 0.25),
+                blurRadius: 6,
+              )
+            ]),
+        alignment: Alignment.center,
+        child: Text(
+          getTranslation(context, 'register.register'),
+          style: bold20White,
+        ),
+      ),
+    );
+  }
+
+  emailField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          getTranslation(context, 'register.email_address'),
+          style: medium14WhiteF4,
+        ),
+        heightSpace,
+        Container(
+          decoration: BoxDecoration(
+            color: recBgColor,
+            borderRadius: BorderRadius.circular(10.0),
+            boxShadow: [
+              BoxShadow(
+                color: recBgColor.withValues(alpha: 0.25),
+                blurRadius: 6,
+              )
+            ],
+          ),
+          child: TextField(
+            style: medium15WhiteF4,
+            keyboardType: TextInputType.emailAddress,
+            cursorColor: primaryColor,
+            decoration: InputDecoration(
+              border: InputBorder.none,
+              hintText: getTranslation(context, 'register.enter_email'),
+              hintStyle: medium15Grey,
+              enabled: true,
+              contentPadding: const EdgeInsets.symmetric(
+                  vertical: fixPadding * 1.4, horizontal: fixPadding * 2.0),
+              prefixIcon: const Icon(
+                Icons.mail_outline,
+                size: 20,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  moblieNumberField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          getTranslation(context, 'register.mobile_number'),
+          style: medium14WhiteF4,
+        ),
+        heightSpace,
+        Container(
+          decoration: BoxDecoration(
+            color: recBgColor,
+            borderRadius: BorderRadius.circular(10.0),
+            boxShadow: [
+              BoxShadow(
+                color: recBgColor.withValues(alpha: 0.25),
+                blurRadius: 6,
+              )
+            ],
+          ),
+          child: TextField(
+            style: medium15WhiteF4,
+            keyboardType: TextInputType.phone,
+            cursorColor: primaryColor,
+            decoration: InputDecoration(
+              border: InputBorder.none,
+              hintText: getTranslation(context, 'register.enter_number'),
+              hintStyle: medium15Grey,
+              enabled: true,
+              contentPadding: const EdgeInsets.symmetric(
+                  vertical: fixPadding * 1.4, horizontal: fixPadding * 2.0),
+              prefixIcon: const Icon(Icons.phone_android, size: 20),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  usernameField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          getTranslation(context, 'register.user_name'),
+          style: medium14WhiteF4,
+        ),
+        heightSpace,
+        Container(
+          decoration: BoxDecoration(
+            color: recBgColor,
+            borderRadius: BorderRadius.circular(10.0),
+            boxShadow: [
+              BoxShadow(
+                color: recBgColor.withValues(alpha: 0.25),
+                blurRadius: 6,
+              )
+            ],
+          ),
+          child: TextField(
+            keyboardType: TextInputType.name,
+            cursorColor: primaryColor,
+            style: medium15WhiteF4,
+            decoration: InputDecoration(
+              border: InputBorder.none,
+              hintText: getTranslation(context, 'register.enter_name'),
+              hintStyle: medium15Grey,
+              enabled: true,
+              contentPadding: const EdgeInsets.symmetric(
+                  vertical: fixPadding * 1.4, horizontal: fixPadding * 2.0),
+              prefixIcon: const Icon(Icons.person_outline, size: 20),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  welcomeText() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: fixPadding * 2),
+      child: Text(
+        getTranslation(context, 'register.welcome_text'),
+        style: bold14GreyD4,
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+
+  registerTitle() {
+    return Text(
+      getTranslation(context, 'register.register'),
+      style: bold24WhiteF4,
+      textAlign: TextAlign.center,
+    );
+  }
+
+  backButton(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.pop(context);
+      },
+      child: Container(
+        height: 35,
+        width: 35,
+        margin: const EdgeInsets.only(
+            left: fixPadding * 2.0,
+            right: fixPadding * 2,
+            top: fixPadding * 2,
+            bottom: fixPadding),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(5.0),
+          color: recBgColor,
+        ),
+        child: const Icon(
+          Icons.arrow_back,
+          color: whiteColor,
+          size: 22,
+        ),
+      ),
+    );
+  }
+}

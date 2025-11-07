@@ -1,0 +1,254 @@
+{
+    "exit_app": {
+        "exit_text": "Press back once again to exit"
+    },
+    "astrologers": {
+        "astrologers": "Astrologers",
+        "charge": "Charge"
+    },
+    "astrologer_detail": {
+        "about_me": "About me",
+        "chat": "Chat",
+        "call": "Call",
+        "video_call": "Video call",
+        "min": "min",
+        "connect": "Connect",
+        "title": "Similar consultants",
+        "review": "Review",
+        "see_all": "See all",
+        "charge": "Charge"
+    },
+    "login": {
+        "text": "*we are sending OTP for verification",
+        "mobile_number": "Mobile number",
+        "login": "Login",
+        "enter_number": "Enter your mobile number"
+    },
+    "register": {
+        "register": "Register",
+        "email_address": "Email address",
+        "enter_email": "Enter your email address",
+        "mobile_number": "Mobile number",
+        "enter_number": "Enter your mobile number",
+        "user_name": "User name",
+        "enter_name": "Enter your name",
+        "welcome_text": "Welcome  please create your account to continue using this app"
+    },
+    "verification": {
+        "resend": "Resend",
+        "verify": "Verify",
+        "please_wait": "Please wait",
+        "confirm": "Confirmation code has been sent to you on your mobile no +91 1234567890",
+        "verification": "Verification"
+    },
+    "chat": {
+        "active_now": "Active now",
+        "type_here": "Type your text here...."
+    },
+    "compatibility": {
+        "go": "Go",
+        "text": "Check love and business compatibility",
+        "compatibility": "Compatibility"
+    },
+    "compatibility_detail": {
+        "love": "Love",
+        "business": "Business",
+        "health": "Health",
+        "compatibility": "Compatibility",
+        "overall_horoscope": "Overall horoscope",
+        "love_passion": "Love & Passion",
+        "business_career": "Business & Career",
+        "libra": "Libra",
+        "aries": "Aries"
+    },
+    "horoscope_list": {
+        "aries": "Aries",
+        "taurus": "Taurus",
+        "gemini": "Gemini",
+        "cancer": "Cancer",
+        "leo": "Leo",
+        "virgo": "Virgo",
+        "libra": "Libra",
+        "scorpio": "Scorpio",
+        "sagittarius": "Sagittarius",
+        "capricorn": "Capricorn",
+        "aquarius": "Aquarius",
+        "pisces": "Pisces"
+    },
+    "home": {
+        "hello_user": "Hello user",
+        "welcome_text": "welcome to",
+        "horoscope": "Horoscope",
+        "top_astrologers": "Top astrologers",
+        "other_services": "Other services",
+        "connect": "Connect",
+        "see_all": "See all",
+        "talk_to_astrology": "Talk to astrology",
+        "change_life": "Change your life as you like",
+        "start_now": "Start now"
+    },
+    "horoscope": {
+        "horoscope": "Horoscope"
+    },
+    "horoscope_detail": {
+        "today": "Today",
+        "tomorrow": "Tomorrow",
+        "this_week": "This week",
+        "love": "Love",
+        "business": "Business",
+        "health": "Health",
+        "horoscope": "Horoscope",
+        "overall_horoscope": "Overall horoscope",
+        "love_passion": "Love & Passion",
+        "business_career": "Business & Career",
+        "virgo": "Virgo"
+    },
+    "master_card": {
+        "payment_method": "Payment method",
+        "continue": "Continue",
+        "enter_cardholder_name": "Enter card holder name",
+        "name_on_card": "Name on card",
+        "enter_number": "Enter card number",
+        "card_number": "Card number",
+        "expire_date": "Expire date",
+        "cvv": "CVV",
+        "credit_card": "Credit Card"
+    },
+    "message": {
+        "message": "Message",
+        "search": "Search"
+    },
+    "natal_chart": {
+        "natal_chart": "Natal chart",
+        "title": "Natal chart calculation",
+        "calculate": "Calculate",
+        "birth_location": "Birth location",
+        "enter_birth_location": "Enter your birth location",
+        "time_of_birth": "Time of birth",
+        "select_time": "Select time of birth",
+        "time": "Time",
+        "date_birth": "Date of birth",
+        "select_date": "Select date of birth",
+        "date": "Date",
+        "cancel": "Cancel",
+        "proceed": "Proceed",
+        "name": "Name",
+        "enter_name": "Enter your name"
+    },
+    "natal_chart_detail": {
+        "planets": "Planets",
+        "position_degree": "Position of degree",
+        "sign": "Sign",
+        "position_hour": "Position of the hour",
+        "natal_chart": "Natal chart",
+        "title1": "The sun in the sign of cancer",
+        "title2": "Middle of the sky in the sign of libra",
+        "title3": "Ascendant in the sign of leo",
+        "show_less": "Show less",
+        "read_more": "Read more"
+    },
+    "notification": {
+        "notification": "Notification",
+        "no_notification": "No new notification",
+        "remove_notification": "Removed from notification"
+    },
+    "numorology": {
+        "number_effect": "Know how number effect",
+        "numorology": "Numorology",
+        "select_date": "Select your birthdate",
+        "go": "Go"
+    },
+    "numorology_detail": {
+        "funny": "Funny",
+        "obedient": "Obedient",
+        "honest": "Honest",
+        "responsible": "Responsible",
+        "hard_working": "Hard working",
+        "smart": "Smart",
+        "numorology": "Numorology",
+        "about_character": "About character",
+        "about_behavior": "About behavior",
+        "lucky_number": "Your lucky number"
+    },
+    "onboarding": {
+        "content_text": "your personal horoscope in your mobile.know more about your self with our expert calculation.",
+        "the_astrology": "The Astrology",
+        "get_started": "Get started"
+    },
+    "payment_method": {
+        "payment_method": "Payment method",
+        "continue": "Continue"
+    },
+    "plam_reader": {
+        "take_photo_hand": "Take photo of your hand",
+        "take_photo": "Take photo"
+    },
+    "plam_reader_detail": {
+        "horoscope": "Horoscope",
+        "life_line": "Life line",
+        "heart_line": "Heart line",
+        "money_line": "Money line",
+        "health_line": "Health line",
+        "show_less": "Show less",
+        "read_more": "Read more",
+        "personal_analysis": "Your personal analysis"
+    },
+    "about": {
+        "about_us": "About  us"
+    },
+    "edit_profile": {
+        "edit_profile": "Edit profile",
+        "update": "Update",
+        "email_address": "Email address",
+        "enter_email": "Enter email address",
+        "mobile_number": "Mobile number",
+        "enter_number": "Enter mobile number",
+        "user_name": "User name",
+        "enter_name": "Enter your name",
+        "change_profile_Photo": "Change profile Photo",
+        "camera": "Camera",
+        "gallery": "Gallery",
+        "remove_image": "Remove image"
+    },
+    "language": {
+        "language": "Language",
+        "update": "Update"
+    },
+    "profile": {
+        "profile": "Profile",
+        "astrologers": "Astrologers",
+        "compatibility": "Compatibility",
+        "numorology": "Numorology",
+        "plam_reader": "Plam reader",
+        "netal_chart": "Netal chart",
+        "language": "Language",
+        "about_us": "About us",
+        "subscribe": "Subscribe",
+        "logout": "Logout",
+        "logout_text": "Are you sure you want to logout?",
+        "no": "No",
+        "yes": "Yes"
+    },
+    "subscribe": {
+        "content_text": "You are not subscribe. Select your plan and get More benefits.",
+        "subscribe_plans": "Subscribe the plans",
+        "month": "month",
+        "subscribe": "Subscribe",
+        "detail_horoscope": "Detail horoscope",
+        "numorology_feature": "Numorology feature",
+        "compatibility_feature": "Compatibility feature",
+        "plam_feature": "Plam reader feature"
+    },
+    "review": {
+        "review": "Review"
+    },
+    "search": {
+        "search": "Search",
+        "recent_search": "Recent search",
+        "clear_all": "Clear all"
+    },
+    "success": {
+        "congratulation_text": "Congratulation your one month plan active successfully",
+        "back_to_home": "Back to home"
+    }
+}
