@@ -22,7 +22,17 @@
         "login": "تسجيل الدخول",
         "welcome_text": "قم بتسجيل الدخول باستخدام حساب Google أو Apple للمتابعة",
         "sign_in_with_google": "تسجيل الدخول باستخدام Google",
-        "sign_in_with_apple": "تسجيل الدخول باستخدام Apple"
+        "sign_in_with_apple": "تسجيل الدخول باستخدام Apple",
+        "enter_password": "أدخل كلمة المرور الخاصة بك",
+        "fill_all_fields": "يرجى ملء جميع الحقول",
+        "password_min_length": "يجب أن تكون كلمة المرور 6 أحرف على الأقل",
+        "verification_email_sent": "تم إرسال بريد التحقق إلى بريدك الإلكتروني",
+        "please_verify_email": "يرجى التحقق من بريدك الإلكتروني قبل المتابعة",
+        "user_not_found": "المستخدم غير موجود. يرجى التحقق من بريدك الإلكتروني",
+        "wrong_password": "كلمة مرور خاطئة. يرجى المحاولة مرة أخرى",
+        "email_already_in_use": "البريد الإلكتروني مستخدم بالفعل",
+        "weak_password": "كلمة المرور ضعيفة جدًا",
+        "invalid_email": "عنوان بريد إلكتروني غير صالح"
     },
     "register": {
         "register": "يسجل",
@@ -32,9 +42,16 @@
         "enter_number": "أدخل رقم هاتفك المحمول",
         "user_name": "اسم المستخدم",
         "enter_name": "أدخل أسمك",
+        "password": "كلمة المرور",
         "welcome_text": "مرحبًا بك ، يرجى إنشاء حسابك لمتابعة استخدام هذا التطبيق",
         "or": "أو",
         "sign_in_with_google": "تسجيل الدخول باستخدام Google"
+    },
+    "auth_choice": {
+        "welcome": "مرحبا",
+        "welcome_text": "اختر كيف تريد المتابعة",
+        "log_in": "تسجيل الدخول",
+        "get_started": "ابدأ"
     },
     "verification": {
         "resend": "إعادة إرسال",

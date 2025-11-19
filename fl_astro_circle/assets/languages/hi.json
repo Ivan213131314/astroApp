@@ -22,7 +22,17 @@
         "login": "लॉग इन करें",
         "welcome_text": "जारी रखने के लिए अपने Google या Apple खाते से साइन इन करें",
         "sign_in_with_google": "Google के साथ साइन इन करें",
-        "sign_in_with_apple": "Apple के साथ साइन इन करें"
+        "sign_in_with_apple": "Apple के साथ साइन इन करें",
+        "enter_password": "अपना पासवर्ड दर्ज करें",
+        "fill_all_fields": "कृपया सभी फ़ील्ड भरें",
+        "password_min_length": "पासवर्ड कम से कम 6 वर्ण का होना चाहिए",
+        "verification_email_sent": "आपके ईमेल पर सत्यापन ईमेल भेजा गया है",
+        "please_verify_email": "कृपया जारी रखने से पहले अपना ईमेल सत्यापित करें",
+        "user_not_found": "उपयोगकर्ता नहीं मिला। कृपया अपना ईमेल जांचें",
+        "wrong_password": "गलत पासवर्ड। कृपया पुनः प्रयास करें",
+        "email_already_in_use": "ईमेल पहले से उपयोग में है",
+        "weak_password": "पासवर्ड बहुत कमजोर है",
+        "invalid_email": "अमान्य ईमेल पता"
     },
     "register": {
         "register": "पंजीकरण करवाना",
@@ -32,9 +42,16 @@
         "enter_number": "अपना मोबाइल संख्या दर्ज करे",
         "user_name": "उपयोगकर्ता नाम",
         "enter_name": "अपना नाम दर्ज करें",
+        "password": "पासवर्ड",
         "welcome_text": "आपका स्वागत है कृपया इस ऐप का उपयोग जारी रखने के लिए अपना खाता बनाएं",
         "or": "या",
         "sign_in_with_google": "Google के साथ साइन इन करें"
+    },
+    "auth_choice": {
+        "welcome": "स्वागत है",
+        "welcome_text": "चुनें कि आप कैसे जारी रखना चाहते हैं",
+        "log_in": "लॉग इन करें",
+        "get_started": "शुरू करें"
     },
     "verification": {
         "resend": "पुन: भेजें",

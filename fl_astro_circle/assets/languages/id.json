@@ -22,7 +22,17 @@
         "login": "Gabung",
         "welcome_text": "Masuk dengan akun Google atau Apple Anda untuk melanjutkan",
         "sign_in_with_google": "Masuk dengan Google",
-        "sign_in_with_apple": "Masuk dengan Apple"
+        "sign_in_with_apple": "Masuk dengan Apple",
+        "enter_password": "Masukkan kata sandi Anda",
+        "fill_all_fields": "Harap isi semua bidang",
+        "password_min_length": "Kata sandi harus minimal 6 karakter",
+        "verification_email_sent": "Email verifikasi telah dikirim ke email Anda",
+        "please_verify_email": "Harap verifikasi email Anda sebelum melanjutkan",
+        "user_not_found": "Pengguna tidak ditemukan. Harap periksa email Anda",
+        "wrong_password": "Kata sandi salah. Silakan coba lagi",
+        "email_already_in_use": "Email sudah digunakan",
+        "weak_password": "Kata sandi terlalu lemah",
+        "invalid_email": "Alamat email tidak valid"
     },
     "register": {
         "register": "Daftar",
@@ -32,9 +42,16 @@
         "enter_number": "Masukkan nomor ponsel Anda",
         "user_name": "Nama belakang",
         "enter_name": "Masukkan nama Anda",
+        "password": "Kata sandi",
         "welcome_text": "Selamat datang Harap buat akun Anda untuk melanjutkan menggunakan aplikasi ini",
         "or": "ATAU",
         "sign_in_with_google": "Masuk dengan Google"
+    },
+    "auth_choice": {
+        "welcome": "Selamat datang",
+        "welcome_text": "Pilih bagaimana Anda ingin melanjutkan",
+        "log_in": "Masuk",
+        "get_started": "Mulai"
     },
     "verification": {
         "resend": "Ulang",

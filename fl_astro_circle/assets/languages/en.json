@@ -22,7 +22,17 @@
         "login": "Login",
         "welcome_text": "Sign in with your Google or Apple account to continue",
         "sign_in_with_google": "Sign in with Google",
-        "sign_in_with_apple": "Sign in with Apple"
+        "sign_in_with_apple": "Sign in with Apple",
+        "enter_password": "Enter your password",
+        "fill_all_fields": "Please fill all fields",
+        "password_min_length": "Password must be at least 6 characters",
+        "verification_email_sent": "Verification email has been sent to your email",
+        "please_verify_email": "Please verify your email before continuing",
+        "user_not_found": "User not found. Please check your email",
+        "wrong_password": "Wrong password. Please try again",
+        "email_already_in_use": "Email is already in use",
+        "weak_password": "Password is too weak",
+        "invalid_email": "Invalid email address"
     },
     "register": {
         "register": "Register",
@@ -32,9 +42,16 @@
         "enter_number": "Enter your mobile number",
         "user_name": "User name",
         "enter_name": "Enter your name",
+        "password": "Password",
         "welcome_text": "Welcome  please create your account to continue using this app",
         "or": "OR",
         "sign_in_with_google": "Sign in with Google"
+    },
+    "auth_choice": {
+        "welcome": "Welcome",
+        "welcome_text": "Choose how you want to continue",
+        "log_in": "Log In",
+        "get_started": "Get Started"
     },
     "verification": {
         "resend": "Resend",

@@ -60,6 +60,74 @@ class AuthService {
     }
   }
 
+  Future<UserCredential?> registerWithEmailAndPassword({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      final userCredential = await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      
+      // Отправляем письмо с подтверждением после регистрации
+      await userCredential.user?.sendEmailVerification();
+      
+      return userCredential;
+    } catch (e) {
+      throw Exception('Email registration failed: $e');
+    }
+  }
+
+  Future<UserCredential?> signInWithEmailAndPassword({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      return await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+    } catch (e) {
+      throw Exception('Email sign in failed: $e');
+    }
+  }
+
+  Future<void> sendEmailVerification() async {
+    try {
+      final user = _auth.currentUser;
+      if (user != null && !user.emailVerified) {
+        await user.sendEmailVerification();
+      } else if (user == null) {
+        throw Exception('No user is currently signed in');
+      } else {
+        throw Exception('Email is already verified');
+      }
+    } catch (e) {
+      throw Exception('Failed to send email verification: $e');
+    }
+  }
+
+  bool isEmailVerified() {
+    return _auth.currentUser?.emailVerified ?? false;
+  }
+
+  Future<void> reloadUser() async {
+    try {
+      await _auth.currentUser?.reload();
+    } catch (e) {
+      throw Exception('Failed to reload user: $e');
+    }
+  }
+
+  Future<void> sendPasswordResetEmail(String email) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+    } catch (e) {
+      throw Exception('Failed to send password reset email: $e');
+    }
+  }
+
   Future<void> signOut() async {
     await Future.wait([
       _auth.signOut(),

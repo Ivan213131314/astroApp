@@ -17,6 +17,16 @@ class _LoginScreenState extends State<LoginScreen> {
   DateTime? backPressTime;
   final AuthService _authService = AuthService();
   bool _isLoading = false;
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  bool _obscurePassword = true;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,6 +79,18 @@ class _LoginScreenState extends State<LoginScreen> {
                   heightSpace,
                   heightSpace,
                   heightSpace,
+                  emailField(),
+                  heightSpace,
+                  heightSpace,
+                  passwordField(),
+                  heightSpace,
+                  heightSpace,
+                  loginButton(),
+                  heightSpace,
+                  heightSpace,
+                  orDivider(),
+                  heightSpace,
+                  heightSpace,
                   googleSignInButton(),
                   heightSpace,
                   heightSpace,
@@ -92,6 +114,147 @@ class _LoginScreenState extends State<LoginScreen> {
         style: medium14WhiteF4,
         textAlign: TextAlign.center,
       ),
+    );
+  }
+
+  emailField() {
+    return Container(
+      decoration: BoxDecoration(
+        color: recBgColor,
+        borderRadius: BorderRadius.circular(10.0),
+        boxShadow: [
+          BoxShadow(
+            color: recBgColor.withValues(alpha: 0.25),
+            blurRadius: 6,
+          )
+        ],
+      ),
+      child: TextField(
+        controller: _emailController,
+        style: medium15WhiteF4,
+        keyboardType: TextInputType.emailAddress,
+        cursorColor: primaryColor,
+        decoration: InputDecoration(
+          border: InputBorder.none,
+          hintText: getTranslation(context, 'register.enter_email'),
+          hintStyle: medium15Grey,
+          contentPadding: const EdgeInsets.symmetric(
+            vertical: fixPadding * 1.4,
+            horizontal: fixPadding * 2.0,
+          ),
+          prefixIcon: const Icon(
+            Icons.mail_outline,
+            size: 20,
+            color: whiteColor,
+          ),
+        ),
+      ),
+    );
+  }
+
+  passwordField() {
+    return Container(
+      decoration: BoxDecoration(
+        color: recBgColor,
+        borderRadius: BorderRadius.circular(10.0),
+        boxShadow: [
+          BoxShadow(
+            color: recBgColor.withValues(alpha: 0.25),
+            blurRadius: 6,
+          )
+        ],
+      ),
+      child: TextField(
+        controller: _passwordController,
+        style: medium15WhiteF4,
+        obscureText: _obscurePassword,
+        cursorColor: primaryColor,
+        decoration: InputDecoration(
+          border: InputBorder.none,
+          hintText: getTranslation(context, 'login.enter_password'),
+          hintStyle: medium15Grey,
+          contentPadding: const EdgeInsets.symmetric(
+            vertical: fixPadding * 1.4,
+            horizontal: fixPadding * 2.0,
+          ),
+          prefixIcon: const Icon(
+            Icons.lock_outline,
+            size: 20,
+            color: whiteColor,
+          ),
+          suffixIcon: IconButton(
+            icon: Icon(
+              _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+              color: whiteColor,
+              size: 20,
+            ),
+            onPressed: () {
+              setState(() {
+                _obscurePassword = !_obscurePassword;
+              });
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  loginButton() {
+    return InkWell(
+      onTap: _isLoading ? null : _handleEmailLogin,
+      child: Container(
+        width: double.maxFinite,
+        padding: const EdgeInsets.symmetric(
+          vertical: fixPadding * 1.2,
+          horizontal: fixPadding * 2.0,
+        ),
+        decoration: BoxDecoration(
+          color: primaryColor,
+          borderRadius: BorderRadius.circular(10.0),
+          boxShadow: [
+            BoxShadow(
+              color: primaryColor.withValues(alpha: 0.25),
+              blurRadius: 6,
+            )
+          ],
+        ),
+        alignment: Alignment.center,
+        child: _isLoading
+            ? const SpinKitThreeBounce(
+                color: whiteColor,
+                size: 20,
+              )
+            : Text(
+                getTranslation(context, 'login.login'),
+                style: bold20White,
+              ),
+      ),
+    );
+  }
+
+  orDivider() {
+    return Row(
+      children: [
+        Expanded(
+          child: Container(
+            height: 1,
+            color: whiteColor.withValues(alpha: 0.3),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: fixPadding),
+          child: Text(
+            getTranslation(context, 'register.or'),
+            style: medium14WhiteF4,
+          ),
+        ),
+        Expanded(
+          child: Container(
+            height: 1,
+            color: whiteColor.withValues(alpha: 0.3),
+          ),
+        ),
+      ],
     );
   }
 
@@ -204,6 +367,71 @@ class _LoginScreenState extends State<LoginScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error: ${e.toString()}'),
+            backgroundColor: redColor,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _handleEmailLogin() async {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(getTranslation(context, 'login.fill_all_fields')),
+          backgroundColor: redColor,
+        ),
+      );
+      return;
+    }
+
+    if (password.length < 6) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(getTranslation(context, 'login.password_min_length')),
+          backgroundColor: redColor,
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final userCredential = await _authService.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      if (userCredential != null && mounted) {
+        await _authService.reloadUser();
+        Navigator.pushReplacementNamed(context, '/bottombar');
+      }
+    } catch (e) {
+      if (mounted) {
+        String errorMessage = e.toString();
+        if (errorMessage.contains('user-not-found')) {
+          errorMessage = getTranslation(context, 'login.user_not_found');
+        } else if (errorMessage.contains('wrong-password')) {
+          errorMessage = getTranslation(context, 'login.wrong_password');
+        } else if (errorMessage.contains('invalid-email')) {
+          errorMessage = getTranslation(context, 'login.invalid_email');
+        }
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMessage),
             backgroundColor: redColor,
           ),
         );

@@ -118,9 +118,19 @@ class _MyAppState extends State<MyApp> {
           child: const OnboardingScreen(),
           type: PageTransitionType.fade,
         );
+      case '/authChoice':
+        return PageTransition(
+          child: const AuthChoiceScreen(),
+          type: PageTransitionType.rightToLeft,
+        );
       case '/login':
         return PageTransition(
           child: const LoginScreen(),
+          type: PageTransitionType.rightToLeft,
+        );
+      case '/register':
+        return PageTransition(
+          child: const RegisterScreen(),
           type: PageTransitionType.rightToLeft,
         );
       case '/bottombar':

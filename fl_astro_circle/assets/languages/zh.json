@@ -22,7 +22,17 @@
         "login": "登录",
         "welcome_text": "使用您的Google或Apple帐户登录以继续",
         "sign_in_with_google": "使用Google登录",
-        "sign_in_with_apple": "使用Apple登录"
+        "sign_in_with_apple": "使用Apple登录",
+        "enter_password": "输入您的密码",
+        "fill_all_fields": "请填写所有字段",
+        "password_min_length": "密码必须至少6个字符",
+        "verification_email_sent": "验证邮件已发送到您的邮箱",
+        "please_verify_email": "请先验证您的邮箱再继续",
+        "user_not_found": "未找到用户。请检查您的邮箱",
+        "wrong_password": "密码错误。请重试",
+        "email_already_in_use": "邮箱已被使用",
+        "weak_password": "密码太弱",
+        "invalid_email": "无效的邮箱地址"
     },
     "register": {
         "register": "登记",
@@ -32,9 +42,16 @@
         "enter_number": "输入你的手机号码",
         "user_name": "用户名",
         "enter_name": "输入你的名字",
+        "password": "密码",
         "welcome_text": "欢迎创建您的帐户以继续使用此应用",
         "or": "或",
         "sign_in_with_google": "使用 Google 登录"
+    },
+    "auth_choice": {
+        "welcome": "欢迎",
+        "welcome_text": "选择您想要继续的方式",
+        "log_in": "登录",
+        "get_started": "开始"
     },
     "verification": {
         "resend": "重发",

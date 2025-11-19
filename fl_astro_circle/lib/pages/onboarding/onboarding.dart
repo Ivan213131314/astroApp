@@ -80,7 +80,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   getStartedButton(BuildContext context) {
     return InkWell(
       onTap: () {
-        Navigator.pushNamed(context, '/login');
+        Navigator.pushNamed(context, '/authChoice');
       },
       child: Container(
         width: double.maxFinite,
