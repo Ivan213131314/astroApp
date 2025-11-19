@@ -6,8 +6,11 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:fl_astro_circle/pages/screens.dart';
 import 'localization/localization_const.dart';
+import 'package:firebase_core/firebase_core.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(const MyApp());
 }
 
@@ -118,16 +121,6 @@ class _MyAppState extends State<MyApp> {
       case '/login':
         return PageTransition(
           child: const LoginScreen(),
-          type: PageTransitionType.rightToLeft,
-        );
-      case '/register':
-        return PageTransition(
-          child: const RegisterScreen(),
-          type: PageTransitionType.rightToLeft,
-        );
-      case '/verification':
-        return PageTransition(
-          child: const VerificationScreen(),
           type: PageTransitionType.rightToLeft,
         );
       case '/bottombar':

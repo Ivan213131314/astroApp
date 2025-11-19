@@ -1,5 +1,7 @@
 import 'package:fl_astro_circle/localization/localization_const.dart';
+import 'package:fl_astro_circle/services/auth_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 import '../../theme/theme.dart';
 
@@ -11,6 +13,9 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
+  final AuthService _authService = AuthService();
+  bool _isLoading = false;
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -66,6 +71,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       heightSpace,
                       heightSpace,
                       registerButton(),
+                      heightSpace,
+                      heightSpace,
+                      orDivider(),
+                      heightSpace,
+                      heightSpace,
+                      googleSignInButton(),
                       heightSpace,
                       heightSpace,
                     ],
@@ -244,6 +255,109 @@ class _RegisterScreenState extends State<RegisterScreen> {
       style: bold24WhiteF4,
       textAlign: TextAlign.center,
     );
+  }
+
+  orDivider() {
+    return Row(
+      children: [
+        Expanded(
+          child: Container(
+            height: 1,
+            color: whiteColor.withValues(alpha: 0.3),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: fixPadding),
+          child: Text(
+            getTranslation(context, 'register.or'),
+            style: medium14WhiteF4,
+          ),
+        ),
+        Expanded(
+          child: Container(
+            height: 1,
+            color: whiteColor.withValues(alpha: 0.3),
+          ),
+        ),
+      ],
+    );
+  }
+
+  googleSignInButton() {
+    return InkWell(
+      onTap: _isLoading ? null : _handleGoogleSignIn,
+      child: Container(
+        width: double.maxFinite,
+        padding: const EdgeInsets.symmetric(
+            vertical: fixPadding * 1.2, horizontal: fixPadding * 2.0),
+        decoration: BoxDecoration(
+          color: recBgColor,
+          borderRadius: BorderRadius.circular(10.0),
+          boxShadow: [
+            BoxShadow(
+              color: recBgColor.withValues(alpha: 0.25),
+              blurRadius: 6,
+            ),
+          ],
+        ),
+        alignment: Alignment.center,
+        child: _isLoading
+            ? const SpinKitThreeBounce(
+                color: primaryColor,
+                size: 20,
+              )
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.network(
+                    'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg',
+                    height: 24,
+                    width: 24,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Icon(
+                        Icons.g_mobiledata,
+                        color: whiteColor,
+                        size: 24,
+                      );
+                    },
+                  ),
+                  widthSpace,
+                  Text(
+                    getTranslation(context, 'register.sign_in_with_google'),
+                    style: bold20White,
+                  ),
+                ],
+              ),
+      ),
+    );
+  }
+
+  Future<void> _handleGoogleSignIn() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final userCredential = await _authService.signInWithGoogle();
+      if (userCredential != null && mounted) {
+        Navigator.pushReplacementNamed(context, '/bottombar');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: redColor,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   backButton(BuildContext context) {

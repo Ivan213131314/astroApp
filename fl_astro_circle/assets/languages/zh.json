@@ -19,10 +19,10 @@
         "charge": "收费"
     },
     "login": {
-        "text": "*我们正在发送OTP进行验证",
-        "mobile_number": "手机号码",
         "login": "登录",
-        "enter_number": "输入你的手机号码"
+        "welcome_text": "使用您的Google或Apple帐户登录以继续",
+        "sign_in_with_google": "使用Google登录",
+        "sign_in_with_apple": "使用Apple登录"
     },
     "register": {
         "register": "登记",
@@ -32,7 +32,9 @@
         "enter_number": "输入你的手机号码",
         "user_name": "用户名",
         "enter_name": "输入你的名字",
-        "welcome_text": "欢迎创建您的帐户以继续使用此应用"
+        "welcome_text": "欢迎创建您的帐户以继续使用此应用",
+        "or": "或",
+        "sign_in_with_google": "使用 Google 登录"
     },
     "verification": {
         "resend": "重发",

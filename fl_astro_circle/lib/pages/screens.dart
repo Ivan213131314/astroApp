@@ -1,6 +1,4 @@
 export 'package:fl_astro_circle/pages/auth/login.dart';
-export 'package:fl_astro_circle/pages/auth/register.dart';
-export 'package:fl_astro_circle/pages/auth/verification.dart';
 export 'package:fl_astro_circle/pages/bottomNavigationBar/bottom_navigation_bar.dart';
 export 'package:fl_astro_circle/pages/home/home.dart';
 export 'package:fl_astro_circle/pages/onboarding/onboarding.dart';

@@ -1,11 +1,10 @@
 import 'dart:io';
 
 import 'package:fl_astro_circle/localization/localization_const.dart';
-import 'package:fl_astro_circle/pages/profile/languages.dart';
 import 'package:fl_astro_circle/theme/theme.dart';
+import 'package:fl_astro_circle/services/auth_service.dart';
 import 'package:flutter/material.dart';
-import 'package:intl_phone_field/country_picker_dialog.dart';
-import 'package:intl_phone_field/intl_phone_field.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -16,6 +15,8 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   DateTime? backPressTime;
+  final AuthService _authService = AuthService();
+  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -63,17 +64,17 @@ class _LoginScreenState extends State<LoginScreen> {
                   loginText(),
                   heightSpace,
                   heightSpace,
-                  mobileNumberTitle(),
-                  heightSpace,
-                  phoneField(),
-                  heightSpace,
-                  infoText(),
+                  welcomeText(),
                   heightSpace,
                   heightSpace,
                   heightSpace,
                   heightSpace,
+                  googleSignInButton(),
                   heightSpace,
-                  loginButton()
+                  heightSpace,
+                  Platform.isIOS ? appleSignInButton() : const SizedBox(),
+                  Platform.isIOS ? heightSpace : const SizedBox(),
+                  Platform.isIOS ? heightSpace : const SizedBox(),
                 ],
               ),
             ),
@@ -83,17 +84,14 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  infoText() {
-    return Text(
-      getTranslation(context, 'login.text'),
-      style: medium14Red,
-    );
-  }
-
-  mobileNumberTitle() {
-    return Text(
-      getTranslation(context, 'login.mobile_number'),
-      style: medium16White,
+  welcomeText() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: fixPadding * 2),
+      child: Text(
+        getTranslation(context, 'login.welcome_text'),
+        style: medium14WhiteF4,
+        textAlign: TextAlign.center,
+      ),
     );
   }
 
@@ -105,69 +103,146 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  loginButton() {
+  googleSignInButton() {
     return InkWell(
-      onTap: () {
-        Navigator.pushNamed(context, '/register');
-      },
+      onTap: _isLoading ? null : _handleGoogleSignIn,
       child: Container(
         width: double.maxFinite,
         padding: const EdgeInsets.symmetric(
             vertical: fixPadding * 1.2, horizontal: fixPadding * 2.0),
         decoration: BoxDecoration(
-          color: primaryColor,
+          color: recBgColor,
           borderRadius: BorderRadius.circular(10.0),
           boxShadow: [
             BoxShadow(
-              color: primaryColor.withValues(alpha: 0.25),
-              blurRadius: 5,
+              color: recBgColor.withValues(alpha: 0.25),
+              blurRadius: 6,
             ),
           ],
         ),
         alignment: Alignment.center,
-        child: Text(
-          getTranslation(context, 'login.login'),
-          style: bold20White,
+        child: _isLoading
+            ? const SpinKitThreeBounce(
+                color: primaryColor,
+                size: 20,
+              )
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.network(
+                    'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg',
+                    height: 24,
+                    width: 24,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Icon(
+                        Icons.g_mobiledata,
+                        color: whiteColor,
+                        size: 24,
+                      );
+                    },
+                  ),
+                  widthSpace,
+                  Text(
+                    getTranslation(context, 'login.sign_in_with_google'),
+                    style: bold20White,
+                  ),
+                ],
+              ),
+      ),
+    );
+  }
+
+  appleSignInButton() {
+    return InkWell(
+      onTap: _isLoading ? null : _handleAppleSignIn,
+      child: Container(
+        width: double.maxFinite,
+        padding: const EdgeInsets.symmetric(
+            vertical: fixPadding * 1.2, horizontal: fixPadding * 2.0),
+        decoration: BoxDecoration(
+          color: whiteColor,
+          borderRadius: BorderRadius.circular(10.0),
+          boxShadow: [
+            BoxShadow(
+              color: whiteColor.withValues(alpha: 0.25),
+              blurRadius: 6,
+            ),
+          ],
+        ),
+        alignment: Alignment.center,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.apple,
+              color: black03Color,
+              size: 24,
+            ),
+            widthSpace,
+            Text(
+              getTranslation(context, 'login.sign_in_with_apple'),
+              style: bold20Black03,
+            ),
+          ],
         ),
       ),
     );
   }
 
-  phoneField() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: fixPadding * 1.5),
-      decoration: BoxDecoration(
-        color: recBgColor,
-        borderRadius: BorderRadius.circular(10.0),
-        boxShadow: [
-          BoxShadow(
-            color: recBgColor.withValues(alpha: 0.25),
-            blurRadius: 6,
+  Future<void> _handleGoogleSignIn() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final userCredential = await _authService.signInWithGoogle();
+      if (userCredential != null && mounted) {
+        Navigator.pushReplacementNamed(context, '/bottombar');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: redColor,
           ),
-        ],
-      ),
-      child: IntlPhoneField(
-        style: medium15WhiteF4,
-        cursorColor: primaryColor,
-        disableLengthCheck: true,
-        textAlign: languageValue == 4 ? TextAlign.right : TextAlign.left,
-        dropdownIconPosition: IconPosition.trailing,
-        dropdownIcon: const Icon(
-          Icons.keyboard_arrow_down_outlined,
-          size: 20,
-          color: whiteColor,
-        ),
-        pickerDialogStyle: PickerDialogStyle(backgroundColor: recBgColor),
-        initialCountryCode: "IN",
-        decoration: InputDecoration(
-          contentPadding:
-              const EdgeInsets.symmetric(vertical: fixPadding * 1.4),
-          border: InputBorder.none,
-          hintText: getTranslation(context, 'login.enter_number'),
-          hintStyle: medium16GreyD4,
-        ),
-      ),
-    );
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _handleAppleSignIn() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final userCredential = await _authService.signInWithApple();
+      if (userCredential != null && mounted) {
+        Navigator.pushReplacementNamed(context, '/bottombar');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: redColor,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   onWillPop() {

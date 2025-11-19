@@ -19,10 +19,10 @@
         "charge": "Charge"
     },
     "login": {
-        "text": "*we are sending OTP for verification",
-        "mobile_number": "Mobile number",
         "login": "Login",
-        "enter_number": "Enter your mobile number"
+        "welcome_text": "Sign in with your Google or Apple account to continue",
+        "sign_in_with_google": "Sign in with Google",
+        "sign_in_with_apple": "Sign in with Apple"
     },
     "register": {
         "register": "Register",
@@ -32,7 +32,9 @@
         "enter_number": "Enter your mobile number",
         "user_name": "User name",
         "enter_name": "Enter your name",
-        "welcome_text": "Welcome  please create your account to continue using this app"
+        "welcome_text": "Welcome  please create your account to continue using this app",
+        "or": "OR",
+        "sign_in_with_google": "Sign in with Google"
     },
     "verification": {
         "resend": "Resend",

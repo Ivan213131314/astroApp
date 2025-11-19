@@ -19,10 +19,10 @@
         "charge": "تكلفة"
     },
     "login": {
-        "text": "*نرسل OTP للتحقق",
-        "mobile_number": "رقم الهاتف المحمول",
         "login": "تسجيل الدخول",
-        "enter_number": "أدخل رقم هاتفك المحمول"
+        "welcome_text": "قم بتسجيل الدخول باستخدام حساب Google أو Apple للمتابعة",
+        "sign_in_with_google": "تسجيل الدخول باستخدام Google",
+        "sign_in_with_apple": "تسجيل الدخول باستخدام Apple"
     },
     "register": {
         "register": "يسجل",
@@ -32,7 +32,9 @@
         "enter_number": "أدخل رقم هاتفك المحمول",
         "user_name": "اسم المستخدم",
         "enter_name": "أدخل أسمك",
-        "welcome_text": "مرحبًا بك ، يرجى إنشاء حسابك لمتابعة استخدام هذا التطبيق"
+        "welcome_text": "مرحبًا بك ، يرجى إنشاء حسابك لمتابعة استخدام هذا التطبيق",
+        "or": "أو",
+        "sign_in_with_google": "تسجيل الدخول باستخدام Google"
     },
     "verification": {
         "resend": "إعادة إرسال",
