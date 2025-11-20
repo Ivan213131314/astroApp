@@ -1,5 +1,7 @@
 import 'package:fl_astro_circle/theme/theme.dart';
 import 'package:flutter/material.dart';
+import 'package:google_places_flutter/google_places_flutter.dart';
+import 'package:google_places_flutter/model/prediction.dart';
 
 class PlaceOfBirthScreen extends StatefulWidget {
   const PlaceOfBirthScreen({super.key});
@@ -11,13 +13,18 @@ class PlaceOfBirthScreen extends StatefulWidget {
 class _PlaceOfBirthScreenState extends State<PlaceOfBirthScreen> {
   final TextEditingController placeController = TextEditingController();
   final FocusNode placeFocusNode = FocusNode();
+  
+  // TODO: Замените на ваш Google Places API ключ
+  static const String googleApiKey = "AIzaSyA2SREUYbUCxDavUiFaZ1UyKf6XPI7eZ1k";
+  
+  String? selectedPlaceId;
+  double? latitude;
+  double? longitude;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      placeFocusNode.requestFocus();
-    });
+    // GooglePlaceAutoCompleteTextField управляет фокусом автоматически
   }
 
   @override
@@ -106,10 +113,6 @@ class _PlaceOfBirthScreenState extends State<PlaceOfBirthScreen> {
 
   Widget placeInputField() {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: fixPadding * 2.0,
-        vertical: fixPadding * 0.8,
-      ),
       decoration: BoxDecoration(
         color: const Color(0xFF2F2955),
         borderRadius: BorderRadius.circular(12.0),
@@ -118,15 +121,10 @@ class _PlaceOfBirthScreenState extends State<PlaceOfBirthScreen> {
           width: 2,
         ),
       ),
-      child: TextField(
-        controller: placeController,
-        focusNode: placeFocusNode,
-        style: const TextStyle(
-          color: whiteColor,
-          fontSize: 16,
-          fontWeight: FontWeight.w400,
-        ),
-        decoration: const InputDecoration(
+      child: GooglePlaceAutoCompleteTextField(
+        textEditingController: placeController,
+        googleAPIKey: googleApiKey,
+        inputDecoration: const InputDecoration(
           hintText: 'Type in your place of birth',
           hintStyle: TextStyle(
             color: greyColor,
@@ -134,11 +132,71 @@ class _PlaceOfBirthScreenState extends State<PlaceOfBirthScreen> {
             fontWeight: FontWeight.w400,
           ),
           border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(vertical: fixPadding * 1.2),
+          contentPadding: EdgeInsets.symmetric(
+            horizontal: fixPadding * 2.0,
+            vertical: fixPadding * 1.2,
+          ),
         ),
-        onChanged: (value) {
-          setState(() {});
+        textStyle: const TextStyle(
+          color: whiteColor,
+          fontSize: 16,
+          fontWeight: FontWeight.w400,
+        ),
+        debounceTime: 600,
+        isLatLngRequired: true,
+        getPlaceDetailWithLatLng: (Prediction prediction) {
+          setState(() {
+            selectedPlaceId = prediction.placeId;
+            latitude = double.tryParse(prediction.lat ?? '');
+            longitude = double.tryParse(prediction.lng ?? '');
+          });
         },
+        itemClick: (Prediction prediction) {
+          placeController.text = prediction.description ?? '';
+          placeController.selection = TextSelection.fromPosition(
+            TextPosition(offset: placeController.text.length),
+          );
+          placeFocusNode.unfocus();
+          setState(() {
+            selectedPlaceId = prediction.placeId;
+          });
+        },
+        seperatedBuilder: const Divider(
+          color: Color(0xFF3D3761),
+          height: 1,
+        ),
+        containerHorizontalPadding: 0,
+        containerVerticalPadding: 0,
+        itemBuilder: (context, index, Prediction prediction) {
+          return Container(
+            color: const Color(0xFF2F2955),
+            padding: const EdgeInsets.symmetric(
+              horizontal: fixPadding * 2.0,
+              vertical: fixPadding * 1.2,
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.location_on,
+                  color: primaryColor,
+                  size: 20,
+                ),
+                const SizedBox(width: fixPadding),
+                Expanded(
+                  child: Text(
+                    prediction.description ?? '',
+                    style: const TextStyle(
+                      color: whiteColor,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+        isCrossBtnShown: true,
       ),
     );
   }
