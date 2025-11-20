@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:fl_astro_circle/theme/theme.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class WelcomeOnboardingScreen extends StatefulWidget {
   const WelcomeOnboardingScreen({super.key});
@@ -11,6 +12,19 @@ class WelcomeOnboardingScreen extends StatefulWidget {
 
 class _WelcomeOnboardingScreenState extends State<WelcomeOnboardingScreen> {
   DateTime? backPressTime;
+  
+  // Debug function to reset onboarding
+  Future<void> resetOnboarding() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('onboarding_completed', false);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Onboarding reset! Restart app to see it again.'),
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +51,19 @@ class _WelcomeOnboardingScreenState extends State<WelcomeOnboardingScreen> {
               ],
             ),
           ),
-          child: SafeArea(
+          child: Stack(
+            children: [
+              // Debug button to reset onboarding (top-right corner)
+              Positioned(
+                top: 40,
+                right: 16,
+                child: IconButton(
+                  icon: const Icon(Icons.refresh, color: greyColor, size: 20),
+                  onPressed: resetOnboarding,
+                  tooltip: 'Reset onboarding',
+                ),
+              ),
+              SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(fixPadding * 2.0),
               child: Column(
@@ -58,6 +84,8 @@ class _WelcomeOnboardingScreenState extends State<WelcomeOnboardingScreen> {
                 ],
               ),
             ),
+              ),
+            ],
           ),
         ),
       ),

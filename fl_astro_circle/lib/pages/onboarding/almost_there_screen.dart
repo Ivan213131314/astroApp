@@ -186,9 +186,7 @@ class _AlmostThereScreenState extends State<AlmostThereScreen> {
 
   Widget nextButton() {
     return InkWell(
-      onTap: () {
-        Navigator.pushNamed(context, '/register');
-      },
+      onTap: completeOnboarding,
       child: Container(
         width: double.maxFinite,
         padding: const EdgeInsets.symmetric(
