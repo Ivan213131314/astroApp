@@ -115,8 +115,93 @@ class _MyAppState extends State<MyApp> {
         );
       case '/onboarding':
         return PageTransition(
-          child: const OnboardingScreen(),
+          child: const WelcomeOnboardingScreen(),
           type: PageTransitionType.fade,
+        );
+      case '/onboardingGoals':
+        return PageTransition(
+          child: const GoalsScreen(),
+          type: PageTransitionType.rightToLeft,
+        );
+      case '/onboardingGoalsInfo':
+        return PageTransition(
+          child: const GoalsInfoScreen(),
+          type: PageTransitionType.rightToLeft,
+        );
+      case '/onboardingMainReason':
+        return PageTransition(
+          child: const MainReasonScreen(),
+          type: PageTransitionType.rightToLeft,
+        );
+      case '/onboardingGoalTogether':
+        return PageTransition(
+          child: const GoalTogetherScreen(),
+          type: PageTransitionType.rightToLeft,
+        );
+      case '/onboardingBirthChartIntro':
+        return PageTransition(
+          child: const BirthChartIntroScreen(),
+          type: PageTransitionType.rightToLeft,
+        );
+      case '/onboardingDateOfBirth':
+        return PageTransition(
+          child: const DateOfBirthScreen(),
+          type: PageTransitionType.rightToLeft,
+        );
+      case '/onboardingTimeOfBirth':
+        return PageTransition(
+          child: const TimeOfBirthScreen(),
+          type: PageTransitionType.rightToLeft,
+        );
+      case '/onboardingPlaceOfBirth':
+        return PageTransition(
+          child: const PlaceOfBirthScreen(),
+          type: PageTransitionType.rightToLeft,
+        );
+      case '/onboardingHoroscopesQuestion':
+        return PageTransition(
+          child: const HoroscopesQuestionScreen(),
+          type: PageTransitionType.rightToLeft,
+        );
+      case '/onboardingGender':
+        return PageTransition(
+          child: const GenderScreen(),
+          type: PageTransitionType.rightToLeft,
+        );
+      case '/onboardingName':
+        return PageTransition(
+          child: const NameScreen(),
+          type: PageTransitionType.rightToLeft,
+        );
+      case '/onboardingBirthChartQuestion':
+        return PageTransition(
+          child: const BirthChartQuestionScreen(),
+          type: PageTransitionType.rightToLeft,
+        );
+      case '/onboardingRelationshipStatus':
+        return PageTransition(
+          child: const RelationshipStatusScreen(),
+          type: PageTransitionType.rightToLeft,
+        );
+      case '/onboardingInterests':
+        return PageTransition(
+          child: const InterestsScreen(),
+          type: PageTransitionType.rightToLeft,
+        );
+      case '/onboardingCompatibilityQuestion':
+        return PageTransition(
+          child: const CompatibilityQuestionScreen(),
+          type: PageTransitionType.rightToLeft,
+        );
+      case '/onboardingPremium':
+        return PageTransition(
+          child: const PremiumScreen(),
+          type: PageTransitionType.rightToLeft,
+        );
+      case '/onboardingAlmostThere':
+        return PageTransition(
+          child: const AlmostThereScreen(),
+          type: PageTransitionType.rightToLeft,
         );
       case '/authChoice':
         return PageTransition(

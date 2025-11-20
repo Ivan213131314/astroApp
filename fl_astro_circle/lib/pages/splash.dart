@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:fl_astro_circle/theme/theme.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -14,9 +15,24 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     Timer(const Duration(seconds: 3), () {
-      Navigator.pushNamed(context, '/onboarding');
+      checkOnboardingStatus();
     });
     super.initState();
+  }
+
+  Future<void> checkOnboardingStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    final hasCompletedOnboarding = prefs.getBool('onboarding_completed') ?? false;
+    
+    if (!mounted) return;
+    
+    if (hasCompletedOnboarding) {
+      // Если onboarding пройден, идём на экран выбора авторизации
+      Navigator.pushNamed(context, '/authChoice');
+    } else {
+      // Если не пройден, показываем onboarding
+      Navigator.pushNamed(context, '/onboarding');
+    }
   }
 
   @override
