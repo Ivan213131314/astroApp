@@ -106,6 +106,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
   }
 
   Widget goalItem(String text) {
+    final isSelected = goals[text]!;
     return Padding(
       padding: const EdgeInsets.only(bottom: fixPadding * 1.5),
       child: InkWell(
@@ -120,11 +121,11 @@ class _GoalsScreenState extends State<GoalsScreen> {
             vertical: fixPadding * 1.8,
           ),
           decoration: BoxDecoration(
-            color: goals[text]! 
+            color: isSelected 
                 ? primaryColor.withValues(alpha: 0.2)
-                : const Color(0xFF2F2955),
+                : const Color(0xFF1F1A3D),
             border: Border.all(
-              color: goals[text]! ? primaryColor : Colors.transparent,
+              color: isSelected ? primaryColor : const Color(0xFF2F2955),
               width: 2,
             ),
             borderRadius: BorderRadius.circular(12.0),
@@ -134,8 +135,8 @@ class _GoalsScreenState extends State<GoalsScreen> {
               Expanded(
                 child: Text(
                   text,
-                  style: const TextStyle(
-                    color: whiteColor,
+                  style: TextStyle(
+                    color: isSelected ? whiteColor : whiteColor.withValues(alpha: 0.6),
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
                   ),
@@ -145,14 +146,14 @@ class _GoalsScreenState extends State<GoalsScreen> {
                 height: 24,
                 width: 24,
                 decoration: BoxDecoration(
-                  color: goals[text]! ? primaryColor : Colors.transparent,
+                  color: isSelected ? primaryColor : Colors.transparent,
                   border: Border.all(
-                    color: goals[text]! ? primaryColor : greyColor,
+                    color: isSelected ? primaryColor : const Color(0xFF3D3761),
                     width: 2,
                   ),
                   borderRadius: BorderRadius.circular(4),
                 ),
-                child: goals[text]!
+                child: isSelected
                     ? const Icon(
                         Icons.check,
                         size: 16,
@@ -168,31 +169,33 @@ class _GoalsScreenState extends State<GoalsScreen> {
   }
 
   Widget nextButton() {
+    final bool hasSelection = goals.values.any((selected) => selected);
+    
     return InkWell(
-      onTap: () {
+      onTap: hasSelection ? () {
         Navigator.pushNamed(context, '/onboardingGoalsInfo');
-      },
+      } : null,
       child: Container(
         width: double.maxFinite,
         padding: const EdgeInsets.symmetric(
           vertical: fixPadding * 1.5,
         ),
         decoration: BoxDecoration(
-          color: primaryColor,
+          color: hasSelection ? primaryColor : const Color(0xFF3D3761),
           borderRadius: BorderRadius.circular(12.0),
-          boxShadow: [
+          boxShadow: hasSelection ? [
             BoxShadow(
               color: primaryColor.withValues(alpha: 0.4),
               blurRadius: 12,
               spreadRadius: 2,
             )
-          ],
+          ] : [],
         ),
         alignment: Alignment.center,
-        child: const Text(
+        child: Text(
           'NEXT',
           style: TextStyle(
-            color: whiteColor,
+            color: hasSelection ? whiteColor : whiteColor.withValues(alpha: 0.4),
             fontSize: 16,
             fontWeight: FontWeight.w700,
             letterSpacing: 1.2,

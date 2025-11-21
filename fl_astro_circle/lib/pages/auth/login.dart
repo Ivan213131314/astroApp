@@ -63,15 +63,16 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
             child: SafeArea(
-              child: ListView(
-                padding: const EdgeInsets.all(fixPadding * 2.0),
-                physics: const BouncingScrollPhysics(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  heightSpace,
-                  heightSpace,
-                  heightSpace,
-                  heightSpace,
-                  loginText(),
+                  backButton(context),
+                  Expanded(
+                    child: ListView(
+                      padding: const EdgeInsets.symmetric(horizontal: fixPadding * 2.0),
+                      physics: const BouncingScrollPhysics(),
+                      children: [
+                        loginText(),
                   heightSpace,
                   heightSpace,
                   welcomeText(),
@@ -94,9 +95,14 @@ class _LoginScreenState extends State<LoginScreen> {
                   googleSignInButton(),
                   heightSpace,
                   heightSpace,
-                  Platform.isIOS ? appleSignInButton() : const SizedBox(),
-                  Platform.isIOS ? heightSpace : const SizedBox(),
-                  Platform.isIOS ? heightSpace : const SizedBox(),
+                        Platform.isIOS ? appleSignInButton() : const SizedBox(),
+                        Platform.isIOS ? heightSpace : const SizedBox(),
+                        Platform.isIOS ? heightSpace : const SizedBox(),
+                        dontHaveAccountText(),
+                        heightSpace,
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -471,6 +477,61 @@ class _LoginScreenState extends State<LoginScreen> {
         });
       }
     }
+  }
+
+  dontHaveAccountText() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          'Don\'t have an account? ',
+          style: TextStyle(
+            color: whiteColor.withValues(alpha: 0.6),
+            fontSize: 14,
+            fontWeight: FontWeight.w400,
+          ),
+        ),
+        GestureDetector(
+          onTap: () {
+            Navigator.pushNamed(context, '/register');
+          },
+          child: const Text(
+            'Register',
+            style: TextStyle(
+              color: primaryColor,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  backButton(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.pop(context);
+      },
+      child: Container(
+        height: 35,
+        width: 35,
+        margin: const EdgeInsets.only(
+            left: fixPadding * 2.0,
+            right: fixPadding * 2,
+            top: fixPadding * 2,
+            bottom: fixPadding),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(5.0),
+          color: recBgColor,
+        ),
+        child: const Icon(
+          Icons.arrow_back,
+          color: whiteColor,
+          size: 22,
+        ),
+      ),
+    );
   }
 
   onWillPop() {

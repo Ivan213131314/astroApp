@@ -84,6 +84,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       googleSignInButton(),
                       heightSpace,
                       heightSpace,
+                      alreadyHaveAccountText(),
+                      heightSpace,
                     ],
                   ),
                 )
@@ -430,6 +432,35 @@ class _RegisterScreenState extends State<RegisterScreen> {
         });
       }
     }
+  }
+
+  alreadyHaveAccountText() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          'Already have an account? ',
+          style: TextStyle(
+            color: whiteColor.withValues(alpha: 0.6),
+            fontSize: 14,
+            fontWeight: FontWeight.w400,
+          ),
+        ),
+        GestureDetector(
+          onTap: () {
+            Navigator.pushReplacementNamed(context, '/login');
+          },
+          child: const Text(
+            'Login',
+            style: TextStyle(
+              color: primaryColor,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   backButton(BuildContext context) {

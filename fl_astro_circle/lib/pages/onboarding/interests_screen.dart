@@ -9,7 +9,7 @@ class InterestsScreen extends StatefulWidget {
 }
 
 class _InterestsScreenState extends State<InterestsScreen> {
-  String? selectedInterest;
+  Set<String> selectedInterests = {};
 
   final List<Map<String, dynamic>> interests = [
     {'icon': Icons.attach_money, 'label': 'Money'},
@@ -115,20 +115,24 @@ class _InterestsScreenState extends State<InterestsScreen> {
   }
 
   Widget interestItem(IconData icon, String label) {
-    final isSelected = selectedInterest == label;
+    final isSelected = selectedInterests.contains(label);
     return InkWell(
       onTap: () {
         setState(() {
-          selectedInterest = label;
+          if (isSelected) {
+            selectedInterests.remove(label);
+          } else {
+            selectedInterests.add(label);
+          }
         });
       },
       child: Container(
         decoration: BoxDecoration(
           color: isSelected 
               ? primaryColor.withValues(alpha: 0.3)
-              : const Color(0xFF2F2955),
+              : const Color(0xFF1F1A3D),
           border: Border.all(
-            color: isSelected ? primaryColor : Colors.transparent,
+            color: isSelected ? primaryColor : const Color(0xFF2F2955),
             width: 2,
           ),
           borderRadius: BorderRadius.circular(16.0),
@@ -142,20 +146,20 @@ class _InterestsScreenState extends State<InterestsScreen> {
               decoration: BoxDecoration(
                 color: isSelected 
                     ? primaryColor.withValues(alpha: 0.5)
-                    : primaryColor.withValues(alpha: 0.2),
+                    : primaryColor.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 icon,
                 size: 32,
-                color: isSelected ? primaryColor : whiteColor.withValues(alpha: 0.7),
+                color: isSelected ? primaryColor : whiteColor.withValues(alpha: 0.5),
               ),
             ),
             heightSpace,
             Text(
               label,
               style: TextStyle(
-                color: isSelected ? whiteColor : greyColor,
+                color: isSelected ? whiteColor : whiteColor.withValues(alpha: 0.5),
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
               ),
@@ -168,8 +172,10 @@ class _InterestsScreenState extends State<InterestsScreen> {
   }
 
   Widget nextButton() {
+    final bool hasSelection = selectedInterests.isNotEmpty;
+    
     return InkWell(
-      onTap: selectedInterest != null
+      onTap: hasSelection
           ? () {
               Navigator.pushNamed(context, '/onboardingCompatibilityQuestion');
             }
@@ -180,11 +186,11 @@ class _InterestsScreenState extends State<InterestsScreen> {
           vertical: fixPadding * 1.5,
         ),
         decoration: BoxDecoration(
-          color: selectedInterest != null 
+          color: hasSelection 
               ? primaryColor 
               : const Color(0xFF3D3761),
           borderRadius: BorderRadius.circular(12.0),
-          boxShadow: selectedInterest != null
+          boxShadow: hasSelection
               ? [
                   BoxShadow(
                     color: primaryColor.withValues(alpha: 0.4),
@@ -198,7 +204,7 @@ class _InterestsScreenState extends State<InterestsScreen> {
         child: Text(
           'NEXT',
           style: TextStyle(
-            color: selectedInterest != null ? whiteColor : greyColor,
+            color: hasSelection ? whiteColor : greyColor,
             fontSize: 16,
             fontWeight: FontWeight.w700,
             letterSpacing: 1.2,
