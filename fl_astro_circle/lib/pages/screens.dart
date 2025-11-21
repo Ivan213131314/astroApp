@@ -42,6 +42,7 @@ export 'package:fl_astro_circle/pages/natalChart/natal_chart.dart';
 export 'package:fl_astro_circle/pages/natalChartDetail/natal_chart_detail.dart';
 export 'package:fl_astro_circle/pages/message/message.dart';
 export 'package:fl_astro_circle/pages/notification/notification.dart';
+export 'package:fl_astro_circle/pages/universeMessage/universe_message.dart';
 export 'package:fl_astro_circle/pages/profile/profile.dart';
 export 'package:fl_astro_circle/pages/masterCard/master_card.dart';
 export 'package:fl_astro_circle/pages/paymentMethod/payment_method.dart';

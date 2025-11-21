@@ -5,7 +5,8 @@ import 'package:flutter/material.dart';
 import '../../theme/theme.dart';
 
 class CompatibilityScreen extends StatefulWidget {
-  const CompatibilityScreen({super.key});
+  final bool showBackButton;
+  const CompatibilityScreen({super.key, this.showBackButton = false});
 
   @override
   State<CompatibilityScreen> createState() => _CompatibilityScreenState();
@@ -129,23 +130,24 @@ class _CompatibilityScreenState extends State<CompatibilityScreen> {
     final size = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: scaffoldBgColor,
-      appBar: AppBar(
+      appBar: widget.showBackButton ? AppBar(
         centerTitle: false,
         backgroundColor: Colors.transparent,
         elevation: 0,
         automaticallyImplyLeading: false,
         titleSpacing: 20.0,
         title: backButton(context),
-      ),
-      body: Stack(
-        children: [
-          bgImage(size),
-          ListView(
-            padding: const EdgeInsets.all(fixPadding * 2.0),
-            physics: const BouncingScrollPhysics(),
-            children: [
-              heightSpace,
-              compatibilityText(),
+      ) : null,
+      body: SafeArea(
+        child: Stack(
+          children: [
+            bgImage(size),
+            ListView(
+              padding: const EdgeInsets.all(fixPadding * 2.0),
+              physics: const BouncingScrollPhysics(),
+              children: [
+                heightSpace,
+                compatibilityText(),
               heightSpace,
               contentText(),
               heightSpace,
@@ -170,6 +172,7 @@ class _CompatibilityScreenState extends State<CompatibilityScreen> {
             ],
           )
         ],
+        ),
       ),
     );
   }

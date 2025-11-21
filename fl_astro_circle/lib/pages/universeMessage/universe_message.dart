@@ -1,0 +1,412 @@
+import 'dart:async';
+import 'package:fl_astro_circle/pages/screens.dart';
+import 'package:fl_astro_circle/services/universe_message_service.dart';
+import 'package:fl_astro_circle/theme/theme.dart';
+import 'package:flutter/material.dart';
+import 'package:line_awesome_flutter/line_awesome_flutter.dart';
+import 'package:badges/badges.dart' as badges;
+import 'package:page_transition/page_transition.dart';
+
+class UniverseMessageScreen extends StatefulWidget {
+  const UniverseMessageScreen({super.key});
+
+  @override
+  State<UniverseMessageScreen> createState() => _UniverseMessageScreenState();
+}
+
+class _UniverseMessageScreenState extends State<UniverseMessageScreen> {
+  final TextEditingController messageController = TextEditingController();
+  final UniverseMessageService messageService = UniverseMessageService();
+  
+  MessageStatus currentStatus = MessageStatus.idle;
+  Timer? responseTimer;
+  bool showReceivedDialog = false;
+
+  final List<String> quickSuggestions = [
+    "When will I find my love?",
+    "When will I get rich?",
+    "What is my purpose?",
+    "Will I be successful?",
+    "When will I marry?",
+    "What awaits me?",
+    "Is my partner loyal?",
+    "Will I change careers?",
+    "When will I travel?",
+    "What is my destiny?",
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    messageService.addListener(() {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    messageController.dispose();
+    responseTimer?.cancel();
+    super.dispose();
+  }
+
+  void sendMessageToUniverse() {
+    if (messageController.text.trim().isEmpty) return;
+    
+    setState(() {
+      currentStatus = MessageStatus.sending;
+    });
+
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) {
+        setState(() {
+          currentStatus = MessageStatus.waiting;
+        });
+        
+        // Для теста - 1 минута
+        responseTimer = Timer(const Duration(minutes: 1), () {
+          if (mounted) {
+            messageService.addUniverseResponse(messageController.text);
+            setState(() {
+              showReceivedDialog = true;
+            });
+            
+            Future.delayed(const Duration(seconds: 3), () {
+              if (mounted) {
+                setState(() {
+                  showReceivedDialog = false;
+                  currentStatus = MessageStatus.idle;
+                  messageController.clear();
+                });
+              }
+            });
+          }
+        });
+      }
+    });
+  }
+
+  String getTooltipText() {
+    switch (currentStatus) {
+      case MessageStatus.idle:
+        return "Your message will be sent to the universe via NASA satellites. The universe will respond with an audio message that we will decipher.";
+      case MessageStatus.sending:
+        return "Sending your message to the universe via NASA satellites...";
+      case MessageStatus.waiting:
+        return "Message sent to the universe! Waiting for a response from space. This may take several hours to a day.";
+      case MessageStatus.received:
+        return "Message from space received!";
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: scaffoldBgColor,
+      appBar: AppBar(
+        backgroundColor: scaffoldBgColor,
+        elevation: 0,
+        centerTitle: false,
+        automaticallyImplyLeading: false,
+        titleSpacing: 20.0,
+        title: const Text(
+          'Universe Message',
+          style: bold20White,
+        ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 20.0),
+            child: badges.Badge(
+              showBadge: messageService.unreadCount > 0,
+              badgeContent: Text(
+                '${messageService.unreadCount}',
+                style: const TextStyle(color: whiteColor, fontSize: 10),
+              ),
+              badgeStyle: const badges.BadgeStyle(
+                badgeColor: redColor,
+                padding: EdgeInsets.all(6),
+              ),
+              child: IconButton(
+                icon: const Icon(LineAwesomeIcons.bell, color: whiteF4Color),
+                onPressed: () {
+                  messageService.markAllAsRead();
+                  Navigator.push(
+                    context,
+                    PageTransition(
+                      child: const NotificationScreen(),
+                      type: PageTransitionType.rightToLeft,
+                      duration: const Duration(milliseconds: 300),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+      body: Stack(
+        children: [
+          Center(
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: fixPadding * 2),
+                    padding: const EdgeInsets.all(fixPadding * 2),
+                    decoration: BoxDecoration(
+                      color: blueShade1,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: primaryColor.withValues(alpha: 0.3),
+                          blurRadius: 20,
+                          spreadRadius: 5,
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        const Icon(
+                          Icons.rocket_launch_rounded,
+                          size: 60,
+                          color: primaryColor,
+                        ),
+                        heightSpace,
+                        const Text(
+                          'Ready? Send a message to space',
+                          style: bold18White,
+                          textAlign: TextAlign.center,
+                        ),
+                        heightSpace,
+                        heightSpace,
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.chat_bubble_outline,
+                              color: primaryColor,
+                              size: 20,
+                            ),
+                            widthSpace,
+                            const Expanded(
+                              child: Text(
+                                'Ask anything that\'s on your mind',
+                                style: medium14WhiteF4,
+                              ),
+                            ),
+                          ],
+                        ),
+                        heightSpace,
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.lock_outline,
+                              color: primaryColor,
+                              size: 20,
+                            ),
+                            widthSpace,
+                            const Expanded(
+                              child: Text(
+                                'Your message stays private and confidential',
+                                style: medium14WhiteF4,
+                              ),
+                            ),
+                          ],
+                        ),
+                        heightSpace,
+                        heightSpace,
+                        Container(
+                          padding: const EdgeInsets.all(fixPadding * 1.5),
+                          decoration: BoxDecoration(
+                            color: scaffoldBgColor.withValues(alpha: 0.5),
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          child: Text(
+                            getTooltipText(),
+                            style: regualr14Grey,
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              padding: const EdgeInsets.all(fixPadding * 2),
+              decoration: BoxDecoration(
+                color: blueShade1,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.3),
+                    blurRadius: 10,
+                    offset: const Offset(0, -5),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (currentStatus == MessageStatus.idle) ...[
+                    SizedBox(
+                      height: 50,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: quickSuggestions.length,
+                        itemBuilder: (context, index) {
+                          return GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                messageController.text = quickSuggestions[index];
+                              });
+                            },
+                            child: Container(
+                              margin: const EdgeInsets.only(right: fixPadding),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: fixPadding * 1.5,
+                                vertical: fixPadding,
+                              ),
+                              decoration: BoxDecoration(
+                                color: scaffoldBgColor,
+                                borderRadius: BorderRadius.circular(25),
+                                border: Border.all(
+                                  color: primaryColor.withValues(alpha: 0.3),
+                                ),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  quickSuggestions[index],
+                                  style: medium14WhiteF4,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    heightSpace,
+                  ],
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: fixPadding * 1.5),
+                          decoration: BoxDecoration(
+                            color: scaffoldBgColor,
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          child: TextField(
+                            controller: messageController,
+                            enabled: currentStatus == MessageStatus.idle,
+                            style: regualr16WhiteF4,
+                            decoration: const InputDecoration(
+                              hintText: 'Write a message',
+                              hintStyle: regualr16Grey,
+                              border: InputBorder.none,
+                            ),
+                            maxLines: 1,
+                          ),
+                        ),
+                      ),
+                      widthSpace,
+                      GestureDetector(
+                        onTap: currentStatus == MessageStatus.idle
+                            ? sendMessageToUniverse
+                            : null,
+                        child: Container(
+                          height: 50,
+                          width: 50,
+                          decoration: BoxDecoration(
+                            color: currentStatus == MessageStatus.idle
+                                ? primaryColor
+                                : greyColor,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.send_rounded,
+                            color: whiteColor,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (currentStatus != MessageStatus.idle) ...[
+                    heightSpace,
+                    Text(
+                      currentStatus == MessageStatus.sending
+                          ? 'Sending to space...'
+                          : 'Waiting for response...',
+                      style: medium14Grey,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+          if (showReceivedDialog)
+            Positioned.fill(
+              child: Container(
+                color: Colors.black.withValues(alpha: 0.7),
+                child: Center(
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: fixPadding * 2),
+                    padding: const EdgeInsets.all(fixPadding * 3),
+                    decoration: BoxDecoration(
+                      color: blueShade1,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: primaryColor.withValues(alpha: 0.5),
+                          blurRadius: 30,
+                          spreadRadius: 10,
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.mark_email_read_rounded,
+                          size: 80,
+                          color: greenColor,
+                        ),
+                        heightSpace,
+                        heightSpace,
+                        const Text(
+                          'Message from space received!',
+                          style: bold20White,
+                          textAlign: TextAlign.center,
+                        ),
+                        heightSpace,
+                        const Text(
+                          'Check notifications to decipher',
+                          style: medium16Grey,
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+enum MessageStatus {
+  idle,
+  sending,
+  waiting,
+  received,
+}
+

@@ -285,7 +285,7 @@ class _MyAppState extends State<MyApp> {
         );
       case '/compatibility':
         return PageTransition(
-          child: const CompatibilityScreen(),
+          child: const CompatibilityScreen(showBackButton: true),
           type: PageTransitionType.rightToLeft,
         );
       case '/compatibilityDetail':
@@ -316,6 +316,11 @@ class _MyAppState extends State<MyApp> {
       case '/message':
         return PageTransition(
           child: const MessageScreen(),
+          type: PageTransitionType.rightToLeft,
+        );
+      case '/universeMessage':
+        return PageTransition(
+          child: const UniverseMessageScreen(),
           type: PageTransitionType.rightToLeft,
         );
       case '/notification':

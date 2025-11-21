@@ -19,14 +19,16 @@ class _BottomBarState extends State<BottomBar> {
 
   final itemList = [
     LineAwesomeIcons.home_solid,
-    CupertinoIcons.ellipses_bubble,
+    Icons.rocket_launch_rounded,
+    CupertinoIcons.heart_fill,
     LineAwesomeIcons.bell,
     LineAwesomeIcons.user,
   ];
 
   List pages = const [
     HomeScreen(),
-    MessageScreen(),
+    UniverseMessageScreen(),
+    CompatibilityScreen(),
     NotificationScreen(),
     ProfileScreen(),
   ];
