@@ -1,8 +1,10 @@
 import 'package:fl_astro_circle/localization/localization_const.dart';
 import 'package:fl_astro_circle/theme/theme.dart';
+import 'package:fl_astro_circle/services/auth_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -12,6 +14,7 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  final AuthService _authService = AuthService();
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -122,8 +125,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
                     TextButton(
-                      onPressed: () {
-                        Navigator.pushNamed(context, '/login');
+                      onPressed: () async {
+                        Navigator.pop(context);
+                        await _authService.signOut();
+                        
+                        // Сбрасываем флаг onboarding при выходе
+                        final prefs = await SharedPreferences.getInstance();
+                        await prefs.setBool('onboarding_completed', false);
+                        
+                        if (mounted) {
+                          Navigator.pushNamedAndRemoveUntil(
+                            context, 
+                            '/onboarding', 
+                            (route) => false
+                          );
+                        }
                       },
                       child: Text(
                         getTranslation(context, 'profile.yes'),

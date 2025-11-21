@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:fl_astro_circle/theme/theme.dart';
+import 'package:fl_astro_circle/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -12,26 +13,34 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  final AuthService _authService = AuthService();
+
   @override
   void initState() {
     Timer(const Duration(seconds: 3), () {
-      checkOnboardingStatus();
+      checkAppStatus();
     });
     super.initState();
   }
 
-  Future<void> checkOnboardingStatus() async {
+  Future<void> checkAppStatus() async {
     final prefs = await SharedPreferences.getInstance();
     final hasCompletedOnboarding = prefs.getBool('onboarding_completed') ?? false;
     
     if (!mounted) return;
     
-    if (hasCompletedOnboarding) {
-      // Если onboarding пройден, идём на экран выбора авторизации
-      Navigator.pushNamed(context, '/authChoice');
+    // Проверяем, залогинен ли пользователь
+    final currentUser = _authService.currentUser;
+    
+    if (currentUser != null) {
+      // Если пользователь залогинен, идём на главную страницу
+      Navigator.pushReplacementNamed(context, '/bottombar');
+    } else if (hasCompletedOnboarding) {
+      // Если onboarding пройден но пользователь не залогинен, идём на экран выбора авторизации
+      Navigator.pushReplacementNamed(context, '/authChoice');
     } else {
-      // Если не пройден, показываем onboarding
-      Navigator.pushNamed(context, '/onboarding');
+      // Если не пройден onboarding, показываем его
+      Navigator.pushReplacementNamed(context, '/onboarding');
     }
   }
 
