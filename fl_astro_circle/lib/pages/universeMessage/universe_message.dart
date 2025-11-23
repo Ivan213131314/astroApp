@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:fl_astro_circle/pages/screens.dart';
 import 'package:fl_astro_circle/services/universe_message_service.dart';
+import 'package:fl_astro_circle/services/superwall_service.dart';
 import 'package:fl_astro_circle/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
@@ -390,6 +391,67 @@ class _UniverseMessageScreenState extends State<UniverseMessageScreen> {
                           'Check notifications to decipher',
                           style: medium16Grey,
                           textAlign: TextAlign.center,
+                        ),
+                        heightSpace,
+                        heightSpace,
+                        GestureDetector(
+                          onTap: () async {
+                            // Показать Superwall paywall
+                            await SuperwallService().showPaywall(
+                              placement: "subscribe_button",
+                              onPurchased: () {
+                                // После покупки переходим к расшифровке
+                                Navigator.push(
+                                  context,
+                                  PageTransition(
+                                    child: const NotificationScreen(),
+                                    type: PageTransitionType.rightToLeft,
+                                    duration: const Duration(milliseconds: 300),
+                                  ),
+                                );
+                              },
+                              onDeclined: () {
+                                // Пользователь отклонил - можно показать сообщение
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Subscribe to unlock universe messages'),
+                                    backgroundColor: Colors.orange,
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: fixPadding * 2,
+                              vertical: fixPadding * 1.5,
+                            ),
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [primaryColor, Color(0xFF7B5CFA)],
+                              ),
+                              borderRadius: BorderRadius.circular(30),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: primaryColor.withValues(alpha: 0.4),
+                                  blurRadius: 15,
+                                  offset: const Offset(0, 5),
+                                ),
+                              ],
+                            ),
+                            child: const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.hearing, color: whiteColor, size: 20),
+                                widthSpace,
+                                Text(
+                                  'Decipher Universe Message',
+                                  style: bold16WhiteF4,
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ],
                     ),

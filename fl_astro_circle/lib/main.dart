@@ -7,10 +7,19 @@ import 'package:page_transition/page_transition.dart';
 import 'package:fl_astro_circle/pages/screens.dart';
 import 'localization/localization_const.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:superwallkit_flutter/superwallkit_flutter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  
+  // Инициализация Superwall
+  Superwall.configure('pk_zZA_dWvZ0yUQUDpWQsBVO');
+  
+  // Установить начальный статус подписки (неподписан)
+  // Это нужно чтобы Superwall не ждал таймаута
+  await Superwall.shared.setSubscriptionStatus(SubscriptionStatusInactive());
+  
   runApp(const MyApp());
 }
 

@@ -2,6 +2,7 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:fl_astro_circle/localization/localization_const.dart';
 import 'package:fl_astro_circle/widget/column_builder.dart';
 import 'package:flutter/material.dart';
+import 'package:fl_astro_circle/services/superwall_service.dart';
 
 import '../../theme/theme.dart';
 
@@ -140,8 +141,25 @@ class _SubscribeScreenState extends State<SubscribeScreen> {
                 ),
               ),
               InkWell(
-                onTap: () {
-                  Navigator.pushNamed(context, '/paymentMethod');
+                onTap: () async {
+                  // Показать Superwall paywall
+                  await SuperwallService().showPaywall(
+                    placement: "subscribe_button", // Название placement из Superwall Dashboard
+                    onPurchased: () {
+                      // После успешной покупки
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Подписка успешно оформлена!'),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                      Navigator.pop(context);
+                    },
+                    onDeclined: () {
+                      // Пользователь отклонил покупку
+                      print("Покупка отклонена");
+                    },
+                  );
                 },
                 child: Container(
                   padding: const EdgeInsets.symmetric(

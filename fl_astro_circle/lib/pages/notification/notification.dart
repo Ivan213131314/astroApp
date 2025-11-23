@@ -1,6 +1,7 @@
 import 'package:fl_astro_circle/localization/localization_const.dart';
 import 'package:fl_astro_circle/services/universe_message_service.dart';
 import 'package:fl_astro_circle/services/cosmic_audio_generator.dart';
+import 'package:fl_astro_circle/services/superwall_service.dart';
 import 'package:fl_astro_circle/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
@@ -372,6 +373,80 @@ class _NotificationScreenState extends State<NotificationScreen> {
                 },
               ),
             ],
+            heightBox(10),
+            Align(
+              alignment: Alignment.centerRight,
+              child: GestureDetector(
+                onTap: () async {
+                  // Показать Superwall paywall
+                  await SuperwallService().showPaywall(
+                    placement: "subscribe_button",
+                    onPurchased: () {
+                      // После покупки показываем расшифровку
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          backgroundColor: Colors.green,
+                          behavior: SnackBarBehavior.floating,
+                          content: Text(
+                            'Deciphering universe message...',
+                            style: medium14WhiteF4,
+                          ),
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                    },
+                    onDeclined: () {
+                      // Пользователь отклонил
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          backgroundColor: Colors.orange,
+                          behavior: SnackBarBehavior.floating,
+                          content: Text(
+                            'Subscribe to decipher universe messages',
+                            style: medium14WhiteF4,
+                          ),
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                    },
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: fixPadding * 1.2,
+                    vertical: fixPadding * 0.8,
+                  ),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [primaryColor, Color(0xFF7B5CFA)],
+                    ),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: primaryColor.withValues(alpha: 0.3),
+                        blurRadius: 10,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.hearing, color: whiteColor, size: 14),
+                      SizedBox(width: 6),
+                      Text(
+                        'Decipher',
+                        style: TextStyle(
+                          color: whiteColor,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
