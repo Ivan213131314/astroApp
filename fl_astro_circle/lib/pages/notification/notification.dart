@@ -1,9 +1,9 @@
 import 'package:fl_astro_circle/localization/localization_const.dart';
 import 'package:fl_astro_circle/services/universe_message_service.dart';
+import 'package:fl_astro_circle/services/cosmic_audio_generator.dart';
 import 'package:fl_astro_circle/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
-import 'package:just_audio/just_audio.dart';
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
@@ -14,7 +14,7 @@ class NotificationScreen extends StatefulWidget {
 
 class _NotificationScreenState extends State<NotificationScreen> {
   final UniverseMessageService messageService = UniverseMessageService();
-  final AudioPlayer audioPlayer = AudioPlayer();
+  final CosmicAudioGenerator audioGenerator = CosmicAudioGenerator();
   String? currentPlayingId;
 
   @override
@@ -26,16 +26,32 @@ class _NotificationScreenState extends State<NotificationScreen> {
         setState(() {});
       }
     });
+    audioGenerator.setOnStateChanged(() {
+      if (mounted) {
+        setState(() {});
+      }
+    });
   }
 
   @override
   void dispose() {
-    audioPlayer.dispose();
+    audioGenerator.dispose();
     super.dispose();
   }
 
-  void playUniverseAudio(UniverseResponse response) {
-    // Mock: создаем звуковой эффект или просто показываем что это работает
+  Future<void> playUniverseAudio(UniverseResponse response) async {
+    if (currentPlayingId == response.id) {
+      return;
+    }
+
+    if (currentPlayingId != null) {
+      await audioGenerator.stop();
+    }
+
+    setState(() {
+      currentPlayingId = response.id;
+    });
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         backgroundColor: blueShade1,
@@ -46,17 +62,49 @@ class _NotificationScreenState extends State<NotificationScreen> {
             widthSpace,
             Expanded(
               child: Text(
-                'Playing cosmic audio message (${response.audioDuration}s)',
+                response.audioFilePath == null
+                    ? 'Generating cosmic audio message...'
+                    : 'Playing cosmic audio message (${response.audioDuration}s)',
                 style: medium14WhiteF4,
               ),
             ),
           ],
         ),
-        duration: Duration(seconds: response.audioDuration),
+        duration: Duration(seconds: 2),
       ),
     );
+
+    final filePath = await audioGenerator.playCosmicMessage(
+      messageId: response.id,
+      durationSeconds: response.audioDuration,
+      audioFilePath: response.audioFilePath,
+      onComplete: () {
+        if (mounted) {
+          setState(() {
+            currentPlayingId = null;
+          });
+        }
+      },
+    );
+    
+    if (response.audioFilePath == null && filePath != null) {
+      await messageService.updateAudioFilePath(response.id, filePath);
+    }
     
     messageService.markAsRead(response.id);
+  }
+
+  Future<void> togglePlayPause(UniverseResponse response) async {
+    if (currentPlayingId == response.id) {
+      if (audioGenerator.isPlaying) {
+        await audioGenerator.pause();
+      } else {
+        await audioGenerator.resume();
+      }
+      setState(() {});
+    } else {
+      await playUniverseAudio(response);
+    }
   }
 
   final notificationList = [
@@ -171,6 +219,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
   }
 
   Widget universeMessageItem(UniverseResponse response) {
+    final isCurrentPlaying = currentPlayingId == response.id;
+    
     return Dismissible(
       key: Key(response.id),
       background: Container(
@@ -191,105 +241,148 @@ class _NotificationScreenState extends State<NotificationScreen> {
           ),
         );
       },
-      child: GestureDetector(
-        onTap: () => playUniverseAudio(response),
-        child: Container(
-          margin: const EdgeInsets.symmetric(
-            horizontal: fixPadding * 2.0,
-            vertical: fixPadding,
-          ),
-          padding: const EdgeInsets.all(fixPadding * 1.5),
-          decoration: BoxDecoration(
-            color: response.isRead ? blueShade1 : blueShade1.withValues(alpha: 0.7),
-            borderRadius: BorderRadius.circular(10.0),
-            border: response.isRead
-                ? null
-                : Border.all(color: primaryColor, width: 2),
-          ),
-          child: Row(
-            children: [
-              Container(
-                height: 60,
-                width: 60,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10.0),
-                  color: const Color(0xFF1F2449),
-                  gradient: LinearGradient(
-                    colors: [primaryColor.withValues(alpha: 0.3), Colors.transparent],
+      child: Container(
+        margin: const EdgeInsets.symmetric(
+          horizontal: fixPadding * 2.0,
+          vertical: fixPadding,
+        ),
+        padding: const EdgeInsets.all(fixPadding * 1.5),
+        decoration: BoxDecoration(
+          color: response.isRead ? blueShade1 : blueShade1.withValues(alpha: 0.7),
+          borderRadius: BorderRadius.circular(10.0),
+          border: response.isRead
+              ? null
+              : Border.all(color: primaryColor, width: 2),
+        ),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                GestureDetector(
+                  onTap: () => togglePlayPause(response),
+                  child: Container(
+                    height: 60,
+                    width: 60,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10.0),
+                      color: const Color(0xFF1F2449),
+                      gradient: LinearGradient(
+                        colors: [primaryColor.withValues(alpha: 0.3), Colors.transparent],
+                      ),
+                    ),
+                    child: Icon(
+                      isCurrentPlaying && audioGenerator.isPlaying
+                          ? Icons.pause
+                          : Icons.play_arrow,
+                      color: primaryColor,
+                      size: 35,
+                    ),
                   ),
                 ),
-                child: const Icon(
-                  Icons.spatial_audio_rounded,
-                  color: primaryColor,
-                  size: 30,
-                ),
-              ),
-              widthSpace,
-              width5Space,
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const Expanded(
-                          child: Text(
-                            'Universe Response 🌌 ✨',
-                            style: medium16WhiteF4,
+                widthSpace,
+                width5Space,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Expanded(
+                            child: Text(
+                              'Universe Response 🌌 ✨',
+                              style: medium16WhiteF4,
+                            ),
                           ),
-                        ),
-                        if (!response.isRead)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: redColor,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: const Text(
-                              'NEW',
-                              style: TextStyle(
-                                color: whiteColor,
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
+                          if (!response.isRead)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: redColor,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: const Text(
+                                'NEW',
+                                style: TextStyle(
+                                  color: whiteColor,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
-                          ),
-                      ],
-                    ),
-                    heightBox(3),
-                    Text(
-                      'Your question: ${response.question}',
-                      style: regualr14Grey,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    heightBox(3),
-                    Row(
-                      children: [
-                        const Icon(Icons.volume_up, color: greyColor, size: 14),
-                        width5Space,
-                        Text(
-                          'Audio message (${response.audioDuration}s)',
-                          style: regualr14Primary,
-                        ),
-                        const Spacer(),
-                        Text(
-                          response.getTimeAgo(),
-                          style: regualr14Grey,
-                        ),
-                      ],
-                    ),
-                  ],
+                        ],
+                      ),
+                      heightBox(3),
+                      Text(
+                        'Your question: ${response.question}',
+                        style: regualr14Grey,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      heightBox(3),
+                      Text(
+                        response.getTimeAgo(),
+                        style: regualr14Grey,
+                      ),
+                    ],
+                  ),
                 ),
+              ],
+            ),
+            if (isCurrentPlaying) ...[
+              heightBox(10),
+              StreamBuilder<Duration>(
+                stream: audioGenerator.positionStream,
+                builder: (context, snapshot) {
+                  final position = snapshot.data ?? Duration.zero;
+                  final totalDuration = Duration(seconds: response.audioDuration);
+                  final progress = totalDuration.inMilliseconds > 0
+                      ? position.inMilliseconds / totalDuration.inMilliseconds
+                      : 0.0;
+
+                  return Column(
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            _formatDuration(position),
+                            style: regualr14Grey,
+                          ),
+                          const Spacer(),
+                          Text(
+                            _formatDuration(totalDuration),
+                            style: regualr14Grey,
+                          ),
+                        ],
+                      ),
+                      heightBox(5),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(5),
+                        child: LinearProgressIndicator(
+                          value: progress.clamp(0.0, 1.0),
+                          backgroundColor: const Color(0xFF1F2449),
+                          valueColor: const AlwaysStoppedAnimation<Color>(primaryColor),
+                          minHeight: 6,
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
             ],
-          ),
+          ],
         ),
       ),
     );
+  }
+
+  String _formatDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    final minutes = twoDigits(duration.inMinutes.remainder(60));
+    final seconds = twoDigits(duration.inSeconds.remainder(60));
+    return '$minutes:$seconds';
   }
 
   Widget regularNotificationItem(int index) {

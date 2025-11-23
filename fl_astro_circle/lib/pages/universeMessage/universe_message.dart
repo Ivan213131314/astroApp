@@ -65,8 +65,8 @@ class _UniverseMessageScreenState extends State<UniverseMessageScreen> {
           currentStatus = MessageStatus.waiting;
         });
         
-        // Для теста - 1 минута
-        responseTimer = Timer(const Duration(minutes: 1), () {
+        // Получение ответа от вселенной через 5 секунд
+        responseTimer = Timer(const Duration(seconds: 5), () {
           if (mounted) {
             messageService.addUniverseResponse(messageController.text);
             setState(() {

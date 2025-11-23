@@ -30,7 +30,7 @@ class UniverseMessageService extends ChangeNotifier {
     final response = UniverseResponse(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       question: question,
-      audioUrl: 'mock_audio_${Random().nextInt(1000)}.mp3',
+      audioFilePath: null,
       audioDuration: Random().nextInt(13) + 8, // 8-20 секунд
       timestamp: DateTime.now(),
       isRead: false,
@@ -40,6 +40,15 @@ class UniverseMessageService extends ChangeNotifier {
     _unreadCount++;
     await _saveResponses();
     notifyListeners();
+  }
+
+  Future<void> updateAudioFilePath(String id, String filePath) async {
+    final index = _responses.indexWhere((r) => r.id == id);
+    if (index != -1) {
+      _responses[index].audioFilePath = filePath;
+      await _saveResponses();
+      notifyListeners();
+    }
   }
 
   Future<void> markAsRead(String id) async {
@@ -83,7 +92,7 @@ class UniverseMessageService extends ChangeNotifier {
 class UniverseResponse {
   final String id;
   final String question;
-  final String audioUrl;
+  String? audioFilePath;
   final int audioDuration;
   final DateTime timestamp;
   bool isRead;
@@ -91,7 +100,7 @@ class UniverseResponse {
   UniverseResponse({
     required this.id,
     required this.question,
-    required this.audioUrl,
+    this.audioFilePath,
     required this.audioDuration,
     required this.timestamp,
     this.isRead = false,
@@ -101,7 +110,7 @@ class UniverseResponse {
     return {
       'id': id,
       'question': question,
-      'audioUrl': audioUrl,
+      'audioFilePath': audioFilePath,
       'audioDuration': audioDuration,
       'timestamp': timestamp.toIso8601String(),
       'isRead': isRead,
@@ -112,7 +121,7 @@ class UniverseResponse {
     return UniverseResponse(
       id: json['id'],
       question: json['question'],
-      audioUrl: json['audioUrl'],
+      audioFilePath: json['audioFilePath'],
       audioDuration: json['audioDuration'],
       timestamp: DateTime.parse(json['timestamp']),
       isRead: json['isRead'] ?? false,
