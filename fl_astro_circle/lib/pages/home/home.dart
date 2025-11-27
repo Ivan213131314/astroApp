@@ -534,18 +534,23 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           heightSpace,
           heightSpace,
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: fixPadding * 1.5,
-              vertical: 7.0,
-            ),
-            decoration: BoxDecoration(
-              color: const Color(0xFF2D1A07),
-              borderRadius: BorderRadius.circular(5.0),
-            ),
-            child: Text(
-              getTranslation(context, 'home.start_now'),
-              style: medium18White,
+          GestureDetector(
+            onTap: () {
+              Navigator.pushNamed(context, '/astrologerChat');
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: fixPadding * 1.5,
+                vertical: 7.0,
+              ),
+              decoration: BoxDecoration(
+                color: const Color(0xFF2D1A07),
+                borderRadius: BorderRadius.circular(5.0),
+              ),
+              child: Text(
+                getTranslation(context, 'home.start_now'),
+                style: medium18White,
+              ),
             ),
           )
         ],

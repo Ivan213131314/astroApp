@@ -52,3 +52,4 @@ export 'package:fl_astro_circle/pages/profile/edit_profile.dart';
 export 'package:fl_astro_circle/pages/profile/languages.dart';
 export 'package:fl_astro_circle/pages/profile/subscribe.dart';
 export 'package:fl_astro_circle/pages/success/success.dart';
+export 'package:fl_astro_circle/pages/astrologerChat/astrologer_chat.dart';

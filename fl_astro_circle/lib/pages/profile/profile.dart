@@ -58,6 +58,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Navigator.pushNamed(context, '/natalchart');
           }),
           iconListTile(
+              CupertinoIcons.chat_bubble_2,
+              "Chat with Astrologer",
+              () {
+            Navigator.pushNamed(context, '/astrologerChat');
+          }),
+          iconListTile(
               CupertinoIcons.globe, getTranslation(context, 'profile.language'),
               () {
             Navigator.pushNamed(context, '/language');

@@ -377,6 +377,11 @@ class _MyAppState extends State<MyApp> {
           child: const SuccessScreen(),
           type: PageTransitionType.rightToLeft,
         );
+      case '/astrologerChat':
+        return PageTransition(
+          child: const AstrologerChatScreen(),
+          type: PageTransitionType.rightToLeft,
+        );
       default:
         return null;
     }
