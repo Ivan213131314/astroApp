@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
+import 'package:fl_astro_circle/services/notification_storage_service.dart';
+import 'dart:async';
 import 'dart:math';
 
 class UniverseMessageService extends ChangeNotifier {
@@ -8,141 +8,59 @@ class UniverseMessageService extends ChangeNotifier {
   factory UniverseMessageService() => _instance;
   UniverseMessageService._internal();
 
-  List<UniverseResponse> _responses = [];
+  final NotificationStorageService _storageService = NotificationStorageService();
+  
+  List<UniverseMessageData> _responses = [];
   int _unreadCount = 0;
+  StreamSubscription? _subscription;
 
-  List<UniverseResponse> get responses => _responses;
+  List<UniverseMessageData> get responses => _responses;
   int get unreadCount => _unreadCount;
 
-  Future<void> loadResponses() async {
-    final prefs = await SharedPreferences.getInstance();
-    final String? responsesJson = prefs.getString('universe_responses');
-    
-    if (responsesJson != null) {
-      final List<dynamic> decoded = json.decode(responsesJson);
-      _responses = decoded.map((e) => UniverseResponse.fromJson(e)).toList();
-      _unreadCount = _responses.where((r) => !r.isRead).length;
+  void loadResponses() {
+    _subscription?.cancel();
+    _subscription = _storageService.getUniverseMessagesStream().listen((messages) {
+      _responses = messages;
+      _unreadCount = messages.where((r) => !r.isRead).length;
       notifyListeners();
-    }
+    });
   }
 
   Future<void> addUniverseResponse(String question) async {
-    final response = UniverseResponse(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+    final audioDuration = Random().nextInt(13) + 8; // 8-20 секунд
+    await _storageService.saveUniverseMessage(
       question: question,
       audioFilePath: null,
-      audioDuration: Random().nextInt(13) + 8, // 8-20 секунд
-      timestamp: DateTime.now(),
-      isRead: false,
+      audioDuration: audioDuration,
     );
-
-    _responses.insert(0, response);
-    _unreadCount++;
-    await _saveResponses();
-    notifyListeners();
   }
 
   Future<void> updateAudioFilePath(String id, String filePath) async {
-    final index = _responses.indexWhere((r) => r.id == id);
-    if (index != -1) {
-      _responses[index].audioFilePath = filePath;
-      await _saveResponses();
-      notifyListeners();
-    }
+    await _storageService.updateUniverseMessageAudioPath(id, filePath);
   }
 
   Future<void> markAsRead(String id) async {
-    final index = _responses.indexWhere((r) => r.id == id);
-    if (index != -1 && !_responses[index].isRead) {
-      _responses[index].isRead = true;
-      _unreadCount--;
-      await _saveResponses();
-      notifyListeners();
-    }
+    await _storageService.markUniverseMessageAsRead(id);
   }
 
   Future<void> markAllAsRead() async {
     for (var response in _responses) {
-      response.isRead = true;
+      if (!response.isRead) {
+        await _storageService.markUniverseMessageAsRead(response.id);
+      }
     }
-    _unreadCount = 0;
-    await _saveResponses();
-    notifyListeners();
   }
 
   Future<void> deleteResponse(String id) async {
-    final index = _responses.indexWhere((r) => r.id == id);
-    if (index != -1) {
-      if (!_responses[index].isRead) {
-        _unreadCount--;
-      }
-      _responses.removeAt(index);
-      await _saveResponses();
-      notifyListeners();
-    }
+    await _storageService.deleteUniverseMessage(id);
   }
 
-  Future<void> _saveResponses() async {
-    final prefs = await SharedPreferences.getInstance();
-    final responsesJson = json.encode(_responses.map((e) => e.toJson()).toList());
-    await prefs.setString('universe_responses', responsesJson);
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
   }
 }
 
-class UniverseResponse {
-  final String id;
-  final String question;
-  String? audioFilePath;
-  final int audioDuration;
-  final DateTime timestamp;
-  bool isRead;
-
-  UniverseResponse({
-    required this.id,
-    required this.question,
-    this.audioFilePath,
-    required this.audioDuration,
-    required this.timestamp,
-    this.isRead = false,
-  });
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'question': question,
-      'audioFilePath': audioFilePath,
-      'audioDuration': audioDuration,
-      'timestamp': timestamp.toIso8601String(),
-      'isRead': isRead,
-    };
-  }
-
-  factory UniverseResponse.fromJson(Map<String, dynamic> json) {
-    return UniverseResponse(
-      id: json['id'],
-      question: json['question'],
-      audioFilePath: json['audioFilePath'],
-      audioDuration: json['audioDuration'],
-      timestamp: DateTime.parse(json['timestamp']),
-      isRead: json['isRead'] ?? false,
-    );
-  }
-
-  String getTimeAgo() {
-    final now = DateTime.now();
-    final difference = now.difference(timestamp);
-
-    if (difference.inMinutes < 1) {
-      return 'Just now';
-    } else if (difference.inMinutes < 60) {
-      return '${difference.inMinutes}min ago';
-    } else if (difference.inHours < 24) {
-      return '${difference.inHours}h ago';
-    } else if (difference.inDays < 7) {
-      return '${difference.inDays}d ago';
-    } else {
-      return '${(difference.inDays / 7).floor()}w ago';
-    }
-  }
-}
-
+// Keep this for backwards compatibility, but use UniverseMessageData from storage service
+typedef UniverseResponse = UniverseMessageData;

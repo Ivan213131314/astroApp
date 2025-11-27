@@ -1,8 +1,10 @@
 import 'package:fl_astro_circle/localization/localization_const.dart';
+import 'package:fl_astro_circle/services/notification_storage_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:scroll_date_picker/scroll_date_picker.dart';
+import 'dart:math';
 
 import '../../theme/theme.dart';
 
@@ -20,8 +22,89 @@ class _NatalChartScreenState extends State<NatalChartScreen> {
   TextEditingController locationController = TextEditingController();
 
   DateTime selectedDate = DateTime.now();
-
   DateTime selectedTime = DateTime.now();
+  
+  final NotificationStorageService _storageService = NotificationStorageService();
+  bool _isLoading = false;
+
+  // Генерация данных натальной карты (псевдо-расчет)
+  List<Map<String, dynamic>> _generatePlanetsData() {
+    final random = Random();
+    final planets = ["Sun", "Mercury", "Venus", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Pluto"];
+    final signs = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"];
+    
+    return planets.map((planet) {
+      return {
+        'planet': planet,
+        'degree': '${random.nextInt(30)}°',
+        'sign': signs[random.nextInt(signs.length)],
+        'house': '${random.nextInt(12) + 1}',
+      };
+    }).toList();
+  }
+
+  Future<void> _calculateAndSave() async {
+    if (nameController.text.isEmpty) {
+      _showError('Please enter your name');
+      return;
+    }
+    if (dobController.text.isEmpty) {
+      _showError('Please select date of birth');
+      return;
+    }
+    if (timeofBirthController.text.isEmpty) {
+      _showError('Please select time of birth');
+      return;
+    }
+    if (locationController.text.isEmpty) {
+      _showError('Please enter birth location');
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final planetsData = _generatePlanetsData();
+      
+      await _storageService.saveNatalChart(
+        name: nameController.text,
+        dateOfBirth: selectedDate,
+        timeOfBirth: timeofBirthController.text,
+        location: locationController.text,
+        planetsData: planetsData,
+      );
+
+      if (!mounted) return;
+      
+      Navigator.pushNamed(
+        context, 
+        '/natalchartDetail',
+        arguments: {
+          'name': nameController.text,
+          'dateOfBirth': selectedDate,
+          'timeOfBirth': timeofBirthController.text,
+          'location': locationController.text,
+          'planetsData': planetsData,
+        },
+      );
+    } catch (e) {
+      _showError('Failed to save natal chart: $e');
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: redColor,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -102,15 +185,13 @@ class _NatalChartScreenState extends State<NatalChartScreen> {
 
   calculateButton() {
     return InkWell(
-      onTap: () {
-        Navigator.pushNamed(context, '/natalchartDetail');
-      },
+      onTap: _isLoading ? null : _calculateAndSave,
       child: Container(
         width: double.maxFinite,
         padding: const EdgeInsets.symmetric(
             vertical: fixPadding * 1.2, horizontal: fixPadding * 2.0),
         decoration: BoxDecoration(
-          color: primaryColor,
+          color: _isLoading ? greyColor : primaryColor,
           borderRadius: BorderRadius.circular(10.0),
           boxShadow: [
             BoxShadow(
@@ -120,10 +201,19 @@ class _NatalChartScreenState extends State<NatalChartScreen> {
           ],
         ),
         alignment: Alignment.center,
-        child: Text(
-          getTranslation(context, 'natal_chart.calculate'),
-          style: bold20White,
-        ),
+        child: _isLoading
+            ? const SizedBox(
+                height: 24,
+                width: 24,
+                child: CircularProgressIndicator(
+                  color: whiteColor,
+                  strokeWidth: 2,
+                ),
+              )
+            : Text(
+                getTranslation(context, 'natal_chart.calculate'),
+                style: bold20White,
+              ),
       ),
     );
   }

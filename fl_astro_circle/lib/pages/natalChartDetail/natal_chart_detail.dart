@@ -12,44 +12,62 @@ class NatalChartDetailScreen extends StatefulWidget {
 }
 
 class _NatalChartDetailScreenState extends State<NatalChartDetailScreen> {
-  final planetsList = [
-    {
-      "title": translation('natal_chart_detail.planets'),
-      "list": [
-        "Sun",
-        "Mercury",
-        "Venus",
-        "Mars",
-        "Jupiter",
-        "Saturn",
-        "Uranus",
-        "Neptune",
-        "Pluto"
-      ]
-    },
-    {
-      "title": translation('natal_chart_detail.position_degree'),
-      "list": ["10°", "12°", "14°", "10°", "05°", "03°", "02°", "15°", "10°"]
-    },
-    {
-      "title": translation('natal_chart_detail.sign'),
-      "list": [
-        "Aries",
-        "Leo",
-        "Libra",
-        "Scorpio",
-        "Capricorn",
-        "Pisces",
-        "Cancer",
-        "Aquarius",
-        "Aries"
-      ]
-    },
-    {
-      "title": translation('natal_chart_detail.position_hour'),
-      "list": ["05", "03", "06", "04", "04", "03", "02", "07", "05"]
-    },
-  ];
+  Map<String, dynamic>? chartData;
+  List<Map<String, dynamic>> planetsData = [];
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args != null && args is Map<String, dynamic>) {
+      chartData = args;
+      planetsData = List<Map<String, dynamic>>.from(args['planetsData'] ?? []);
+    }
+  }
+
+  List<Map<String, dynamic>> get planetsList {
+    if (planetsData.isEmpty) {
+      // Fallback to default data if no data passed
+      return [
+        {
+          "title": translation('natal_chart_detail.planets'),
+          "list": ["Sun", "Mercury", "Venus", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Pluto"]
+        },
+        {
+          "title": translation('natal_chart_detail.position_degree'),
+          "list": ["10°", "12°", "14°", "10°", "05°", "03°", "02°", "15°", "10°"]
+        },
+        {
+          "title": translation('natal_chart_detail.sign'),
+          "list": ["Aries", "Leo", "Libra", "Scorpio", "Capricorn", "Pisces", "Cancer", "Aquarius", "Aries"]
+        },
+        {
+          "title": translation('natal_chart_detail.position_hour'),
+          "list": ["05", "03", "06", "04", "04", "03", "02", "07", "05"]
+        },
+      ];
+    }
+
+    // Transform planetsData to display format
+    return [
+      {
+        "title": translation('natal_chart_detail.planets'),
+        "list": planetsData.map((p) => p['planet'] as String).toList()
+      },
+      {
+        "title": translation('natal_chart_detail.position_degree'),
+        "list": planetsData.map((p) => p['degree'] as String).toList()
+      },
+      {
+        "title": translation('natal_chart_detail.sign'),
+        "list": planetsData.map((p) => p['sign'] as String).toList()
+      },
+      {
+        "title": translation('natal_chart_detail.position_hour'),
+        "list": planetsData.map((p) => p['house'] as String).toList()
+      },
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,6 +85,27 @@ class _NatalChartDetailScreenState extends State<NatalChartDetailScreen> {
         physics: const BouncingScrollPhysics(),
         padding: EdgeInsets.zero,
         children: [
+          if (chartData != null) ...[
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: fixPadding * 2.0),
+              child: Column(
+                children: [
+                  Text(
+                    chartData!['name'] ?? '',
+                    style: bold20White,
+                    textAlign: TextAlign.center,
+                  ),
+                  height5Space,
+                  Text(
+                    '${chartData!['location'] ?? ''} • ${chartData!['timeOfBirth'] ?? ''}',
+                    style: regualr14Grey,
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+            heightSpace,
+          ],
           Text(
             getTranslation(context, 'natal_chart_detail.natal_chart'),
             style: medium18White,
@@ -147,6 +186,7 @@ class _NatalChartDetailScreenState extends State<NatalChartDetailScreen> {
   }
 
   planetsListContent() {
+    final list = planetsList;
     return Container(
       width: double.maxFinite,
       color: blueShade1,
@@ -156,11 +196,11 @@ class _NatalChartDetailScreenState extends State<NatalChartDetailScreen> {
         children: [
           Row(
             children: List.generate(
-              planetsList.length,
+              list.length,
               (index) {
                 return Expanded(
                   child: Text(
-                    planetsList[index]['title'].toString(),
+                    list[index]['title'].toString(),
                     style: medium16White,
                     textAlign: TextAlign.center,
                   ),
@@ -170,9 +210,9 @@ class _NatalChartDetailScreenState extends State<NatalChartDetailScreen> {
           ),
           Row(
             children: List.generate(
-              planetsList.length,
+              list.length,
               (index) {
-                List itemData = planetsList[index]['list'] as List;
+                List itemData = list[index]['list'] as List;
                 return Expanded(
                   child: Padding(
                     padding:
@@ -183,7 +223,7 @@ class _NatalChartDetailScreenState extends State<NatalChartDetailScreen> {
                             padding: const EdgeInsets.symmetric(
                                 vertical: fixPadding),
                             child: Text(
-                              itemData[i],
+                              itemData[i].toString(),
                               style:
                                   index == 0 ? regualr15GreyD4 : regualr14Grey,
                               overflow: TextOverflow.ellipsis,

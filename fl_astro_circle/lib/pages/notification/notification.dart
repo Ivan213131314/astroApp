@@ -1,5 +1,6 @@
 import 'package:fl_astro_circle/localization/localization_const.dart';
 import 'package:fl_astro_circle/services/universe_message_service.dart';
+import 'package:fl_astro_circle/services/notification_storage_service.dart';
 import 'package:fl_astro_circle/services/cosmic_audio_generator.dart';
 import 'package:fl_astro_circle/services/superwall_service.dart';
 import 'package:fl_astro_circle/pages/universeMessage/universe_decipher_screen.dart';
@@ -17,6 +18,7 @@ class NotificationScreen extends StatefulWidget {
 
 class _NotificationScreenState extends State<NotificationScreen> {
   final UniverseMessageService messageService = UniverseMessageService();
+  final NotificationStorageService storageService = NotificationStorageService();
   final CosmicAudioGenerator audioGenerator = CosmicAudioGenerator();
   String? currentPlayingId;
 
@@ -42,7 +44,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
     super.dispose();
   }
 
-  Future<void> playUniverseAudio(UniverseResponse response) async {
+  Future<void> playUniverseAudio(UniverseMessageData response) async {
     if (currentPlayingId == response.id) {
       return;
     }
@@ -97,7 +99,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
     messageService.markAsRead(response.id);
   }
 
-  Future<void> togglePlayPause(UniverseResponse response) async {
+  Future<void> togglePlayPause(UniverseMessageData response) async {
     if (currentPlayingId == response.id) {
       if (audioGenerator.isPlaying) {
         await audioGenerator.pause();
@@ -110,56 +112,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
     }
   }
 
-  final notificationList = [
-    {
-      "image": "assets/notification/aries.png",
-      "title": "Your weekly horoscope is here 🙏 🙏",
-      "description":
-          "Lorem ipsum dolor sit amet consectetur. In vitae in volutpat eu lectus. Eget aliquet",
-      "time": "2min ago"
-    },
-    {
-      "image": "assets/notification/astrology.png",
-      "title": "Natal chart😇🙏 ",
-      "description":
-          "Lorem ipsum dolor sit amet consectetur. In vitae in volutpat eu lectus. Eget aliquet",
-      "time": "2min ago"
-    },
-    {
-      "image": "assets/notification/aries.png",
-      "title": "Your daily horoscope is here 🙏 🙏",
-      "description":
-          "Lorem ipsum dolor sit amet consectetur. In vitae in volutpat eu lectus. Eget aliquet",
-      "time": "2min ago"
-    },
-    {
-      "image": "assets/notification/natal-chart.png",
-      "title": "Your weekly horoscope is here 🙏 🙏",
-      "description":
-          "Lorem ipsum dolor sit amet consectetur. In vitae in volutpat eu lectus. Eget aliquet",
-      "time": "2min ago"
-    },
-    {
-      "image": "assets/notification/astrology.png",
-      "title": "Your day at glance",
-      "description":
-          "Lorem ipsum dolor sit amet consectetur. In vitae in volutpat eu lectus. Eget aliquet",
-      "time": "2min ago"
-    },
-    {
-      "image": "assets/notification/aries.png",
-      "title": "Your weekly horoscope is here 🙏 🙏",
-      "description":
-          "Lorem ipsum dolor sit amet consectetur. In vitae in volutpat eu lectus. Eget aliquet",
-      "time": "2min ago"
-    }
-  ];
-
   @override
   Widget build(BuildContext context) {
-    final hasUniverseMessages = messageService.responses.isNotEmpty;
-    final hasRegularNotifications = notificationList.isNotEmpty;
-    
     return Scaffold(
       appBar: AppBar(
         backgroundColor: scaffoldBgColor,
@@ -172,18 +126,47 @@ class _NotificationScreenState extends State<NotificationScreen> {
           style: bold20White,
         ),
       ),
-      body: !hasUniverseMessages && !hasRegularNotifications
-          ? emptyNotificationListContent()
-          : allNotificationsContent(),
+      body: StreamBuilder<List<NatalChartData>>(
+        stream: storageService.getNatalChartsStream(),
+        builder: (context, natalSnapshot) {
+          return StreamBuilder<List<CompatibilityData>>(
+            stream: storageService.getCompatibilityStream(),
+            builder: (context, compatSnapshot) {
+              final natalCharts = natalSnapshot.data ?? [];
+              final compatibilities = compatSnapshot.data ?? [];
+              final universeMessages = messageService.responses;
+              
+              final hasAnyNotifications = natalCharts.isNotEmpty || 
+                  compatibilities.isNotEmpty || 
+                  universeMessages.isNotEmpty;
+
+              if (!hasAnyNotifications) {
+                return emptyNotificationListContent();
+              }
+
+              return allNotificationsContent(
+                universeMessages: universeMessages,
+                natalCharts: natalCharts,
+                compatibilities: compatibilities,
+              );
+            },
+          );
+        },
+      ),
     );
   }
 
-  allNotificationsContent() {
+  Widget allNotificationsContent({
+    required List<UniverseMessageData> universeMessages,
+    required List<NatalChartData> natalCharts,
+    required List<CompatibilityData> compatibilities,
+  }) {
     return ListView(
       padding: const EdgeInsets.only(bottom: fixPadding),
       physics: const BouncingScrollPhysics(),
       children: [
-        if (messageService.responses.isNotEmpty) ...[
+        // Universe Messages Section
+        if (universeMessages.isNotEmpty) ...[
           const Padding(
             padding: EdgeInsets.symmetric(
               horizontal: fixPadding * 2.0,
@@ -200,28 +183,58 @@ class _NotificationScreenState extends State<NotificationScreen> {
               ],
             ),
           ),
-          ...messageService.responses.map((response) => universeMessageItem(response)).toList(),
-          heightSpace,
+          ...universeMessages.map((response) => universeMessageItem(response)).toList(),
           heightSpace,
         ],
-        if (notificationList.isNotEmpty) ...[
+
+        // Natal Charts Section
+        if (natalCharts.isNotEmpty) ...[
           const Padding(
             padding: EdgeInsets.symmetric(
               horizontal: fixPadding * 2.0,
               vertical: fixPadding,
             ),
-            child: Text(
-              'Other Notifications',
-              style: bold18White,
+            child: Row(
+              children: [
+                Icon(Icons.auto_awesome, color: primaryColor, size: 20),
+                widthSpace,
+                Text(
+                  'Natal Charts',
+                  style: bold18White,
+                ),
+              ],
             ),
           ),
-          ...List.generate(notificationList.length, (index) => regularNotificationItem(index)),
+          ...natalCharts.map((chart) => natalChartItem(chart)).toList(),
+          heightSpace,
+        ],
+
+        // Compatibility Section
+        if (compatibilities.isNotEmpty) ...[
+          const Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: fixPadding * 2.0,
+              vertical: fixPadding,
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.favorite, color: redColor, size: 20),
+                widthSpace,
+                Text(
+                  'Compatibility Results',
+                  style: bold18White,
+                ),
+              ],
+            ),
+          ),
+          ...compatibilities.map((compat) => compatibilityItem(compat)).toList(),
+          heightSpace,
         ],
       ],
     );
   }
 
-  Widget universeMessageItem(UniverseResponse response) {
+  Widget universeMessageItem(UniverseMessageData response) {
     final isCurrentPlaying = currentPlayingId == response.id;
     
     return Dismissible(
@@ -380,11 +393,9 @@ class _NotificationScreenState extends State<NotificationScreen> {
               alignment: Alignment.centerRight,
               child: GestureDetector(
                 onTap: () async {
-                  // Показать Superwall paywall
                   await SuperwallService().showPaywall(
                     placement: "subscribe_button",
                     onPurchased: () {
-                      // После покупки переходим на экран расшифровки
                       Navigator.push(
                         context,
                         PageTransition(
@@ -395,7 +406,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
                       );
                     },
                     onDeclined: () {
-                      // Пользователь отклонил
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           backgroundColor: Colors.orange,
@@ -452,97 +462,259 @@ class _NotificationScreenState extends State<NotificationScreen> {
     );
   }
 
-  String _formatDuration(Duration duration) {
-    String twoDigits(int n) => n.toString().padLeft(2, '0');
-    final minutes = twoDigits(duration.inMinutes.remainder(60));
-    final seconds = twoDigits(duration.inSeconds.remainder(60));
-    return '$minutes:$seconds';
-  }
-
-  Widget regularNotificationItem(int index) {
+  Widget natalChartItem(NatalChartData chart) {
     return Dismissible(
-      key: UniqueKey(),
+      key: Key(chart.id),
       background: Container(
         margin: const EdgeInsets.symmetric(vertical: fixPadding),
         color: redColor,
       ),
       onDismissed: (direction) {
-        setState(() {
-          notificationList.removeAt(index);
-        });
+        storageService.deleteNatalChart(chart.id);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             backgroundColor: whiteColor,
-            duration: const Duration(milliseconds: 1500),
+            duration: Duration(milliseconds: 1500),
             behavior: SnackBarBehavior.floating,
             content: Text(
-              getTranslation(context, 'notification.remove_notification'),
+              'Natal chart removed',
               style: bold15Black03,
             ),
           ),
         );
       },
-      child: Container(
-        margin: const EdgeInsets.symmetric(
-          horizontal: fixPadding * 2.0,
-          vertical: fixPadding,
-        ),
-        padding: const EdgeInsets.all(fixPadding),
-        decoration: BoxDecoration(
-          color: blueShade1,
-          borderRadius: BorderRadius.circular(10.0),
-        ),
-        child: Row(
-          children: [
-            Container(
-              height: 60,
-              width: 60,
-              padding: const EdgeInsets.all(fixPadding / 1.5),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10.0),
-                color: const Color(0xFF1F2449),
-                boxShadow: [
-                  BoxShadow(
-                    color: blueShade1.withValues(alpha: 0.2),
-                    blurRadius: 12,
-                    offset: const Offset(0, 6),
-                  )
-                ],
+      child: GestureDetector(
+        onTap: () {
+          storageService.markNatalChartAsRead(chart.id);
+          Navigator.pushNamed(
+            context,
+            '/natalchartDetail',
+            arguments: {
+              'name': chart.name,
+              'dateOfBirth': chart.dateOfBirth,
+              'timeOfBirth': chart.timeOfBirth,
+              'location': chart.location,
+              'planetsData': chart.planetsData,
+            },
+          );
+        },
+        child: Container(
+          margin: const EdgeInsets.symmetric(
+            horizontal: fixPadding * 2.0,
+            vertical: fixPadding,
+          ),
+          padding: const EdgeInsets.all(fixPadding * 1.5),
+          decoration: BoxDecoration(
+            color: chart.isRead ? blueShade1 : blueShade1.withValues(alpha: 0.7),
+            borderRadius: BorderRadius.circular(10.0),
+            border: chart.isRead
+                ? null
+                : Border.all(color: primaryColor, width: 2),
+          ),
+          child: Row(
+            children: [
+              Container(
+                height: 60,
+                width: 60,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10.0),
+                  color: const Color(0xFF1F2449),
+                ),
+                child: const Icon(
+                  Icons.auto_awesome,
+                  color: primaryColor,
+                  size: 30,
+                ),
               ),
-              child: Image.asset(
-                notificationList[index]['image'].toString(),
-                fit: BoxFit.cover,
+              widthSpace,
+              width5Space,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Natal Chart: ${chart.name}',
+                            style: medium16WhiteF4,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (!chart.isRead)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: redColor,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Text(
+                              'NEW',
+                              style: TextStyle(
+                                color: whiteColor,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    heightBox(3),
+                    Text(
+                      '${chart.location} • ${chart.timeOfBirth}',
+                      style: regualr14Grey,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    heightBox(3),
+                    Text(
+                      chart.getTimeAgo(),
+                      style: regualr14Grey,
+                    ),
+                  ],
+                ),
               ),
-            ),
-            widthSpace,
-            width5Space,
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    notificationList[index]['title'].toString(),
-                    style: medium16WhiteF4,
-                  ),
-                  heightBox(3),
-                  Text(
-                    notificationList[index]['description'].toString(),
-                    style: regualr14Grey,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  heightBox(3),
-                  Text(
-                    notificationList[index]['time'].toString(),
-                    style: regualr14Grey,
-                  )
-                ],
-              ),
-            ),
-          ],
+              const Icon(Icons.chevron_right, color: greyColor),
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  Widget compatibilityItem(CompatibilityData compat) {
+    final avgPercent = ((compat.lovePercent + compat.businessPercent + compat.healthPercent) / 3 * 100).toInt();
+    
+    return Dismissible(
+      key: Key(compat.id),
+      background: Container(
+        margin: const EdgeInsets.symmetric(vertical: fixPadding),
+        color: redColor,
+      ),
+      onDismissed: (direction) {
+        storageService.deleteCompatibility(compat.id);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: whiteColor,
+            duration: Duration(milliseconds: 1500),
+            behavior: SnackBarBehavior.floating,
+            content: Text(
+              'Compatibility result removed',
+              style: bold15Black03,
+            ),
+          ),
+        );
+      },
+      child: GestureDetector(
+        onTap: () {
+          storageService.markCompatibilityAsRead(compat.id);
+          Navigator.pushNamed(
+            context,
+            '/compatibilityDetail',
+            arguments: {
+              'sign1': compat.sign1,
+              'sign1Image': compat.sign1Image,
+              'sign2': compat.sign2,
+              'sign2Image': compat.sign2Image,
+              'lovePercent': compat.lovePercent,
+              'businessPercent': compat.businessPercent,
+              'healthPercent': compat.healthPercent,
+            },
+          );
+        },
+        child: Container(
+          margin: const EdgeInsets.symmetric(
+            horizontal: fixPadding * 2.0,
+            vertical: fixPadding,
+          ),
+          padding: const EdgeInsets.all(fixPadding * 1.5),
+          decoration: BoxDecoration(
+            color: compat.isRead ? blueShade1 : blueShade1.withValues(alpha: 0.7),
+            borderRadius: BorderRadius.circular(10.0),
+            border: compat.isRead
+                ? null
+                : Border.all(color: redColor, width: 2),
+          ),
+          child: Row(
+            children: [
+              Container(
+                height: 60,
+                width: 60,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10.0),
+                  color: const Color(0xFF1F2449),
+                ),
+                child: const Icon(
+                  Icons.favorite,
+                  color: redColor,
+                  size: 30,
+                ),
+              ),
+              widthSpace,
+              width5Space,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            '${compat.sign1} & ${compat.sign2}',
+                            style: medium16WhiteF4,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (!compat.isRead)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: redColor,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Text(
+                              'NEW',
+                              style: TextStyle(
+                                color: whiteColor,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    heightBox(3),
+                    Text(
+                      'Compatibility: $avgPercent%',
+                      style: regualr14Grey,
+                    ),
+                    heightBox(3),
+                    Text(
+                      compat.getTimeAgo(),
+                      style: regualr14Grey,
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right, color: greyColor),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _formatDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    final minutes = twoDigits(duration.inMinutes.remainder(60));
+    final seconds = twoDigits(duration.inSeconds.remainder(60));
+    return '$minutes:$seconds';
   }
 
   emptyNotificationListContent() {

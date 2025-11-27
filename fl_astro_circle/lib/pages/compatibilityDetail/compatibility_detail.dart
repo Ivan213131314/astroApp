@@ -13,23 +13,61 @@ class CompatibilityDetailScreen extends StatefulWidget {
 }
 
 class _CompatibilityDetailScreenState extends State<CompatibilityDetailScreen> {
-  final percentageList = [
-    {
-      "title": translation('compatibility_detail.love'),
-      "color": redColor,
-      "value": 0.88,
-    },
-    {
-      "title": translation('compatibility_detail.business'),
-      "color": greenColor,
-      "value": 0.95,
-    },
-    {
-      "title": translation('compatibility_detail.health'),
-      "color": primaryColor,
-      "value": 0.60,
+  Map<String, dynamic>? compatibilityData;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args != null && args is Map<String, dynamic>) {
+      compatibilityData = args;
     }
-  ];
+  }
+
+  List<Map<String, dynamic>> get percentageList {
+    if (compatibilityData != null) {
+      return [
+        {
+          "title": translation('compatibility_detail.love'),
+          "color": redColor,
+          "value": compatibilityData!['lovePercent'] ?? 0.88,
+        },
+        {
+          "title": translation('compatibility_detail.business'),
+          "color": greenColor,
+          "value": compatibilityData!['businessPercent'] ?? 0.95,
+        },
+        {
+          "title": translation('compatibility_detail.health'),
+          "color": primaryColor,
+          "value": compatibilityData!['healthPercent'] ?? 0.60,
+        }
+      ];
+    }
+    return [
+      {
+        "title": translation('compatibility_detail.love'),
+        "color": redColor,
+        "value": 0.88,
+      },
+      {
+        "title": translation('compatibility_detail.business'),
+        "color": greenColor,
+        "value": 0.95,
+      },
+      {
+        "title": translation('compatibility_detail.health'),
+        "color": primaryColor,
+        "value": 0.60,
+      }
+    ];
+  }
+
+  String get sign1 => compatibilityData?['sign1'] ?? getTranslation(context, 'compatibility_detail.libra');
+  String get sign1Image => compatibilityData?['sign1Image'] ?? "assets/home/image-7.png";
+  String get sign2 => compatibilityData?['sign2'] ?? getTranslation(context, 'compatibility_detail.aries');
+  String get sign2Image => compatibilityData?['sign2Image'] ?? "assets/home/image-1.png";
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -184,8 +222,7 @@ class _CompatibilityDetailScreenState extends State<CompatibilityDetailScreen> {
           top: fixPadding),
       child: Row(
         children: [
-          horoscopeWidget(size, "assets/home/image-7.png",
-              getTranslation(context, 'compatibility_detail.libra')),
+          horoscopeWidget(size, sign1Image, sign1),
           Expanded(
             child: Row(
               children: [
@@ -195,8 +232,7 @@ class _CompatibilityDetailScreenState extends State<CompatibilityDetailScreen> {
               ],
             ),
           ),
-          horoscopeWidget(size, "assets/home/image-1.png",
-              getTranslation(context, 'compatibility_detail.aries')),
+          horoscopeWidget(size, sign2Image, sign2),
         ],
       ),
     );

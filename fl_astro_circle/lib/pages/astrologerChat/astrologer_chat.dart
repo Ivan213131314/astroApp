@@ -17,6 +17,7 @@ class _AstrologerChatScreenState extends State<AstrologerChatScreen>
   final TextEditingController messageController = TextEditingController();
   bool chatStarted = false;
   bool isAstrologerTyping = false;
+  bool showEmojiPicker = false;
 
   final String astrologerName = "Astro Maya";
   final String astrologerImage = "assets/message/image1.png";
@@ -25,6 +26,14 @@ class _AstrologerChatScreenState extends State<AstrologerChatScreen>
 
   // Animation controller for typing dots
   late AnimationController _typingAnimationController;
+
+  // Emoji list for picker
+  final List<String> emojiList = [
+    '😀', '😊', '😍', '🥰', '😘', '😎', '🤔', '😢',
+    '😭', '😡', '🥳', '🤩', '😇', '🙏', '💪', '👍',
+    '👎', '❤️', '💔', '⭐', '🌙', '☀️', '🔮', '✨',
+    '🌟', '💫', '🎯', '🍀', '🌈', '🦋', '🌸', '🌺',
+  ];
 
   // Mock responses from the astrologer
   final List<String> mockResponses = [
@@ -97,7 +106,8 @@ class _AstrologerChatScreenState extends State<AstrologerChatScreen>
         final responseMessage =
             mockResponses[mockResponseIndex % mockResponses.length];
 
-        // Typing duration depends on message length (50ms per character)
+        // Typing duration depends on message length (150ms per character)
+
         final typingDuration = responseMessage.length * 150;
 
         Timer(Duration(milliseconds: typingDuration), () {
@@ -315,6 +325,7 @@ class _AstrologerChatScreenState extends State<AstrologerChatScreen>
     return Column(
       children: [
         _messagesListContent(),
+        if (showEmojiPicker) _emojiPicker(),
         Padding(
           padding: const EdgeInsets.all(fixPadding * 2.0),
           child: Row(
@@ -326,6 +337,48 @@ class _AstrologerChatScreenState extends State<AstrologerChatScreen>
           ),
         ),
       ],
+    );
+  }
+
+  Widget _emojiPicker() {
+    return Container(
+      height: 200,
+      margin: const EdgeInsets.symmetric(horizontal: fixPadding * 2.0),
+      decoration: BoxDecoration(
+        color: recBgColor,
+        borderRadius: BorderRadius.circular(12.0),
+        border: Border.all(color: greyColor.withValues(alpha: 0.3)),
+      ),
+      child: GridView.builder(
+        padding: const EdgeInsets.all(fixPadding),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 8,
+          mainAxisSpacing: 8,
+          crossAxisSpacing: 8,
+        ),
+        itemCount: emojiList.length,
+        itemBuilder: (context, index) {
+          return GestureDetector(
+            onTap: () {
+              messageController.text += emojiList[index];
+              messageController.selection = TextSelection.fromPosition(
+                TextPosition(offset: messageController.text.length),
+              );
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: blueShade1,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              alignment: Alignment.center,
+              child: Text(
+                emojiList[index],
+                style: const TextStyle(fontSize: 22),
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -475,26 +528,28 @@ class _AstrologerChatScreenState extends State<AstrologerChatScreen>
           style: medium15WhiteF4,
           enabled: !isAstrologerTyping,
           onSubmitted: (_) => _sendMessage(),
+          onTap: () {
+            if (showEmojiPicker) {
+              setState(() {
+                showEmojiPicker = false;
+              });
+            }
+          },
           decoration: InputDecoration(
             border: InputBorder.none,
-            prefixIcon: const Icon(
-              CupertinoIcons.smiley,
-              color: greyColor,
+            prefixIcon: GestureDetector(
+              onTap: () {
+                setState(() {
+                  showEmojiPicker = !showEmojiPicker;
+                });
+              },
+              child: Icon(
+                CupertinoIcons.smiley,
+                color: showEmojiPicker ? primaryColor : greyColor,
+              ),
             ),
             hintText: isAstrologerTyping ? "Wait for response..." : "Type here...",
             hintStyle: regualr14Grey,
-            suffixIcon: const Padding(
-              padding: EdgeInsets.symmetric(horizontal: fixPadding),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.mic_none,
-                    color: greyColor,
-                  ),
-                ],
-              ),
-            ),
           ),
         ),
       ),
