@@ -74,10 +74,10 @@ class _BirthChartQuestionScreenState extends State<BirthChartQuestionScreen> wit
         ),
         child: Column(
           children: [
-            LinearProgressIndicator(
+            const LinearProgressIndicator(
               value: 0.6,
-              backgroundColor: const Color(0xFF3D3761),
-              valueColor: const AlwaysStoppedAnimation<Color>(primaryColor),
+              backgroundColor: Color(0xFF3D3761),
+              valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
               minHeight: 3,
             ),
             Expanded(
@@ -106,7 +106,7 @@ class _BirthChartQuestionScreenState extends State<BirthChartQuestionScreen> wit
                                 size: 50,
                                 color: whiteColor.withValues(alpha: 0.9),
                               ),
-                              Positioned(
+                              const Positioned(
                                 top: 25,
                                 right: 25,
                                 child: Icon(

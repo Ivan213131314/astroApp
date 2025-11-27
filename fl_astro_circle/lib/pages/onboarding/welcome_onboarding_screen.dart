@@ -41,13 +41,13 @@ class _WelcomeOnboardingScreenState extends State<WelcomeOnboardingScreen> {
         body: Container(
           height: size.height,
           width: size.width,
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
                 scaffoldBgColor,
-                const Color(0xFF301B87),
+                Color(0xFF301B87),
               ],
             ),
           ),

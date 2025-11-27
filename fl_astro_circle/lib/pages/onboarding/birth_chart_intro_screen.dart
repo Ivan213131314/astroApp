@@ -74,10 +74,10 @@ class _BirthChartIntroScreenState extends State<BirthChartIntroScreen> with Sing
         ),
         child: Column(
           children: [
-            LinearProgressIndicator(
+            const LinearProgressIndicator(
               value: 0.25,
-              backgroundColor: const Color(0xFF3D3761),
-              valueColor: const AlwaysStoppedAnimation<Color>(primaryColor),
+              backgroundColor: Color(0xFF3D3761),
+              valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
               minHeight: 3,
             ),
             Expanded(
@@ -106,7 +106,7 @@ class _BirthChartIntroScreenState extends State<BirthChartIntroScreen> with Sing
                                 size: 70,
                                 color: whiteColor.withValues(alpha: 0.8),
                               ),
-                              Positioned(
+                              const Positioned(
                                 top: 20,
                                 right: 20,
                                 child: Icon(

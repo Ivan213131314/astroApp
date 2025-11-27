@@ -46,10 +46,10 @@ class _PremiumScreenState extends State<PremiumScreen> {
         ),
         child: Column(
           children: [
-            LinearProgressIndicator(
+            const LinearProgressIndicator(
               value: 0.8,
-              backgroundColor: const Color(0xFF3D3761),
-              valueColor: const AlwaysStoppedAnimation<Color>(primaryColor),
+              backgroundColor: Color(0xFF3D3761),
+              valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
               minHeight: 3,
             ),
             Expanded(

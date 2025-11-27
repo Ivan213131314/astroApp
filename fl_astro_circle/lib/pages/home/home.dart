@@ -91,7 +91,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final otherServicesList = [
     {
-      "image": "assets/home/service5.png",
+      "image": "assets/home/service6.png",
       "title": "Ask Universe",
       "detail": "Send your question to the universe via NASA satellites",
       "route": '/universeMessage'

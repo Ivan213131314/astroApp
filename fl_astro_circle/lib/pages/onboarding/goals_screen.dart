@@ -19,7 +19,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
     '✨ Get guidance and advice': false,
   };
 
-  double _progress = 0.0;
+  final double _progress = 0.0;
 
   @override
   Widget build(BuildContext context) {

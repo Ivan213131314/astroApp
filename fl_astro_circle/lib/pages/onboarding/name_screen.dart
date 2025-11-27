@@ -63,10 +63,10 @@ class _NameScreenState extends State<NameScreen> {
         ),
         child: Column(
           children: [
-            LinearProgressIndicator(
+            const LinearProgressIndicator(
               value: 0.55,
-              backgroundColor: const Color(0xFF3D3761),
-              valueColor: const AlwaysStoppedAnimation<Color>(primaryColor),
+              backgroundColor: Color(0xFF3D3761),
+              valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
               minHeight: 3,
             ),
             Expanded(
@@ -114,7 +114,7 @@ class _NameScreenState extends State<NameScreen> {
         color: primaryColor.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Icon(
+      child: const Icon(
         Icons.person,
         size: 60,
         color: primaryColor,

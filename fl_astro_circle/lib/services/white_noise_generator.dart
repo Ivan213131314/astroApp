@@ -41,7 +41,7 @@ class WhiteNoiseGenerator {
     final random = Random();
     final samples = <int>[];
     
-    final segmentLength = sampleRate ~/ 2;
+    const segmentLength = sampleRate ~/ 2;
     int currentSample = 0;
     
     double pinkB0 = 0.0;
@@ -127,7 +127,7 @@ class WhiteNoiseGenerator {
           sample += sin(beepPhase) * 0.4;
         }
         
-        final amplitude = 32767 * 0.8;
+        const amplitude = 32767 * 0.8;
         final intSample = (sample * amplitude).clamp(-32768, 32767).toInt();
         samples.add(intSample);
       }
@@ -180,11 +180,11 @@ class WhiteNoiseGenerator {
     byteData.setUint32(offset, sampleRate, Endian.little);
     offset += 4;
     
-    final byteRate = sampleRate * numChannels * bitsPerSample ~/ 8;
+    const byteRate = sampleRate * numChannels * bitsPerSample ~/ 8;
     byteData.setUint32(offset, byteRate, Endian.little);
     offset += 4;
     
-    final blockAlign = numChannels * bitsPerSample ~/ 8;
+    const blockAlign = numChannels * bitsPerSample ~/ 8;
     byteData.setUint16(offset, blockAlign, Endian.little);
     offset += 2;
     

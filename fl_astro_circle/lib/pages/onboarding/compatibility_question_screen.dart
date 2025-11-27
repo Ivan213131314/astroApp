@@ -74,10 +74,10 @@ class _CompatibilityQuestionScreenState extends State<CompatibilityQuestionScree
         ),
         child: Column(
           children: [
-            LinearProgressIndicator(
+            const LinearProgressIndicator(
               value: 0.75,
-              backgroundColor: const Color(0xFF3D3761),
-              valueColor: const AlwaysStoppedAnimation<Color>(primaryColor),
+              backgroundColor: Color(0xFF3D3761),
+              valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
               minHeight: 3,
             ),
             Expanded(
@@ -116,7 +116,7 @@ class _CompatibilityQuestionScreenState extends State<CompatibilityQuestionScree
                                   Container(
                                     height: 50,
                                     width: 50,
-                                    decoration: BoxDecoration(
+                                    decoration: const BoxDecoration(
                                       color: primaryColor,
                                       shape: BoxShape.circle,
                                     ),

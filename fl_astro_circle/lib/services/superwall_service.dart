@@ -1,4 +1,5 @@
 import 'package:superwallkit_flutter/superwallkit_flutter.dart';
+import 'package:fl_astro_circle/config/debug_config.dart';
 
 class SuperwallService {
   static final SuperwallService _instance = SuperwallService._internal();
@@ -12,11 +13,23 @@ class SuperwallService {
     Function? onDeclined,
     Function? onRestored,
   }) async {
+    // DEBUG: Skip paywall and simulate purchase
+    if (DebugConfig.skipPaywall) {
+      DebugConfig.log('Skipping paywall - simulating purchase');
+      await Superwall.shared.setSubscriptionStatus(
+        SubscriptionStatusActive(entitlements: {Entitlement(id: 'debug_test')}),
+      );
+      if (onPurchased != null) {
+        onPurchased();
+      }
+      return;
+    }
+
     final handler = PaywallPresentationHandler();
 
     // Обработка закрытия paywall
     handler.onDismiss((paywallInfo, paywallResult) async {
-      String name = (await paywallInfo.name) ?? 'Unknown';
+      String name = (paywallInfo.name) ?? 'Unknown';
       print("Paywall закрыт: $name");
 
       switch (paywallResult) {
@@ -51,7 +64,7 @@ class SuperwallService {
 
     // Обработка показа paywall
     handler.onPresent((paywallInfo) async {
-      String name = (await paywallInfo.name) ?? 'Unknown';
+      String name = (paywallInfo.name) ?? 'Unknown';
       print("Paywall показан: $name");
     });
 

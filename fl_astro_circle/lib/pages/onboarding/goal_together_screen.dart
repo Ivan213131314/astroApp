@@ -74,10 +74,10 @@ class _GoalTogetherScreenState extends State<GoalTogetherScreen> with SingleTick
         ),
         child: Column(
           children: [
-            LinearProgressIndicator(
+            const LinearProgressIndicator(
               value: 0.2,
-              backgroundColor: const Color(0xFF3D3761),
-              valueColor: const AlwaysStoppedAnimation<Color>(primaryColor),
+              backgroundColor: Color(0xFF3D3761),
+              valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
               minHeight: 3,
             ),
             Expanded(
@@ -114,7 +114,7 @@ class _GoalTogetherScreenState extends State<GoalTogetherScreen> with SingleTick
                                 size: 60,
                                 color: whiteColor.withValues(alpha: 0.9),
                               ),
-                              Positioned(
+                              const Positioned(
                                 top: 30,
                                 right: 30,
                                 child: Icon(

@@ -17,22 +17,22 @@ class _MainReasonScreenState extends State<MainReasonScreen> with TickerProvider
     {
       'text': 'Make decisions with confidence',
       'icon': Icons.psychology_outlined,
-      'gradient': [Color(0xFF7B2FF7), Color(0xFFB565F2)],
+      'gradient': [const Color(0xFF7B2FF7), const Color(0xFFB565F2)],
     },
     {
       'text': 'Receive answers to my questions',
       'icon': Icons.lightbulb_outline,
-      'gradient': [Color(0xFF6B4CE6), Color(0xFF9B7AF0)],
+      'gradient': [const Color(0xFF6B4CE6), const Color(0xFF9B7AF0)],
     },
     {
       'text': 'Get an outside perspective',
       'icon': Icons.visibility_outlined,
-      'gradient': [Color(0xFF5A3DD5), Color(0xFF8A6EE8)],
+      'gradient': [const Color(0xFF5A3DD5), const Color(0xFF8A6EE8)],
     },
     {
       'text': 'Feel hope and motivation',
       'icon': Icons.favorite_outline,
-      'gradient': [Color(0xFF7E3FE8), Color(0xFFAE6FF5)],
+      'gradient': [const Color(0xFF7E3FE8), const Color(0xFFAE6FF5)],
     },
   ];
 
@@ -101,10 +101,10 @@ class _MainReasonScreenState extends State<MainReasonScreen> with TickerProvider
         ),
         child: Column(
           children: [
-            LinearProgressIndicator(
+            const LinearProgressIndicator(
               value: 0.15,
-              backgroundColor: const Color(0xFF3D3761),
-              valueColor: const AlwaysStoppedAnimation<Color>(primaryColor),
+              backgroundColor: Color(0xFF3D3761),
+              valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
               minHeight: 3,
             ),
             Expanded(

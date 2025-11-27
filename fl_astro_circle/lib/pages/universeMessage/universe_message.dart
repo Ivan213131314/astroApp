@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:fl_astro_circle/pages/screens.dart';
+import 'package:fl_astro_circle/pages/universeMessage/universe_decipher_screen.dart';
 import 'package:fl_astro_circle/services/universe_message_service.dart';
 import 'package:fl_astro_circle/services/superwall_service.dart';
 import 'package:fl_astro_circle/theme/theme.dart';
@@ -183,15 +184,15 @@ class _UniverseMessageScreenState extends State<UniverseMessageScreen> {
                         ),
                         heightSpace,
                         heightSpace,
-                        Row(
+                        const Row(
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.chat_bubble_outline,
                               color: primaryColor,
                               size: 20,
                             ),
                             widthSpace,
-                            const Expanded(
+                            Expanded(
                               child: Text(
                                 'Ask anything that\'s on your mind',
                                 style: medium14WhiteF4,
@@ -200,15 +201,15 @@ class _UniverseMessageScreenState extends State<UniverseMessageScreen> {
                           ],
                         ),
                         heightSpace,
-                        Row(
+                        const Row(
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.lock_outline,
                               color: primaryColor,
                               size: 20,
                             ),
                             widthSpace,
-                            const Expanded(
+                            Expanded(
                               child: Text(
                                 'Your message stays private and confidential',
                                 style: medium14WhiteF4,
@@ -404,7 +405,9 @@ class _UniverseMessageScreenState extends State<UniverseMessageScreen> {
                                 Navigator.push(
                                   context,
                                   PageTransition(
-                                    child: const NotificationScreen(),
+                                    child: UniverseDecipherScreen(
+                                      question: messageController.text,
+                                    ),
                                     type: PageTransitionType.rightToLeft,
                                     duration: const Duration(milliseconds: 300),
                                   ),

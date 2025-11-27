@@ -2,9 +2,11 @@ import 'package:fl_astro_circle/localization/localization_const.dart';
 import 'package:fl_astro_circle/services/universe_message_service.dart';
 import 'package:fl_astro_circle/services/cosmic_audio_generator.dart';
 import 'package:fl_astro_circle/services/superwall_service.dart';
+import 'package:fl_astro_circle/pages/universeMessage/universe_decipher_screen.dart';
 import 'package:fl_astro_circle/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
+import 'package:page_transition/page_transition.dart';
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
@@ -71,7 +73,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
             ),
           ],
         ),
-        duration: Duration(seconds: 2),
+        duration: const Duration(seconds: 2),
       ),
     );
 
@@ -182,16 +184,16 @@ class _NotificationScreenState extends State<NotificationScreen> {
       physics: const BouncingScrollPhysics(),
       children: [
         if (messageService.responses.isNotEmpty) ...[
-          Padding(
-            padding: const EdgeInsets.symmetric(
+          const Padding(
+            padding: EdgeInsets.symmetric(
               horizontal: fixPadding * 2.0,
               vertical: fixPadding,
             ),
             child: Row(
               children: [
-                const Icon(Icons.rocket_launch_rounded, color: primaryColor, size: 20),
+                Icon(Icons.rocket_launch_rounded, color: primaryColor, size: 20),
                 widthSpace,
-                const Text(
+                Text(
                   'Universe Messages',
                   style: bold18White,
                 ),
@@ -231,9 +233,9 @@ class _NotificationScreenState extends State<NotificationScreen> {
       onDismissed: (direction) {
         messageService.deleteResponse(response.id);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             backgroundColor: whiteColor,
-            duration: const Duration(milliseconds: 1500),
+            duration: Duration(milliseconds: 1500),
             behavior: SnackBarBehavior.floating,
             content: Text(
               'Universe message removed',
@@ -382,16 +384,13 @@ class _NotificationScreenState extends State<NotificationScreen> {
                   await SuperwallService().showPaywall(
                     placement: "subscribe_button",
                     onPurchased: () {
-                      // После покупки показываем расшифровку
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          backgroundColor: Colors.green,
-                          behavior: SnackBarBehavior.floating,
-                          content: Text(
-                            'Deciphering universe message...',
-                            style: medium14WhiteF4,
-                          ),
-                          duration: Duration(seconds: 2),
+                      // После покупки переходим на экран расшифровки
+                      Navigator.push(
+                        context,
+                        PageTransition(
+                          child: UniverseDecipherScreen(question: response.question),
+                          type: PageTransitionType.rightToLeft,
+                          duration: const Duration(milliseconds: 300),
                         ),
                       );
                     },
