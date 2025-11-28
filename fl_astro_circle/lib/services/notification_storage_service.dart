@@ -117,6 +117,10 @@ class NotificationStorageService {
     required double lovePercent,
     required double businessPercent,
     required double healthPercent,
+    String? name1,
+    String? name2,
+    String? birthDate1,
+    String? birthDate2,
   }) async {
     final docRef = await _getUserCollection('compatibility').add({
       'sign1': sign1,
@@ -126,10 +130,52 @@ class NotificationStorageService {
       'lovePercent': lovePercent,
       'businessPercent': businessPercent,
       'healthPercent': healthPercent,
+      'name1': name1,
+      'name2': name2,
+      'birthDate1': birthDate1,
+      'birthDate2': birthDate2,
       'isRead': false,
       'createdAt': FieldValue.serverTimestamp(),
     });
     return docRef.id;
+  }
+
+  /// Поиск существующей совместимости по именам и датам рождения
+  Future<CompatibilityData?> findExistingCompatibility({
+    required String name1,
+    required String name2,
+    required String birthDate1,
+    required String birthDate2,
+  }) async {
+    if (_userId == null) return null;
+    
+    // Ищем точное совпадение по именам и датам (в обоих порядках)
+    final query1 = await _getUserCollection('compatibility')
+        .where('name1', isEqualTo: name1)
+        .where('name2', isEqualTo: name2)
+        .where('birthDate1', isEqualTo: birthDate1)
+        .where('birthDate2', isEqualTo: birthDate2)
+        .limit(1)
+        .get();
+    
+    if (query1.docs.isNotEmpty) {
+      return CompatibilityData.fromFirestore(query1.docs.first);
+    }
+    
+    // Проверяем обратный порядок (person1 <-> person2)
+    final query2 = await _getUserCollection('compatibility')
+        .where('name1', isEqualTo: name2)
+        .where('name2', isEqualTo: name1)
+        .where('birthDate1', isEqualTo: birthDate2)
+        .where('birthDate2', isEqualTo: birthDate1)
+        .limit(1)
+        .get();
+    
+    if (query2.docs.isNotEmpty) {
+      return CompatibilityData.fromFirestore(query2.docs.first);
+    }
+    
+    return null;
   }
 
   Stream<List<CompatibilityData>> getCompatibilityStream() {
@@ -151,6 +197,40 @@ class NotificationStorageService {
 
   Future<void> deleteCompatibility(String docId) async {
     await _getUserCollection('compatibility').doc(docId).delete();
+  }
+
+  /// Обновить AI-контент для совместимости
+  Future<void> updateCompatibilityContent(
+    String docId, {
+    String? loveTeaser,
+    String? loveDetail,
+    String? businessTeaser,
+    String? businessDetail,
+    String? healthTeaser,
+    String? healthDetail,
+  }) async {
+    final updates = <String, dynamic>{};
+    if (loveTeaser != null) updates['loveTeaser'] = loveTeaser;
+    if (loveDetail != null) updates['loveDetail'] = loveDetail;
+    if (businessTeaser != null) updates['businessTeaser'] = businessTeaser;
+    if (businessDetail != null) updates['businessDetail'] = businessDetail;
+    if (healthTeaser != null) updates['healthTeaser'] = healthTeaser;
+    if (healthDetail != null) updates['healthDetail'] = healthDetail;
+    
+    if (updates.isNotEmpty) {
+      await _getUserCollection('compatibility').doc(docId).update(updates);
+    }
+  }
+
+  /// Получить данные совместимости по ID
+  Future<CompatibilityData?> getCompatibilityById(String docId) async {
+    if (_userId == null) return null;
+    
+    final doc = await _getUserCollection('compatibility').doc(docId).get();
+    if (doc.exists) {
+      return CompatibilityData.fromFirestore(doc);
+    }
+    return null;
   }
 
   // ==================== Get unread counts ====================
@@ -292,6 +372,20 @@ class CompatibilityData {
   final double healthPercent;
   final bool isRead;
   final DateTime createdAt;
+  
+  // Персональные данные
+  final String? name1;
+  final String? name2;
+  final String? birthDate1;
+  final String? birthDate2;
+  
+  // AI-сгенерированный контент
+  final String? loveTeaser;
+  final String? loveDetail;
+  final String? businessTeaser;
+  final String? businessDetail;
+  final String? healthTeaser;
+  final String? healthDetail;
 
   CompatibilityData({
     required this.id,
@@ -304,6 +398,16 @@ class CompatibilityData {
     required this.healthPercent,
     required this.isRead,
     required this.createdAt,
+    this.name1,
+    this.name2,
+    this.birthDate1,
+    this.birthDate2,
+    this.loveTeaser,
+    this.loveDetail,
+    this.businessTeaser,
+    this.businessDetail,
+    this.healthTeaser,
+    this.healthDetail,
   });
 
   factory CompatibilityData.fromFirestore(DocumentSnapshot doc) {
@@ -319,7 +423,51 @@ class CompatibilityData {
       healthPercent: (data['healthPercent'] ?? 0.0).toDouble(),
       isRead: data['isRead'] ?? false,
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      name1: data['name1'],
+      name2: data['name2'],
+      birthDate1: data['birthDate1'],
+      birthDate2: data['birthDate2'],
+      loveTeaser: data['loveTeaser'],
+      loveDetail: data['loveDetail'],
+      businessTeaser: data['businessTeaser'],
+      businessDetail: data['businessDetail'],
+      healthTeaser: data['healthTeaser'],
+      healthDetail: data['healthDetail'],
     );
+  }
+  
+  /// Получить отображаемое название (имена или знаки)
+  String get displayTitle {
+    if (name1 != null && name1!.isNotEmpty && name2 != null && name2!.isNotEmpty) {
+      return '$name1 & $name2';
+    }
+    return '$sign1 & $sign2';
+  }
+  
+  /// Получить подзаголовок (знаки если есть имена)
+  String get displaySubtitle {
+    if (name1 != null && name1!.isNotEmpty) {
+      return '$sign1 & $sign2';
+    }
+    return '';
+  }
+
+  /// Проверить, есть ли все тизеры
+  bool get hasAllTeasers => 
+      loveTeaser != null && businessTeaser != null && healthTeaser != null;
+
+  /// Проверить, есть ли детальный контент для категории
+  bool hasDetail(String category) {
+    switch (category) {
+      case 'love':
+        return loveDetail != null;
+      case 'business':
+        return businessDetail != null;
+      case 'health':
+        return healthDetail != null;
+      default:
+        return false;
+    }
   }
 
   String getTimeAgo() {

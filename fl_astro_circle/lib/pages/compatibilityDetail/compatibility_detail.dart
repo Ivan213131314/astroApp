@@ -1,6 +1,8 @@
 import 'package:dotted_border/dotted_border.dart';
 import 'package:fl_astro_circle/localization/localization_const.dart';
 import 'package:fl_astro_circle/theme/theme.dart';
+import 'package:fl_astro_circle/services/ai_chat_service.dart';
+import 'package:fl_astro_circle/services/notification_storage_service.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
@@ -14,14 +16,70 @@ class CompatibilityDetailScreen extends StatefulWidget {
 
 class _CompatibilityDetailScreenState extends State<CompatibilityDetailScreen> {
   Map<String, dynamic>? compatibilityData;
+  final NotificationStorageService _storageService = NotificationStorageService();
+  
+  // AI-контент (только тизеры)
+  String? _loveTeaser;
+  String? _businessTeaser;
+  String? _healthTeaser;
+  
+  // ID документа
+  String? _docId;
+  
+  bool _initialized = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    if (_initialized) return;
+    
     final args = ModalRoute.of(context)?.settings.arguments;
     if (args != null && args is Map<String, dynamic>) {
       compatibilityData = args;
+      _docId = args['docId'];
+      
+      // Читаем тизеры из arguments
+      _loveTeaser = args['loveTeaser'];
+      _businessTeaser = args['businessTeaser'];
+      _healthTeaser = args['healthTeaser'];
+      
+      // Если тизеры не переданы через args, но есть docId - загружаем из хранилища
+      if (_loveTeaser == null && _docId != null) {
+        _loadTeasersFromStorage();
+      }
     }
+    _initialized = true;
+  }
+
+  Future<void> _loadTeasersFromStorage() async {
+    final saved = await _storageService.getCompatibilityById(_docId!);
+    if (saved != null && mounted) {
+      setState(() {
+        _loveTeaser = saved.loveTeaser;
+        _businessTeaser = saved.businessTeaser;
+        _healthTeaser = saved.healthTeaser;
+      });
+    }
+  }
+
+  void _navigateToDeepDetail(CompatibilityCategory category, String teaser) {
+    Navigator.pushNamed(
+      context,
+      '/compatibilityDeepDetail',
+      arguments: {
+        'docId': _docId,
+        'sign1': sign1,
+        'sign1Image': sign1Image,
+        'sign2': sign2,
+        'sign2Image': sign2Image,
+        'category': category.name,
+        'teaser': teaser,
+        'person1Name': person1Name,
+        'person2Name': person2Name,
+        'person1BirthDate': person1BirthDate,
+        'person2BirthDate': person2BirthDate,
+      },
+    );
   }
 
   List<Map<String, dynamic>> get percentageList {
@@ -87,6 +145,7 @@ class _CompatibilityDetailScreenState extends State<CompatibilityDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    
     return Scaffold(
       appBar: AppBar(
         centerTitle: false,
@@ -119,7 +178,7 @@ class _CompatibilityDetailScreenState extends State<CompatibilityDetailScreen> {
     );
   }
 
-  contentList() {
+  Widget contentList() {
     return Container(
       width: double.maxFinite,
       padding: const EdgeInsets.all(fixPadding * 2.0),
@@ -145,45 +204,111 @@ class _CompatibilityDetailScreenState extends State<CompatibilityDetailScreen> {
           // User info block
           _buildUserInfoBlock(),
           heightSpace,
-          const Text(
-            "Lorem ipsum dolor sit amet consectetur. In vitae in volutpat eu lectus. Eget aliquet pharetra nunc lacus. Mauris at mattis laoreet quam. Cursus risus nisl nulla et magna maecenasid id. Enim nibh quisque tellus urna justo. Egestas id pharetrah morbi quam in eu. Mattis mattis odio velit volutpat blandit a pellentesque scelerisque vestibulum eget pulvinar. Eu sit gh ",
-            style: regualr14Grey,
+          heightSpace,
+          
+          // Love & Passion Section
+          _buildCategorySection(
+            title: getTranslation(context, 'compatibility_detail.love_passion'),
+            color: redColor,
+            teaser: _loveTeaser,
+            category: CompatibilityCategory.love,
+            icon: Icons.favorite,
           ),
           heightSpace,
           heightSpace,
-          titleWidget(
-              getTranslation(context, 'compatibility_detail.love_passion'),
-              redColor),
-          heightSpace,
-          const Text(
-            "Lorem ipsum dolor sit amet consectetur. In vitae in volutpat eu lectus. Eget aliquet pharetra nunc lacus. Mauris at mattis laoreet quam. Cursus risus nisl nulla et magna maecenasid id. Enim nibh quisque tellus urna justo. Egestas id pharetrah morbi quam in eu. Mattis mattis odio velit volutpat blandit a pellentesque scelerisque vestibulum eget pulvinar. Eu sit gh ",
-            style: regualr14Grey,
+          
+          // Business & Career Section
+          _buildCategorySection(
+            title: getTranslation(context, 'compatibility_detail.business_career'),
+            color: greenColor,
+            teaser: _businessTeaser,
+            category: CompatibilityCategory.business,
+            icon: Icons.business_center,
           ),
           heightSpace,
           heightSpace,
-          titleWidget(
-              getTranslation(context, 'compatibility_detail.business_career'),
-              greenColor),
-          heightSpace,
-          const Text(
-            "Lorem ipsum dolor sit amet consectetur. In vitae in volutpat eu lectus. Eget aliquet pharetra nunc lacus. Mauris at mattis laoreet quam. Cursus risus nisl nulla et magna maecenasid id. Enim nibh quisque tellus urna justo. Egestas id pharetrah morbi quam in eu. Mattis mattis odio velit volutpat blandit a pellentesque scelerisque vestibulum eget pulvinar. Eu sit gh ",
-            style: regualr14Grey,
-          ),
-          heightSpace,
-          heightSpace,
-          titleWidget(getTranslation(context, 'compatibility_detail.health'),
-              primaryColor),
-          heightSpace,
-          const Text(
-            "Lorem ipsum dolor sit amet consectetur. In vitae in volutpat eu lectus. Eget aliquet pharetra nunc lacus. Mauris at mattis laoreet quam. Cursus risus nisl nulla et magna maecenasid id. Enim nibh quisque tellus urna justo. Egestas id pharetrah morbi quam in eu. Mattis mattis odio velit volutpat blandit a pellentesque scelerisque vestibulum eget pulvinar. Eu sit gh ",
-            style: regualr14Grey,
+          
+          // Health Section
+          _buildCategorySection(
+            title: getTranslation(context, 'compatibility_detail.health'),
+            color: primaryColor,
+            teaser: _healthTeaser,
+            category: CompatibilityCategory.health,
+            icon: Icons.spa,
           ),
         ],
       ),
     );
   }
 
-  persentListContent() {
+  Widget _buildCategorySection({
+    required String title,
+    required Color color,
+    required String? teaser,
+    required CompatibilityCategory category,
+    required IconData icon,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        titleWidget(title, color),
+        heightSpace,
+        Text(
+          teaser ?? '',
+          style: regualr14Grey,
+        ),
+        heightSpace,
+        if (teaser != null)
+          _buildGoDeeper(color, category, teaser, icon),
+      ],
+    );
+  }
+
+  Widget _buildGoDeeper(Color color, CompatibilityCategory category, String teaser, IconData icon) {
+    return GestureDetector(
+      onTap: () => _navigateToDeepDetail(category, teaser),
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: fixPadding * 1.5,
+          vertical: fixPadding,
+        ),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [color.withValues(alpha: 0.8), color],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+          ),
+          borderRadius: BorderRadius.circular(25),
+          boxShadow: [
+            BoxShadow(
+              color: color.withValues(alpha: 0.3),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: whiteColor, size: 18),
+            const SizedBox(width: 8),
+            const Text(
+              'Go Deeper',
+              style: TextStyle(
+                color: whiteColor,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(width: 4),
+            const Icon(Icons.arrow_forward, color: whiteColor, size: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
+  List<Widget> persentListContent() {
     return List.generate(
       percentageList.length,
       (index) {
@@ -258,7 +383,7 @@ class _CompatibilityDetailScreenState extends State<CompatibilityDetailScreen> {
     );
   }
 
-  titleWidget(String title, Color color) {
+  Widget titleWidget(String title, Color color) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -276,7 +401,7 @@ class _CompatibilityDetailScreenState extends State<CompatibilityDetailScreen> {
     );
   }
 
-  horoscopeDetail(Size size) {
+  Widget horoscopeDetail(Size size) {
     return Padding(
       padding: const EdgeInsets.only(
           left: fixPadding * 2.0,
@@ -301,7 +426,7 @@ class _CompatibilityDetailScreenState extends State<CompatibilityDetailScreen> {
     );
   }
 
-  compareButton() {
+  Widget compareButton() {
     return Container(
       height: 45,
       width: 45,
@@ -322,7 +447,7 @@ class _CompatibilityDetailScreenState extends State<CompatibilityDetailScreen> {
     );
   }
 
-  dottedBorder() {
+  Widget dottedBorder() {
     return Expanded(
       child: DottedBorder(
         padding: EdgeInsets.zero,
@@ -333,7 +458,7 @@ class _CompatibilityDetailScreenState extends State<CompatibilityDetailScreen> {
     );
   }
 
-  horoscopeWidget(Size size, image, text) {
+  Widget horoscopeWidget(Size size, image, text) {
     return Container(
       width: size.width * 0.25,
       padding: const EdgeInsets.symmetric(vertical: fixPadding),
@@ -366,7 +491,7 @@ class _CompatibilityDetailScreenState extends State<CompatibilityDetailScreen> {
     );
   }
 
-  backButton(BuildContext context) {
+  Widget backButton(BuildContext context) {
     return GestureDetector(
       onTap: () {
         Navigator.pop(context);

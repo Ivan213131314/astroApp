@@ -161,12 +161,48 @@ class _NotificationScreenState extends State<NotificationScreen> {
     required List<NatalChartData> natalCharts,
     required List<CompatibilityData> compatibilities,
   }) {
+    // Объединяем все уведомления в один список с типом
+    final List<_NotificationItem> allItems = [
+      ...universeMessages.map((m) => _NotificationItem(
+        type: _NotificationType.universe,
+        data: m,
+        isRead: m.isRead,
+        createdAt: m.createdAt,
+      )),
+      ...natalCharts.map((c) => _NotificationItem(
+        type: _NotificationType.natal,
+        data: c,
+        isRead: c.isRead,
+        createdAt: c.createdAt,
+      )),
+      ...compatibilities.map((c) => _NotificationItem(
+        type: _NotificationType.compatibility,
+        data: c,
+        isRead: c.isRead,
+        createdAt: c.createdAt,
+      )),
+    ];
+
+    // Сортируем: непрочитанные вверху, затем по дате (новые сверху)
+    allItems.sort((a, b) {
+      // Сначала по isRead (false < true, чтобы непрочитанные были вверху)
+      if (a.isRead != b.isRead) {
+        return a.isRead ? 1 : -1;
+      }
+      // Затем по дате (новые сверху)
+      return b.createdAt.compareTo(a.createdAt);
+    });
+
+    // Разделяем на новые и прочитанные
+    final unreadItems = allItems.where((item) => !item.isRead).toList();
+    final readItems = allItems.where((item) => item.isRead).toList();
+
     return ListView(
       padding: const EdgeInsets.only(bottom: fixPadding),
       physics: const BouncingScrollPhysics(),
       children: [
-        // Universe Messages Section
-        if (universeMessages.isNotEmpty) ...[
+        // Секция "New" для непрочитанных уведомлений
+        if (unreadItems.isNotEmpty) ...[
           const Padding(
             padding: EdgeInsets.symmetric(
               horizontal: fixPadding * 2.0,
@@ -174,21 +210,21 @@ class _NotificationScreenState extends State<NotificationScreen> {
             ),
             child: Row(
               children: [
-                Icon(Icons.rocket_launch_rounded, color: primaryColor, size: 20),
+                Icon(Icons.fiber_new_rounded, color: redColor, size: 24),
                 widthSpace,
                 Text(
-                  'Universe Messages',
+                  'New',
                   style: bold18White,
                 ),
               ],
             ),
           ),
-          ...universeMessages.map((response) => universeMessageItem(response)).toList(),
+          ...unreadItems.map((item) => _buildNotificationItem(item)).toList(),
           heightSpace,
         ],
 
-        // Natal Charts Section
-        if (natalCharts.isNotEmpty) ...[
+        // Секция "Earlier" для прочитанных уведомлений
+        if (readItems.isNotEmpty) ...[
           const Padding(
             padding: EdgeInsets.symmetric(
               horizontal: fixPadding * 2.0,
@@ -196,42 +232,31 @@ class _NotificationScreenState extends State<NotificationScreen> {
             ),
             child: Row(
               children: [
-                Icon(Icons.auto_awesome, color: primaryColor, size: 20),
+                Icon(Icons.history, color: greyColor, size: 20),
                 widthSpace,
                 Text(
-                  'Natal Charts',
+                  'Earlier',
                   style: bold18White,
                 ),
               ],
             ),
           ),
-          ...natalCharts.map((chart) => natalChartItem(chart)).toList(),
-          heightSpace,
-        ],
-
-        // Compatibility Section
-        if (compatibilities.isNotEmpty) ...[
-          const Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: fixPadding * 2.0,
-              vertical: fixPadding,
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.favorite, color: redColor, size: 20),
-                widthSpace,
-                Text(
-                  'Compatibility Results',
-                  style: bold18White,
-                ),
-              ],
-            ),
-          ),
-          ...compatibilities.map((compat) => compatibilityItem(compat)).toList(),
+          ...readItems.map((item) => _buildNotificationItem(item)).toList(),
           heightSpace,
         ],
       ],
     );
+  }
+
+  Widget _buildNotificationItem(_NotificationItem item) {
+    switch (item.type) {
+      case _NotificationType.universe:
+        return universeMessageItem(item.data as UniverseMessageData);
+      case _NotificationType.natal:
+        return natalChartItem(item.data as NatalChartData);
+      case _NotificationType.compatibility:
+        return compatibilityItem(item.data as CompatibilityData);
+    }
   }
 
   Widget universeMessageItem(UniverseMessageData response) {
@@ -615,13 +640,21 @@ class _NotificationScreenState extends State<NotificationScreen> {
             context,
             '/compatibilityDetail',
             arguments: {
+              'docId': compat.id,
               'sign1': compat.sign1,
               'sign1Image': compat.sign1Image,
               'sign2': compat.sign2,
               'sign2Image': compat.sign2Image,
+              'person1Name': compat.name1,
+              'person2Name': compat.name2,
+              'person1BirthDate': compat.birthDate1,
+              'person2BirthDate': compat.birthDate2,
               'lovePercent': compat.lovePercent,
               'businessPercent': compat.businessPercent,
               'healthPercent': compat.healthPercent,
+              'loveTeaser': compat.loveTeaser,
+              'businessTeaser': compat.businessTeaser,
+              'healthTeaser': compat.healthTeaser,
             },
           );
         },
@@ -640,6 +673,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
           ),
           child: Row(
             children: [
+              // Показываем иконки знаков
               Container(
                 height: 60,
                 width: 60,
@@ -647,10 +681,32 @@ class _NotificationScreenState extends State<NotificationScreen> {
                   borderRadius: BorderRadius.circular(10.0),
                   color: const Color(0xFF1F2449),
                 ),
-                child: const Icon(
-                  Icons.favorite,
-                  color: redColor,
-                  size: 30,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Positioned(
+                      left: 5,
+                      child: Image.asset(
+                        compat.sign1Image,
+                        height: 28,
+                        width: 28,
+                        errorBuilder: (_, __, ___) => const Icon(Icons.star, color: primaryColor, size: 28),
+                      ),
+                    ),
+                    Positioned(
+                      right: 5,
+                      child: Image.asset(
+                        compat.sign2Image,
+                        height: 28,
+                        width: 28,
+                        errorBuilder: (_, __, ___) => const Icon(Icons.star, color: primaryColor, size: 28),
+                      ),
+                    ),
+                    const Positioned(
+                      bottom: 5,
+                      child: Icon(Icons.favorite, color: redColor, size: 16),
+                    ),
+                  ],
                 ),
               ),
               widthSpace,
@@ -663,7 +719,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                       children: [
                         Expanded(
                           child: Text(
-                            '${compat.sign1} & ${compat.sign2}',
+                            compat.displayTitle,
                             style: medium16WhiteF4,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -689,6 +745,13 @@ class _NotificationScreenState extends State<NotificationScreen> {
                           ),
                       ],
                     ),
+                    if (compat.displaySubtitle.isNotEmpty) ...[
+                      heightBox(2),
+                      Text(
+                        compat.displaySubtitle,
+                        style: const TextStyle(color: primaryColor, fontSize: 12),
+                      ),
+                    ],
                     heightBox(3),
                     Text(
                       'Compatibility: $avgPercent%',
@@ -736,4 +799,21 @@ class _NotificationScreenState extends State<NotificationScreen> {
       ),
     );
   }
+}
+
+// Вспомогательные классы для сортировки уведомлений
+enum _NotificationType { universe, natal, compatibility }
+
+class _NotificationItem {
+  final _NotificationType type;
+  final dynamic data;
+  final bool isRead;
+  final DateTime createdAt;
+
+  _NotificationItem({
+    required this.type,
+    required this.data,
+    required this.isRead,
+    required this.createdAt,
+  });
 }

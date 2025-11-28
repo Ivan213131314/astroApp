@@ -36,6 +36,7 @@ export 'package:fl_astro_circle/pages/numorology/numorology.dart';
 export 'package:fl_astro_circle/pages/compatibility/compatibility.dart';
 export 'package:fl_astro_circle/pages/compatibilityBirthDate/compatibility_birth_date.dart';
 export 'package:fl_astro_circle/pages/compatibilityDetail/compatibility_detail.dart';
+export 'package:fl_astro_circle/pages/compatibilityDetail/compatibility_deep_detail.dart';
 export 'package:fl_astro_circle/pages/numorologyDetail/numorology_detail.dart';
 export 'package:fl_astro_circle/pages/plamReader/plam_reader.dart';
 export 'package:fl_astro_circle/pages/plamReaderDetail/plam_reader_detail.dart';

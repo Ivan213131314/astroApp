@@ -309,6 +309,12 @@ class _MyAppState extends State<MyApp> {
           type: PageTransitionType.rightToLeft,
           settings: settings,
         );
+      case '/compatibilityDeepDetail':
+        return PageTransition(
+          child: const CompatibilityDeepDetailScreen(),
+          type: PageTransitionType.rightToLeft,
+          settings: settings,
+        );
       case '/plamReader':
         return PageTransition(
           child: const PlamReaderScreen(),

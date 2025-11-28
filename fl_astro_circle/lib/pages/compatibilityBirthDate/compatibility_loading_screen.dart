@@ -8,6 +8,7 @@ class CompatibilityLoadingScreen extends StatefulWidget {
   final String sign1Name;
   final String sign2Name;
   final VoidCallback onComplete;
+  final Future<Map<String, String>>? contentFuture; // Future с генерацией контента
 
   const CompatibilityLoadingScreen({
     super.key,
@@ -16,6 +17,7 @@ class CompatibilityLoadingScreen extends StatefulWidget {
     required this.sign1Name,
     required this.sign2Name,
     required this.onComplete,
+    this.contentFuture,
   });
 
   @override
@@ -26,13 +28,11 @@ class CompatibilityLoadingScreen extends StatefulWidget {
 class _CompatibilityLoadingScreenState extends State<CompatibilityLoadingScreen>
     with TickerProviderStateMixin {
   late AnimationController _rotationController;
-  late AnimationController _progressController;
   late AnimationController _pulseController;
   late AnimationController _sparkleController;
 
   late Animation<double> _rotation1;
   late Animation<double> _rotation2;
-  late Animation<double> _scale;
   late Animation<double> _pulse;
 
   static const String _staticText = 'Request is being sent to space via satellites...';
@@ -41,11 +41,14 @@ class _CompatibilityLoadingScreenState extends State<CompatibilityLoadingScreen>
     'Analyzing star positions...',
     'Comparing astrological charts...',
     'Calculating compatibility...',
+    'Generating cosmic insights...',
   ];
   int _currentTextIndex = 0;
 
   final List<_Sparkle> _sparkles = [];
   final Random _random = Random();
+  
+  double _displayProgress = 0.0;
 
   @override
   void initState() {
@@ -65,33 +68,6 @@ class _CompatibilityLoadingScreenState extends State<CompatibilityLoadingScreen>
       CurvedAnimation(parent: _rotationController, curve: Curves.linear),
     );
 
-    // Progress animation (5-13 seconds random)
-    final duration = 5 + _random.nextInt(9); // 5-13 seconds
-    _progressController = AnimationController(
-      duration: Duration(seconds: duration),
-      vsync: this,
-    );
-
-    _scale = Tween<double>(begin: 1.0, end: 0.7).animate(
-      CurvedAnimation(parent: _progressController, curve: Curves.easeInOut),
-    );
-
-    _progressController.addListener(() {
-      // Change dynamic text based on progress
-      final progress = _progressController.value;
-      int newIndex = (progress * _dynamicTexts.length).floor();
-      if (newIndex >= _dynamicTexts.length) newIndex = _dynamicTexts.length - 1;
-      if (newIndex != _currentTextIndex) {
-        setState(() => _currentTextIndex = newIndex);
-      }
-    });
-
-    _progressController.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        widget.onComplete();
-      }
-    });
-
     // Pulse animation
     _pulseController = AnimationController(
       duration: const Duration(milliseconds: 1500),
@@ -110,9 +86,53 @@ class _CompatibilityLoadingScreenState extends State<CompatibilityLoadingScreen>
 
     _sparkleController.addListener(_generateSparkles);
 
-    // Start progress
-    _progressController.forward();
+    // Запускаем плавный прогресс и ожидание контента
+    _startProgressAndWaitContent();
   }
+
+  Future<void> _startProgressAndWaitContent() async {
+    // Плавно увеличиваем прогресс до 90% пока ждём контент
+    _animateProgressTo(0.9, const Duration(seconds: 3));
+    
+    // Ждём завершения генерации контента
+    if (widget.contentFuture != null) {
+      await widget.contentFuture;
+    }
+    
+    // Быстро доводим до 100% и переходим
+    await _animateProgressTo(1.0, const Duration(milliseconds: 300));
+    
+    // Небольшая пауза чтобы показать 100%
+    await Future.delayed(const Duration(milliseconds: 200));
+    
+    widget.onComplete();
+  }
+
+  Future<void> _animateProgressTo(double target, Duration duration) async {
+    final startProgress = _displayProgress;
+    final startTime = DateTime.now();
+    
+    while (_displayProgress < target) {
+      await Future.delayed(const Duration(milliseconds: 16)); // ~60fps
+      if (!mounted) return;
+      
+      final elapsed = DateTime.now().difference(startTime).inMilliseconds;
+      final t = (elapsed / duration.inMilliseconds).clamp(0.0, 1.0);
+      
+      setState(() {
+        _displayProgress = startProgress + (target - startProgress) * t;
+        
+        // Update text based on progress
+        int newIndex = (_displayProgress * _dynamicTexts.length).floor();
+        if (newIndex >= _dynamicTexts.length) newIndex = _dynamicTexts.length - 1;
+        _currentTextIndex = newIndex;
+      });
+      
+      if (t >= 1.0) break;
+    }
+  }
+
+  double get _scale => 1.0 - (_displayProgress * 0.3); // 1.0 -> 0.7
 
   void _generateSparkles() {
     if (_random.nextDouble() > 0.7) {
@@ -136,7 +156,6 @@ class _CompatibilityLoadingScreenState extends State<CompatibilityLoadingScreen>
   @override
   void dispose() {
     _rotationController.dispose();
-    _progressController.dispose();
     _pulseController.dispose();
     _sparkleController.dispose();
     super.dispose();
@@ -191,7 +210,6 @@ class _CompatibilityLoadingScreenState extends State<CompatibilityLoadingScreen>
         animation: Listenable.merge([
           _rotationController,
           _pulseController,
-          _progressController,
         ]),
         builder: (context, child) {
           return Stack(
@@ -225,7 +243,7 @@ class _CompatibilityLoadingScreenState extends State<CompatibilityLoadingScreen>
               CustomPaint(
                 size: const Size(250, 250),
                 painter: _OrbitPainter(
-                  progress: _progressController.value,
+                  progress: _displayProgress,
                   color: primaryColor.withValues(alpha: 0.3),
                 ),
               ),
@@ -260,8 +278,8 @@ class _CompatibilityLoadingScreenState extends State<CompatibilityLoadingScreen>
               // Sign 1 - orbiting
               Transform.translate(
                 offset: Offset(
-                  100 * cos(_rotation1.value) * _scale.value,
-                  60 * sin(_rotation1.value) * _scale.value,
+                  100 * cos(_rotation1.value) * _scale,
+                  60 * sin(_rotation1.value) * _scale,
                 ),
                 child: Transform.rotate(
                   angle: _rotation1.value * 0.5,
@@ -272,8 +290,8 @@ class _CompatibilityLoadingScreenState extends State<CompatibilityLoadingScreen>
               // Sign 2 - orbiting opposite
               Transform.translate(
                 offset: Offset(
-                  100 * cos(_rotation2.value) * _scale.value,
-                  60 * sin(_rotation2.value) * _scale.value,
+                  100 * cos(_rotation2.value) * _scale,
+                  60 * sin(_rotation2.value) * _scale,
                 ),
                 child: Transform.rotate(
                   angle: -_rotation2.value * 0.5,
@@ -361,32 +379,27 @@ class _CompatibilityLoadingScreenState extends State<CompatibilityLoadingScreen>
   Widget _buildProgressBar() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 50),
-      child: AnimatedBuilder(
-        animation: _progressController,
-        builder: (context, child) {
-          return Column(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: LinearProgressIndicator(
-                  value: _progressController.value,
-                  backgroundColor: blueShade1,
-                  valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
-                  minHeight: 8,
-                ),
-              ),
-              heightSpace,
-              Text(
-                '${(_progressController.value * 100).toInt()}%',
-                style: const TextStyle(
-                  color: primaryColor,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          );
-        },
+      child: Column(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: LinearProgressIndicator(
+              value: _displayProgress,
+              backgroundColor: blueShade1,
+              valueColor: const AlwaysStoppedAnimation<Color>(primaryColor),
+              minHeight: 8,
+            ),
+          ),
+          heightSpace,
+          Text(
+            '${(_displayProgress * 100).toInt()}%',
+            style: const TextStyle(
+              color: primaryColor,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
       ),
     );
   }

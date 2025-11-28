@@ -2,6 +2,7 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:fl_astro_circle/localization/localization_const.dart';
 import 'package:fl_astro_circle/pages/compatibilityBirthDate/compatibility_loading_screen.dart';
 import 'package:fl_astro_circle/services/notification_storage_service.dart';
+import 'package:fl_astro_circle/services/ai_chat_service.dart';
 import 'package:fl_astro_circle/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -17,10 +18,13 @@ class CompatibilityBirthDateScreen extends StatefulWidget {
 
 class _CompatibilityBirthDateScreenState
     extends State<CompatibilityBirthDateScreen> {
-  final NotificationStorageService _storageService =
-      NotificationStorageService();
+  final NotificationStorageService _storageService = NotificationStorageService();
+  final AiChatService _aiService = AiChatService();
 
   Map<String, dynamic>? _args;
+  
+  // Сгенерированный AI контент
+  Map<String, String>? _generatedContent;
 
   // Person 1 name and date
   final TextEditingController _person1NameController = TextEditingController();
@@ -84,7 +88,70 @@ class _CompatibilityBirthDateScreenState
   String get sign2 => _args?['sign2'] ?? '';
   String get sign2Image => _args?['sign2Image'] ?? 'assets/home/image-1.png';
 
-  void _showLoadingAndNavigate() {
+  void _showLoadingAndNavigate() async {
+    // Валидация имён
+    final name1 = _person1NameController.text.trim();
+    final name2 = _person2NameController.text.trim();
+    
+    if (name1.isEmpty || name2.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            name1.isEmpty && name2.isEmpty 
+                ? 'Please enter names for both persons'
+                : name1.isEmpty 
+                    ? 'Please enter name for Person 1'
+                    : 'Please enter name for Person 2',
+          ),
+          backgroundColor: redColor,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+    
+    final birthDate1Iso = _person1Date.toIso8601String();
+    final birthDate2Iso = _person2Date.toIso8601String();
+    
+    // Проверяем существующую запись в БД
+    final existing = await _storageService.findExistingCompatibility(
+      name1: name1,
+      name2: name2,
+      birthDate1: birthDate1Iso,
+      birthDate2: birthDate2Iso,
+    );
+    
+    if (existing != null && existing.hasAllTeasers && mounted) {
+      // Найдена существующая запись - переходим сразу без генерации
+      Navigator.pushNamed(
+        context,
+        '/compatibilityDetail',
+        arguments: {
+          'docId': existing.id,
+          'sign1': existing.sign1,
+          'sign1Image': existing.sign1Image,
+          'sign2': existing.sign2,
+          'sign2Image': existing.sign2Image,
+          'person1Name': existing.name1,
+          'person2Name': existing.name2,
+          'person1BirthDate': existing.birthDate1,
+          'person2BirthDate': existing.birthDate2,
+          'lovePercent': existing.lovePercent,
+          'businessPercent': existing.businessPercent,
+          'healthPercent': existing.healthPercent,
+          'loveTeaser': existing.loveTeaser,
+          'businessTeaser': existing.businessTeaser,
+          'healthTeaser': existing.healthTeaser,
+        },
+      );
+      return;
+    }
+    
+    // Запускаем генерацию тизеров (параллельно с анимацией)
+    final contentFuture = _generateTeasers();
+    
+    if (!mounted) return;
+    
     Navigator.push(
       context,
       PageRouteBuilder(
@@ -95,6 +162,7 @@ class _CompatibilityBirthDateScreenState
             sign2Image: sign2Image,
             sign1Name: sign1,
             sign2Name: sign2,
+            contentFuture: contentFuture,
             onComplete: () => _navigateToResult(),
           );
         },
@@ -105,14 +173,93 @@ class _CompatibilityBirthDateScreenState
     );
   }
 
+  String _getLanguage() {
+    final locale = Localizations.localeOf(context);
+    switch (locale.languageCode) {
+      case 'ru':
+        return 'Russian';
+      case 'es':
+        return 'Spanish';
+      case 'fr':
+        return 'French';
+      case 'de':
+        return 'German';
+      default:
+        return 'English';
+    }
+  }
+
+  String _formatBirthDate(DateTime date) {
+    final months = ['January', 'February', 'March', 'April', 'May', 'June',
+                    'July', 'August', 'September', 'October', 'November', 'December'];
+    return '${months[date.month - 1]} ${date.day}, ${date.year}';
+  }
+
+  Future<Map<String, String>> _generateTeasers() async {
+    final language = _getLanguage();
+    final name1 = _person1NameController.text.trim();
+    final name2 = _person2NameController.text.trim();
+    final birthDate1 = _formatBirthDate(_person1Date);
+    final birthDate2 = _formatBirthDate(_person2Date);
+    
+    try {
+      // Генерируем только 3 коротких тизера параллельно
+      final results = await Future.wait([
+        _aiService.generateCompatibilityTeaser(
+          sign1: sign1, sign2: sign2, 
+          category: CompatibilityCategory.love, 
+          language: language,
+          name1: name1, name2: name2,
+          birthDate1: birthDate1, birthDate2: birthDate2,
+        ),
+        _aiService.generateCompatibilityTeaser(
+          sign1: sign1, sign2: sign2, 
+          category: CompatibilityCategory.business, 
+          language: language,
+          name1: name1, name2: name2,
+          birthDate1: birthDate1, birthDate2: birthDate2,
+        ),
+        _aiService.generateCompatibilityTeaser(
+          sign1: sign1, sign2: sign2, 
+          category: CompatibilityCategory.health, 
+          language: language,
+          name1: name1, name2: name2,
+          birthDate1: birthDate1, birthDate2: birthDate2,
+        ),
+      ]);
+      
+      _generatedContent = {
+        'loveTeaser': results[0],
+        'businessTeaser': results[1],
+        'healthTeaser': results[2],
+      };
+      
+      return _generatedContent!;
+    } catch (e) {
+      debugPrint('Error generating teasers: $e');
+      _generatedContent = {
+        'loveTeaser': 'The cosmic dance between $name1 and $name2 holds secrets of passion and connection...',
+        'businessTeaser': 'When $name1 and $name2 join forces in the professional realm...',
+        'healthTeaser': 'The wellness journey of $name1 and $name2 together is written in the celestial patterns...',
+      };
+      return _generatedContent!;
+    }
+  }
+
   Future<void> _navigateToResult() async {
     try {
       final random = Random();
       final lovePercent = 0.5 + random.nextDouble() * 0.5;
       final businessPercent = 0.5 + random.nextDouble() * 0.5;
       final healthPercent = 0.5 + random.nextDouble() * 0.5;
+      
+      final name1 = _person1NameController.text.trim();
+      final name2 = _person2NameController.text.trim();
+      final birthDate1Iso = _person1Date.toIso8601String();
+      final birthDate2Iso = _person2Date.toIso8601String();
 
-      await _storageService.saveCompatibility(
+      // Сохраняем с именами и датами
+      final docId = await _storageService.saveCompatibility(
         sign1: sign1,
         sign1Image: sign1Image,
         sign2: sign2,
@@ -120,7 +267,21 @@ class _CompatibilityBirthDateScreenState
         lovePercent: lovePercent,
         businessPercent: businessPercent,
         healthPercent: healthPercent,
+        name1: name1,
+        name2: name2,
+        birthDate1: birthDate1Iso,
+        birthDate2: birthDate2Iso,
       );
+      
+      // Сохраняем тизеры
+      if (_generatedContent != null) {
+        await _storageService.updateCompatibilityContent(
+          docId,
+          loveTeaser: _generatedContent!['loveTeaser'],
+          businessTeaser: _generatedContent!['businessTeaser'],
+          healthTeaser: _generatedContent!['healthTeaser'],
+        );
+      }
 
       if (!mounted) return;
 
@@ -129,17 +290,21 @@ class _CompatibilityBirthDateScreenState
         context,
         '/compatibilityDetail',
         arguments: {
+          'docId': docId,
           'sign1': sign1,
           'sign1Image': sign1Image,
           'sign2': sign2,
           'sign2Image': sign2Image,
-          'person1Name': _person1NameController.text,
-          'person2Name': _person2NameController.text,
-          'person1BirthDate': _person1Date.toIso8601String(),
-          'person2BirthDate': _person2Date.toIso8601String(),
+          'person1Name': name1,
+          'person2Name': name2,
+          'person1BirthDate': birthDate1Iso,
+          'person2BirthDate': birthDate2Iso,
           'lovePercent': lovePercent,
           'businessPercent': businessPercent,
           'healthPercent': healthPercent,
+          'loveTeaser': _generatedContent?['loveTeaser'],
+          'businessTeaser': _generatedContent?['businessTeaser'],
+          'healthTeaser': _generatedContent?['healthTeaser'],
         },
       );
     } catch (e) {
