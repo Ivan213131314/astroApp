@@ -1,8 +1,6 @@
 import 'package:dotted_border/dotted_border.dart';
 import 'package:fl_astro_circle/localization/localization_const.dart';
-import 'package:fl_astro_circle/services/notification_storage_service.dart';
 import 'package:flutter/material.dart';
-import 'dart:math';
 
 import '../../theme/theme.dart';
 
@@ -15,109 +13,35 @@ class CompatibilityScreen extends StatefulWidget {
 }
 
 class _CompatibilityScreenState extends State<CompatibilityScreen> {
-  final NotificationStorageService _storageService = NotificationStorageService();
-  bool _isLoading = false;
 
   final leftHoroscope = [
-    {
-      "image": "assets/home/image-1.png",
-      "name": translation('horoscope_list.aries')
-    },
-    {
-      "image": "assets/home/image-2.png",
-      "name": translation('horoscope_list.taurus')
-    },
-    {
-      "image": "assets/home/image-3.png",
-      "name": translation('horoscope_list.gemini')
-    },
-    {
-      "image": "assets/home/image-4.png",
-      "name": translation('horoscope_list.cancer')
-    },
-    {
-      "image": "assets/home/image-5.png",
-      "name": translation('horoscope_list.leo')
-    },
-    {
-      "image": "assets/home/image-6.png",
-      "name": translation('horoscope_list.virgo')
-    },
-    {
-      "image": "assets/home/image-7.png",
-      "name": translation('horoscope_list.libra')
-    },
-    {
-      "image": "assets/home/image-8.png",
-      "name": translation('horoscope_list.scorpio')
-    },
-    {
-      "image": "assets/home/image-12.png",
-      "name": translation('horoscope_list.sagittarius')
-    },
-    {
-      "image": "assets/home/image-9.png",
-      "name": translation("horoscope_list.capricorn")
-    },
-    {
-      "image": "assets/home/image-10.png",
-      "name": translation('horoscope_list.aquarius')
-    },
-    {
-      "image": "assets/home/image-11.png",
-      "name": translation('horoscope_list.pisces')
-    },
+    {"image": "assets/home/image-1.png", "nameKey": "horoscope_list.aries"},
+    {"image": "assets/home/image-2.png", "nameKey": "horoscope_list.taurus"},
+    {"image": "assets/home/image-3.png", "nameKey": "horoscope_list.gemini"},
+    {"image": "assets/home/image-4.png", "nameKey": "horoscope_list.cancer"},
+    {"image": "assets/home/image-5.png", "nameKey": "horoscope_list.leo"},
+    {"image": "assets/home/image-6.png", "nameKey": "horoscope_list.virgo"},
+    {"image": "assets/home/image-7.png", "nameKey": "horoscope_list.libra"},
+    {"image": "assets/home/image-8.png", "nameKey": "horoscope_list.scorpio"},
+    {"image": "assets/home/image-12.png", "nameKey": "horoscope_list.sagittarius"},
+    {"image": "assets/home/image-9.png", "nameKey": "horoscope_list.capricorn"},
+    {"image": "assets/home/image-10.png", "nameKey": "horoscope_list.aquarius"},
+    {"image": "assets/home/image-11.png", "nameKey": "horoscope_list.pisces"},
   ];
 
   final rightHoroscope = [
-    {
-      "image": "assets/home/image-1.png",
-      "name": translation('horoscope_list.aries')
-    },
-    {
-      "image": "assets/home/image-6.png",
-      "name": translation('horoscope_list.virgo')
-    },
-    {
-      "image": "assets/home/image-7.png",
-      "name": translation('horoscope_list.libra')
-    },
-    {
-      "image": "assets/home/image-3.png",
-      "name": translation('horoscope_list.gemini')
-    },
-    {
-      "image": "assets/home/image-2.png",
-      "name": translation('horoscope_list.taurus')
-    },
-    {
-      "image": "assets/home/image-4.png",
-      "name": translation('horoscope_list.cancer')
-    },
-    {
-      "image": "assets/home/image-5.png",
-      "name": translation('horoscope_list.leo')
-    },
-    {
-      "image": "assets/home/image-8.png",
-      "name": translation('horoscope_list.scorpio')
-    },
-    {
-      "image": "assets/home/image-12.png",
-      "name": translation('horoscope_list.sagittarius')
-    },
-    {
-      "image": "assets/home/image-9.png",
-      "name": translation("horoscope_list.capricorn")
-    },
-    {
-      "image": "assets/home/image-10.png",
-      "name": translation('horoscope_list.aquarius')
-    },
-    {
-      "image": "assets/home/image-11.png",
-      "name": translation('horoscope_list.pisces')
-    },
+    {"image": "assets/home/image-1.png", "nameKey": "horoscope_list.aries"},
+    {"image": "assets/home/image-6.png", "nameKey": "horoscope_list.virgo"},
+    {"image": "assets/home/image-7.png", "nameKey": "horoscope_list.libra"},
+    {"image": "assets/home/image-3.png", "nameKey": "horoscope_list.gemini"},
+    {"image": "assets/home/image-2.png", "nameKey": "horoscope_list.taurus"},
+    {"image": "assets/home/image-4.png", "nameKey": "horoscope_list.cancer"},
+    {"image": "assets/home/image-5.png", "nameKey": "horoscope_list.leo"},
+    {"image": "assets/home/image-8.png", "nameKey": "horoscope_list.scorpio"},
+    {"image": "assets/home/image-12.png", "nameKey": "horoscope_list.sagittarius"},
+    {"image": "assets/home/image-9.png", "nameKey": "horoscope_list.capricorn"},
+    {"image": "assets/home/image-10.png", "nameKey": "horoscope_list.aquarius"},
+    {"image": "assets/home/image-11.png", "nameKey": "horoscope_list.pisces"},
   ];
 
   PageController leftpageController =
@@ -130,58 +54,22 @@ class _CompatibilityScreenState extends State<CompatibilityScreen> {
 
   int rightSelectedIndex = 1;
 
-  Future<void> _calculateAndSave() async {
-    setState(() => _isLoading = true);
+  void _navigateToBirthDateScreen() {
+    final sign1Key = leftHoroscope[leftSelectedIndex]['nameKey'].toString();
+    final sign1Image = leftHoroscope[leftSelectedIndex]['image'].toString();
+    final sign2Key = rightHoroscope[rightSelectedIndex]['nameKey'].toString();
+    final sign2Image = rightHoroscope[rightSelectedIndex]['image'].toString();
 
-    try {
-      final random = Random();
-      final lovePercent = 0.5 + random.nextDouble() * 0.5; // 50-100%
-      final businessPercent = 0.5 + random.nextDouble() * 0.5;
-      final healthPercent = 0.5 + random.nextDouble() * 0.5;
-
-      final sign1 = leftHoroscope[leftSelectedIndex]['name'].toString();
-      final sign1Image = leftHoroscope[leftSelectedIndex]['image'].toString();
-      final sign2 = rightHoroscope[rightSelectedIndex]['name'].toString();
-      final sign2Image = rightHoroscope[rightSelectedIndex]['image'].toString();
-
-      await _storageService.saveCompatibility(
-        sign1: sign1,
-        sign1Image: sign1Image,
-        sign2: sign2,
-        sign2Image: sign2Image,
-        lovePercent: lovePercent,
-        businessPercent: businessPercent,
-        healthPercent: healthPercent,
-      );
-
-      if (!mounted) return;
-
-      Navigator.pushNamed(
-        context,
-        '/compatibilityDetail',
-        arguments: {
-          'sign1': sign1,
-          'sign1Image': sign1Image,
-          'sign2': sign2,
-          'sign2Image': sign2Image,
-          'lovePercent': lovePercent,
-          'businessPercent': businessPercent,
-          'healthPercent': healthPercent,
-        },
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to save compatibility: $e'),
-          backgroundColor: redColor,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-    }
+    Navigator.pushNamed(
+      context,
+      '/compatibilityBirthDate',
+      arguments: {
+        'sign1': getTranslation(context, sign1Key),
+        'sign1Image': sign1Image,
+        'sign2': getTranslation(context, sign2Key),
+        'sign2Image': sign2Image,
+      },
+    );
   }
 
   @override
@@ -238,11 +126,11 @@ class _CompatibilityScreenState extends State<CompatibilityScreen> {
 
   goButton() {
     return GestureDetector(
-      onTap: _isLoading ? null : _calculateAndSave,
+      onTap: _navigateToBirthDateScreen,
       child: Container(
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: _isLoading ? greyColor : primaryColor,
+          color: primaryColor,
           border: Border.all(
             color: whiteColor,
             width: 5,
@@ -250,19 +138,10 @@ class _CompatibilityScreenState extends State<CompatibilityScreen> {
         ),
         child: Padding(
           padding: const EdgeInsets.all(fixPadding * 1.2),
-          child: _isLoading
-              ? const SizedBox(
-                  height: 24,
-                  width: 24,
-                  child: CircularProgressIndicator(
-                    color: whiteColor,
-                    strokeWidth: 2,
-                  ),
-                )
-              : Text(
-                  getTranslation(context, 'compatibility.go'),
-                  style: bold20White,
-                ),
+          child: Text(
+            getTranslation(context, 'compatibility.go'),
+            style: bold20White,
+          ),
         ),
       ),
     );
@@ -364,7 +243,7 @@ class _CompatibilityScreenState extends State<CompatibilityScreen> {
               ),
               height5Space,
               Text(
-                listname[index]['name'].toString(),
+                getTranslation(context, listname[index]['nameKey'].toString()),
                 style: regualr16White,
                 overflow: TextOverflow.ellipsis,
               )

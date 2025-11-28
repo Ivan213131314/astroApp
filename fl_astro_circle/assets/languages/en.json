@@ -69,6 +69,13 @@
         "text": "Check love and business compatibility",
         "compatibility": "Compatibility"
     },
+    "compatibility_birth_date": {
+        "title": "Birth Dates",
+        "subtitle": "Enter birth dates for more accurate compatibility calculation",
+        "person1_date": "First person's birth date",
+        "person2_date": "Second person's birth date",
+        "calculate": "CALCULATE COMPATIBILITY"
+    },
     "compatibility_detail": {
         "love": "Love",
         "business": "Business",

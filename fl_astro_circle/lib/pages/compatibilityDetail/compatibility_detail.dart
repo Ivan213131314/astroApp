@@ -67,6 +67,22 @@ class _CompatibilityDetailScreenState extends State<CompatibilityDetailScreen> {
   String get sign1Image => compatibilityData?['sign1Image'] ?? "assets/home/image-7.png";
   String get sign2 => compatibilityData?['sign2'] ?? getTranslation(context, 'compatibility_detail.aries');
   String get sign2Image => compatibilityData?['sign2Image'] ?? "assets/home/image-1.png";
+  
+  String get person1Name => compatibilityData?['person1Name'] ?? 'Person 1';
+  String get person2Name => compatibilityData?['person2Name'] ?? 'Person 2';
+  String get person1BirthDate => compatibilityData?['person1BirthDate'] ?? '';
+  String get person2BirthDate => compatibilityData?['person2BirthDate'] ?? '';
+
+  String _formatDate(String isoDate) {
+    if (isoDate.isEmpty) return 'Unknown';
+    try {
+      final date = DateTime.parse(isoDate);
+      final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      return '${date.day} ${months[date.month - 1]} ${date.year}';
+    } catch (e) {
+      return 'Unknown';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -125,6 +141,9 @@ class _CompatibilityDetailScreenState extends State<CompatibilityDetailScreen> {
           titleWidget(
               getTranslation(context, 'compatibility_detail.overall_horoscope'),
               primaryColor),
+          heightSpace,
+          // User info block
+          _buildUserInfoBlock(),
           heightSpace,
           const Text(
             "Lorem ipsum dolor sit amet consectetur. In vitae in volutpat eu lectus. Eget aliquet pharetra nunc lacus. Mauris at mattis laoreet quam. Cursus risus nisl nulla et magna maecenasid id. Enim nibh quisque tellus urna justo. Egestas id pharetrah morbi quam in eu. Mattis mattis odio velit volutpat blandit a pellentesque scelerisque vestibulum eget pulvinar. Eu sit gh ",
@@ -192,6 +211,50 @@ class _CompatibilityDetailScreenState extends State<CompatibilityDetailScreen> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildUserInfoBlock() {
+    final name1 = person1Name.isNotEmpty ? person1Name : 'Person 1';
+    final name2 = person2Name.isNotEmpty ? person2Name : 'Person 2';
+    
+    return Container(
+      padding: const EdgeInsets.all(fixPadding * 1.5),
+      decoration: BoxDecoration(
+        color: recBgColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: primaryColor.withValues(alpha: 0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Image.asset(sign1Image, height: 24, width: 24),
+              width5Space,
+              Expanded(
+                child: Text(
+                  '$name1 - $sign1 - ${_formatDate(person1BirthDate)}',
+                  style: regualr14Grey,
+                ),
+              ),
+            ],
+          ),
+          height5Space,
+          Row(
+            children: [
+              Image.asset(sign2Image, height: 24, width: 24),
+              width5Space,
+              Expanded(
+                child: Text(
+                  '$name2 - $sign2 - ${_formatDate(person2BirthDate)}',
+                  style: regualr14Grey,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 

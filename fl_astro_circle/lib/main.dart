@@ -297,10 +297,17 @@ class _MyAppState extends State<MyApp> {
           child: const CompatibilityScreen(showBackButton: true),
           type: PageTransitionType.rightToLeft,
         );
+      case '/compatibilityBirthDate':
+        return PageTransition(
+          child: const CompatibilityBirthDateScreen(),
+          type: PageTransitionType.rightToLeft,
+          settings: settings,
+        );
       case '/compatibilityDetail':
         return PageTransition(
           child: const CompatibilityDetailScreen(),
           type: PageTransitionType.rightToLeft,
+          settings: settings,
         );
       case '/plamReader':
         return PageTransition(
