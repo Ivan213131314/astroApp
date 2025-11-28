@@ -1,6 +1,6 @@
 import 'package:dotted_border/dotted_border.dart';
 import 'package:fl_astro_circle/localization/localization_const.dart';
-import 'package:fl_astro_circle/pages/compatibilityBirthDate/compatibility_loading_screen.dart';
+import 'package:fl_astro_circle/pages/compatibility/compatibilityBirthDate/compatibility_loading_screen.dart';
 import 'package:fl_astro_circle/services/notification_storage_service.dart';
 import 'package:fl_astro_circle/services/ai_chat_service.dart';
 import 'package:fl_astro_circle/theme/theme.dart';
