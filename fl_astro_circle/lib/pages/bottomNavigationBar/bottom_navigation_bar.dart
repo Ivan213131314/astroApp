@@ -8,7 +8,8 @@ import 'package:flutter/services.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 
 class BottomBar extends StatefulWidget {
-  const BottomBar({super.key});
+  final int initialIndex;
+  const BottomBar({super.key, this.initialIndex = 0});
 
   @override
   State<BottomBar> createState() => _BottomBarState();
@@ -33,7 +34,13 @@ class _BottomBarState extends State<BottomBar> {
     ProfileScreen(),
   ];
 
-  int selectedIndex = 0;
+  late int selectedIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedIndex = widget.initialIndex;
+  }
   @override
   Widget build(BuildContext context) {
     return PopScope(

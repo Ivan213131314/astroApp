@@ -228,8 +228,10 @@ class _MyAppState extends State<MyApp> {
           type: PageTransitionType.rightToLeft,
         );
       case '/bottombar':
+        final args = settings.arguments as Map<String, dynamic>?;
+        final initialIndex = args?['selectedIndex'] as int? ?? 0;
         return PageTransition(
-          child: const BottomBar(),
+          child: BottomBar(initialIndex: initialIndex),
           type: PageTransitionType.rightToLeft,
         );
       case '/home':

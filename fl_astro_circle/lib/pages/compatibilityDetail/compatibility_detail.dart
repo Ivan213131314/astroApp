@@ -3,7 +3,9 @@ import 'package:fl_astro_circle/localization/localization_const.dart';
 import 'package:fl_astro_circle/theme/theme.dart';
 import 'package:fl_astro_circle/services/ai_chat_service.dart';
 import 'package:fl_astro_circle/services/notification_storage_service.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
 class CompatibilityDetailScreen extends StatefulWidget {
@@ -142,6 +144,14 @@ class _CompatibilityDetailScreenState extends State<CompatibilityDetailScreen> {
     }
   }
 
+  final _bottomNavItems = [
+    LineAwesomeIcons.home_solid,
+    Icons.rocket_launch_rounded,
+    CupertinoIcons.heart_fill,
+    LineAwesomeIcons.bell,
+    LineAwesomeIcons.user,
+  ];
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -174,6 +184,54 @@ class _CompatibilityDetailScreenState extends State<CompatibilityDetailScreen> {
           horoscopeDetail(size),
           contentList(),
         ],
+      ),
+      bottomNavigationBar: _buildBottomNavigationBar(),
+    );
+  }
+
+  Widget _buildBottomNavigationBar() {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        vertical: fixPadding,
+        horizontal: fixPadding * 2.0,
+      ),
+      width: double.maxFinite,
+      decoration: BoxDecoration(
+        color: scaffoldBgColor,
+        boxShadow: [
+          BoxShadow(
+            color: recBgColor.withValues(alpha: 0.45),
+            blurRadius: 6,
+          )
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: List.generate(_bottomNavItems.length, (index) {
+          final isSelected = index == 2; // Compatibility
+          return InkWell(
+            onTap: () {
+              Navigator.of(context).pushNamedAndRemoveUntil(
+                '/bottombar',
+                (route) => false,
+                arguments: {'selectedIndex': index},
+              );
+            },
+            child: Container(
+              height: 45,
+              width: 45,
+              decoration: BoxDecoration(
+                color: isSelected ? primaryColor : Colors.transparent,
+                shape: BoxShape.circle,
+              ),
+              alignment: Alignment.center,
+              child: Icon(
+                _bottomNavItems[index],
+                color: whiteF4Color,
+              ),
+            ),
+          );
+        }),
       ),
     );
   }
