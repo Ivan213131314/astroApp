@@ -132,22 +132,30 @@ class _NotificationScreenState extends State<NotificationScreen> {
           return StreamBuilder<List<CompatibilityData>>(
             stream: storageService.getCompatibilityStream(),
             builder: (context, compatSnapshot) {
-              final natalCharts = natalSnapshot.data ?? [];
-              final compatibilities = compatSnapshot.data ?? [];
-              final universeMessages = messageService.responses;
-              
-              final hasAnyNotifications = natalCharts.isNotEmpty || 
-                  compatibilities.isNotEmpty || 
-                  universeMessages.isNotEmpty;
+              return StreamBuilder<List<NumerologyData>>(
+                stream: storageService.getNumerologyStream(),
+                builder: (context, numerologySnapshot) {
+                  final natalCharts = natalSnapshot.data ?? [];
+                  final compatibilities = compatSnapshot.data ?? [];
+                  final numerologies = numerologySnapshot.data ?? [];
+                  final universeMessages = messageService.responses;
+                  
+                  final hasAnyNotifications = natalCharts.isNotEmpty || 
+                      compatibilities.isNotEmpty || 
+                      numerologies.isNotEmpty ||
+                      universeMessages.isNotEmpty;
 
-              if (!hasAnyNotifications) {
-                return emptyNotificationListContent();
-              }
+                  if (!hasAnyNotifications) {
+                    return emptyNotificationListContent();
+                  }
 
-              return allNotificationsContent(
-                universeMessages: universeMessages,
-                natalCharts: natalCharts,
-                compatibilities: compatibilities,
+                  return allNotificationsContent(
+                    universeMessages: universeMessages,
+                    natalCharts: natalCharts,
+                    compatibilities: compatibilities,
+                    numerologies: numerologies,
+                  );
+                },
               );
             },
           );
@@ -160,6 +168,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
     required List<UniverseMessageData> universeMessages,
     required List<NatalChartData> natalCharts,
     required List<CompatibilityData> compatibilities,
+    required List<NumerologyData> numerologies,
   }) {
     // Объединяем все уведомления в один список с типом
     final List<_NotificationItem> allItems = [
@@ -180,6 +189,12 @@ class _NotificationScreenState extends State<NotificationScreen> {
         data: c,
         isRead: c.isRead,
         createdAt: c.createdAt,
+      )),
+      ...numerologies.map((n) => _NotificationItem(
+        type: _NotificationType.numerology,
+        data: n,
+        isRead: n.isRead,
+        createdAt: n.createdAt,
       )),
     ];
 
@@ -256,6 +271,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
         return natalChartItem(item.data as NatalChartData);
       case _NotificationType.compatibility:
         return compatibilityItem(item.data as CompatibilityData);
+      case _NotificationType.numerology:
+        return numerologyItem(item.data as NumerologyData);
     }
   }
 
@@ -773,6 +790,153 @@ class _NotificationScreenState extends State<NotificationScreen> {
     );
   }
 
+  Widget numerologyItem(NumerologyData numerology) {
+    return Dismissible(
+      key: Key(numerology.id),
+      background: Container(
+        margin: const EdgeInsets.symmetric(vertical: fixPadding),
+        color: redColor,
+      ),
+      onDismissed: (direction) {
+        storageService.deleteNumerology(numerology.id);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: whiteColor,
+            duration: Duration(milliseconds: 1500),
+            behavior: SnackBarBehavior.floating,
+            content: Text(
+              'Numerology result removed',
+              style: bold15Black03,
+            ),
+          ),
+        );
+      },
+      child: GestureDetector(
+        onTap: () {
+          storageService.markNumerologyAsRead(numerology.id);
+          // Создаем NumerologyResult из NumerologyData
+          Navigator.pushNamed(
+            context,
+            '/numerologyResult',
+            arguments: {
+              'result': _convertToNumerologyResult(numerology),
+              'docId': numerology.id,
+            },
+          );
+        },
+        child: Container(
+          margin: const EdgeInsets.symmetric(
+            horizontal: fixPadding * 2.0,
+            vertical: fixPadding,
+          ),
+          padding: const EdgeInsets.all(fixPadding * 1.5),
+          decoration: BoxDecoration(
+            color: numerology.isRead ? blueShade1 : blueShade1.withValues(alpha: 0.7),
+            borderRadius: BorderRadius.circular(10.0),
+            border: numerology.isRead
+                ? null
+                : Border.all(color: primaryColor, width: 2),
+          ),
+          child: Row(
+            children: [
+              // Показываем число судьбы
+              Container(
+                height: 60,
+                width: 60,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10.0),
+                  color: const Color(0xFF1F2449),
+                ),
+                child: Container(
+                  margin: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(6),
+                    color: primaryColor,
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    '${numerology.luckyNumber}',
+                    style: const TextStyle(
+                      color: whiteColor,
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+              widthSpace,
+              width5Space,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Expanded(
+                          child: Text(
+                            'Numerology Analysis',
+                            style: medium16WhiteF4,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (!numerology.isRead)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: redColor,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Text(
+                              'NEW',
+                              style: TextStyle(
+                                color: whiteColor,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    heightBox(3),
+                    Text(
+                      'Life Path Number ${numerology.luckyNumber} • ${numerology.birthDate}',
+                      style: regualr14Grey,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    heightBox(3),
+                    Text(
+                      numerology.getTimeAgo(),
+                      style: regualr14Grey,
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right, color: greyColor),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Конвертация NumerologyData в NumerologyResult для навигации
+  dynamic _convertToNumerologyResult(NumerologyData data) {
+    // Импортируем через dynamic чтобы избежать циклических зависимостей
+    // NumerologyResult из numorology_service.dart
+    return {
+      'luckyNumber': data.luckyNumber,
+      'birthDate': data.birthDate,
+      'traits': data.traits,
+      'aboutCharacter': data.aboutCharacter,
+      'aboutBehavior': data.aboutBehavior,
+      'aboutResponsibility': data.aboutResponsibility,
+    };
+  }
+
   String _formatDuration(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
     final minutes = twoDigits(duration.inMinutes.remainder(60));
@@ -802,7 +966,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
 }
 
 // Вспомогательные классы для сортировки уведомлений
-enum _NotificationType { universe, natal, compatibility }
+enum _NotificationType { universe, natal, compatibility, numerology }
 
 class _NotificationItem {
   final _NotificationType type;

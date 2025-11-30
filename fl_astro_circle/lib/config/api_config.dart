@@ -20,3 +20,4 @@ class ApiConfig {
   static const String appName = 'Astro Circle';
   static const String appUrl = 'https://astrocircle.app';
 }
+

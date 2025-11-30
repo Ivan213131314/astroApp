@@ -233,6 +233,96 @@ class NotificationStorageService {
     return null;
   }
 
+  // ==================== Numerology ====================
+
+  Future<String> saveNumerology({
+    required int luckyNumber,
+    required String birthDate,
+    required Map<String, double> traits,
+    required String aboutCharacter,
+    required String aboutBehavior,
+    required String aboutResponsibility,
+  }) async {
+    final docRef = await _getUserCollection('numerology').add({
+      'luckyNumber': luckyNumber,
+      'birthDate': birthDate,
+      'traits': traits,
+      'aboutCharacter': aboutCharacter,
+      'aboutBehavior': aboutBehavior,
+      'aboutResponsibility': aboutResponsibility,
+      'isRead': false,
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+    return docRef.id;
+  }
+
+  /// Поиск существующей нумерологии по дате рождения
+  Future<NumerologyData?> findExistingNumerology({
+    required String birthDate,
+  }) async {
+    if (_userId == null) return null;
+    
+    final query = await _getUserCollection('numerology')
+        .where('birthDate', isEqualTo: birthDate)
+        .limit(1)
+        .get();
+    
+    if (query.docs.isNotEmpty) {
+      return NumerologyData.fromFirestore(query.docs.first);
+    }
+    
+    return null;
+  }
+
+  Stream<List<NumerologyData>> getNumerologyStream() {
+    if (_userId == null) return Stream.value([]);
+    
+    return _getUserCollection('numerology')
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => NumerologyData.fromFirestore(doc))
+            .toList());
+  }
+
+  Future<void> markNumerologyAsRead(String docId) async {
+    await _getUserCollection('numerology').doc(docId).update({
+      'isRead': true,
+    });
+  }
+
+  Future<void> deleteNumerology(String docId) async {
+    await _getUserCollection('numerology').doc(docId).delete();
+  }
+
+  /// Обновить AI-контент для нумерологии (детальный анализ)
+  Future<void> updateNumerologyContent(
+    String docId, {
+    String? characterDetail,
+    String? behaviorDetail,
+    String? responsibilityDetail,
+  }) async {
+    final updates = <String, dynamic>{};
+    if (characterDetail != null) updates['characterDetail'] = characterDetail;
+    if (behaviorDetail != null) updates['behaviorDetail'] = behaviorDetail;
+    if (responsibilityDetail != null) updates['responsibilityDetail'] = responsibilityDetail;
+    
+    if (updates.isNotEmpty) {
+      await _getUserCollection('numerology').doc(docId).update(updates);
+    }
+  }
+
+  /// Получить данные нумерологии по ID
+  Future<NumerologyData?> getNumerologyById(String docId) async {
+    if (_userId == null) return null;
+    
+    final doc = await _getUserCollection('numerology').doc(docId).get();
+    if (doc.exists) {
+      return NumerologyData.fromFirestore(doc);
+    }
+    return null;
+  }
+
   // ==================== Get unread counts ====================
 
   Future<int> getUnreadCount() async {
@@ -254,6 +344,11 @@ class NotificationStorageService {
         .where('isRead', isEqualTo: false)
         .get();
     count += compatSnap.docs.length;
+    
+    final numerologySnap = await _getUserCollection('numerology')
+        .where('isRead', isEqualTo: false)
+        .get();
+    count += numerologySnap.docs.length;
     
     return count;
   }
@@ -488,4 +583,94 @@ class CompatibilityData {
   }
 }
 
+class NumerologyData {
+  final String id;
+  final int luckyNumber;
+  final String birthDate;
+  final Map<String, double> traits;
+  final String aboutCharacter;
+  final String aboutBehavior;
+  final String aboutResponsibility;
+  final bool isRead;
+  final DateTime createdAt;
+  
+  // AI-сгенерированный детальный контент
+  final String? characterDetail;
+  final String? behaviorDetail;
+  final String? responsibilityDetail;
+
+  NumerologyData({
+    required this.id,
+    required this.luckyNumber,
+    required this.birthDate,
+    required this.traits,
+    required this.aboutCharacter,
+    required this.aboutBehavior,
+    required this.aboutResponsibility,
+    required this.isRead,
+    required this.createdAt,
+    this.characterDetail,
+    this.behaviorDetail,
+    this.responsibilityDetail,
+  });
+
+  factory NumerologyData.fromFirestore(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
+    
+    // Парсим traits
+    final traitsMap = <String, double>{};
+    if (data['traits'] != null) {
+      final rawTraits = data['traits'] as Map<String, dynamic>;
+      rawTraits.forEach((key, value) {
+        traitsMap[key] = (value as num).toDouble();
+      });
+    }
+    
+    return NumerologyData(
+      id: doc.id,
+      luckyNumber: data['luckyNumber'] ?? 1,
+      birthDate: data['birthDate'] ?? '',
+      traits: traitsMap,
+      aboutCharacter: data['aboutCharacter'] ?? '',
+      aboutBehavior: data['aboutBehavior'] ?? '',
+      aboutResponsibility: data['aboutResponsibility'] ?? '',
+      isRead: data['isRead'] ?? false,
+      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      characterDetail: data['characterDetail'],
+      behaviorDetail: data['behaviorDetail'],
+      responsibilityDetail: data['responsibilityDetail'],
+    );
+  }
+
+  String getTimeAgo() {
+    final now = DateTime.now();
+    final difference = now.difference(createdAt);
+
+    if (difference.inMinutes < 1) {
+      return 'Just now';
+    } else if (difference.inMinutes < 60) {
+      return '${difference.inMinutes}min ago';
+    } else if (difference.inHours < 24) {
+      return '${difference.inHours}h ago';
+    } else if (difference.inDays < 7) {
+      return '${difference.inDays}d ago';
+    } else {
+      return '${(difference.inDays / 7).floor()}w ago';
+    }
+  }
+  
+  /// Проверить, есть ли детальный контент для категории
+  bool hasDetail(String category) {
+    switch (category) {
+      case 'character':
+        return characterDetail != null;
+      case 'behavior':
+        return behaviorDetail != null;
+      case 'responsibility':
+        return responsibilityDetail != null;
+      default:
+        return false;
+    }
+  }
+}
 

@@ -289,10 +289,23 @@ class _MyAppState extends State<MyApp> {
           child: const NumorologyScreen(),
           type: PageTransitionType.rightToLeft,
         );
-      case '/numorologyDetail':
+      case '/numerologyLoading':
         return PageTransition(
-          child: const NumorologyDetailScreen(),
+          child: const NumerologyLoadingWrapper(),
+          type: PageTransitionType.fade,
+          settings: settings,
+        );
+      case '/numerologyResult':
+        return PageTransition(
+          child: const NumerologyResultWrapper(),
+          type: PageTransitionType.fade,
+          settings: settings,
+        );
+      case '/numerologyDeepDetail':
+        return PageTransition(
+          child: const NumerologyDeepDetailScreen(),
           type: PageTransitionType.rightToLeft,
+          settings: settings,
         );
       case '/compatibility':
         return PageTransition(

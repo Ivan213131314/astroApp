@@ -1,10 +1,13 @@
 import 'package:fl_astro_circle/localization/localization_const.dart';
 import 'package:fl_astro_circle/theme/theme.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 import 'package:scroll_date_picker/scroll_date_picker.dart';
 
 class NumorologyScreen extends StatefulWidget {
-  const NumorologyScreen({super.key});
+  final bool showBackButton;
+  const NumorologyScreen({super.key, this.showBackButton = false});
 
   @override
   State<NumorologyScreen> createState() => _NumorologyScreenState();
@@ -12,6 +15,15 @@ class NumorologyScreen extends StatefulWidget {
 
 class _NumorologyScreenState extends State<NumorologyScreen> {
   DateTime selectedDate = DateTime.now();
+
+  final _bottomNavItems = [
+    LineAwesomeIcons.home_solid,
+    Icons.rocket_launch_rounded,
+    CupertinoIcons.heart_fill,
+    LineAwesomeIcons.bell,
+    LineAwesomeIcons.user,
+  ];
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -53,6 +65,54 @@ class _NumorologyScreenState extends State<NumorologyScreen> {
             ],
           ),
         ],
+      ),
+      bottomNavigationBar: widget.showBackButton ? _buildBottomNavigationBar() : null,
+    );
+  }
+
+  Widget _buildBottomNavigationBar() {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        vertical: fixPadding,
+        horizontal: fixPadding * 2.0,
+      ),
+      width: double.maxFinite,
+      decoration: BoxDecoration(
+        color: scaffoldBgColor,
+        boxShadow: [
+          BoxShadow(
+            color: recBgColor.withValues(alpha: 0.45),
+            blurRadius: 6,
+          )
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: List.generate(_bottomNavItems.length, (index) {
+          final isSelected = index == 3; // Notifications tab for numerology
+          return InkWell(
+            onTap: () {
+              Navigator.of(context).pushNamedAndRemoveUntil(
+                '/bottombar',
+                (route) => false,
+                arguments: {'selectedIndex': index},
+              );
+            },
+            child: Container(
+              height: 45,
+              width: 45,
+              decoration: BoxDecoration(
+                color: isSelected ? primaryColor : Colors.transparent,
+                shape: BoxShape.circle,
+              ),
+              alignment: Alignment.center,
+              child: Icon(
+                _bottomNavItems[index],
+                color: whiteF4Color,
+              ),
+            ),
+          );
+        }),
       ),
     );
   }
@@ -169,7 +229,12 @@ class _NumorologyScreenState extends State<NumorologyScreen> {
   goButton() {
     return InkWell(
       onTap: () {
-        Navigator.pushNamed(context, '/numorologyDetail');
+        // Переходим на экран загрузки с выбранной датой
+        Navigator.pushNamed(
+          context,
+          '/numerologyLoading',
+          arguments: {'birthDate': selectedDate},
+        );
       },
       child: Container(
         padding: const EdgeInsets.all(fixPadding * 1.2),
