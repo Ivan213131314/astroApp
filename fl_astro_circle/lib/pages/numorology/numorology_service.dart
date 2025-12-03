@@ -436,3 +436,4 @@ class NumerologyException implements Exception {
   String toString() => message;
 }
 
+

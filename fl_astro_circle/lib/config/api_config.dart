@@ -21,3 +21,4 @@ class ApiConfig {
   static const String appUrl = 'https://astrocircle.app';
 }
 
+

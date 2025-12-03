@@ -4,6 +4,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:scroll_date_picker/scroll_date_picker.dart';
+import 'package:google_places_flutter/google_places_flutter.dart';
+import 'package:google_places_flutter/model/prediction.dart';
 import 'dart:math';
 
 import '../../theme/theme.dart';
@@ -26,6 +28,22 @@ class _NatalChartScreenState extends State<NatalChartScreen> {
   
   final NotificationStorageService _storageService = NotificationStorageService();
   bool _isLoading = false;
+  
+  // Google Places
+  static const String googleApiKey = "AIzaSyA2SREUYbUCxDavUiFaZ1UyKf6XPI7eZ1k";
+  final FocusNode locationFocusNode = FocusNode();
+  double? latitude;
+  double? longitude;
+  
+  @override
+  void dispose() {
+    nameController.dispose();
+    dobController.dispose();
+    timeofBirthController.dispose();
+    locationController.dispose();
+    locationFocusNode.dispose();
+    super.dispose();
+  }
 
   // Генерация данных натальной карты (псевдо-расчет)
   List<Map<String, dynamic>> _generatePlanetsData() {
@@ -235,19 +253,67 @@ class _NatalChartScreenState extends State<NatalChartScreen> {
               ),
             ],
           ),
-          child: TextField(
-            style: medium15WhiteF4,
-            cursorColor: primaryColor,
-            controller: locationController,
-            keyboardType: TextInputType.name,
-            decoration: InputDecoration(
+          child: GooglePlaceAutoCompleteTextField(
+            textEditingController: locationController,
+            googleAPIKey: googleApiKey,
+            focusNode: locationFocusNode,
+            inputDecoration: InputDecoration(
               contentPadding: const EdgeInsets.symmetric(
-                  horizontal: fixPadding * 2.0, vertical: fixPadding * 1.4),
+                horizontal: fixPadding * 2.0,
+                vertical: fixPadding * 1.4,
+              ),
               border: InputBorder.none,
-              hintText:
-                  getTranslation(context, 'natal_chart.enter_birth_location'),
+              hintText: getTranslation(context, 'natal_chart.enter_birth_location'),
               hintStyle: regualr15Grey,
             ),
+            textStyle: medium15WhiteF4,
+            debounceTime: 600,
+            isLatLngRequired: true,
+            getPlaceDetailWithLatLng: (Prediction prediction) {
+              setState(() {
+                latitude = double.tryParse(prediction.lat ?? '');
+                longitude = double.tryParse(prediction.lng ?? '');
+              });
+            },
+            itemClick: (Prediction prediction) {
+              locationController.text = prediction.description ?? '';
+              locationController.selection = TextSelection.fromPosition(
+                TextPosition(offset: locationController.text.length),
+              );
+              FocusScope.of(context).unfocus();
+            },
+            seperatedBuilder: Divider(
+              color: greyColor.withValues(alpha: 0.3),
+              height: 1,
+            ),
+            containerHorizontalPadding: 0,
+            containerVerticalPadding: 0,
+            itemBuilder: (context, index, Prediction prediction) {
+              return Container(
+                color: recBgColor,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: fixPadding * 2.0,
+                  vertical: fixPadding * 1.2,
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.location_on,
+                      color: primaryColor,
+                      size: 20,
+                    ),
+                    const SizedBox(width: fixPadding),
+                    Expanded(
+                      child: Text(
+                        prediction.description ?? '',
+                        style: medium15WhiteF4,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+            isCrossBtnShown: true,
           ),
         )
       ],
