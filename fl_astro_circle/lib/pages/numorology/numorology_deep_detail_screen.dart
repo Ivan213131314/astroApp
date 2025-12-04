@@ -2,9 +2,7 @@ import 'dart:math';
 import 'package:fl_astro_circle/localization/localization_const.dart';
 import 'package:fl_astro_circle/theme/theme.dart';
 import 'package:fl_astro_circle/services/notification_storage_service.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 import 'numorology_service.dart';
 
 class NumerologyDeepDetailScreen extends StatefulWidget {
@@ -278,14 +276,6 @@ The greater good you serve through your life path benefits not only yourself but
     }
   }
 
-  final _bottomNavItems = [
-    LineAwesomeIcons.home_solid,
-    Icons.rocket_launch_rounded,
-    CupertinoIcons.heart_fill,
-    LineAwesomeIcons.bell,
-    LineAwesomeIcons.user,
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -297,54 +287,6 @@ The greater good you serve through your life path benefits not only yourself but
             child: _buildContent(),
           ),
         ],
-      ),
-      bottomNavigationBar: _buildBottomNavigationBar(),
-    );
-  }
-
-  Widget _buildBottomNavigationBar() {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        vertical: fixPadding,
-        horizontal: fixPadding * 2.0,
-      ),
-      width: double.maxFinite,
-      decoration: BoxDecoration(
-        color: scaffoldBgColor,
-        boxShadow: [
-          BoxShadow(
-            color: recBgColor.withValues(alpha: 0.45),
-            blurRadius: 6,
-          )
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: List.generate(_bottomNavItems.length, (index) {
-          final isSelected = index == 3; // Notifications
-          return InkWell(
-            onTap: () {
-              Navigator.of(context).pushNamedAndRemoveUntil(
-                '/bottombar',
-                (route) => false,
-                arguments: {'selectedIndex': index},
-              );
-            },
-            child: Container(
-              height: 45,
-              width: 45,
-              decoration: BoxDecoration(
-                color: isSelected ? primaryColor : Colors.transparent,
-                shape: BoxShape.circle,
-              ),
-              alignment: Alignment.center,
-              child: Icon(
-                _bottomNavItems[index],
-                color: whiteF4Color,
-              ),
-            ),
-          );
-        }),
       ),
     );
   }

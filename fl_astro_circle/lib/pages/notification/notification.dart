@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:fl_astro_circle/localization/localization_const.dart';
 import 'package:fl_astro_circle/services/universe_message_service.dart';
 import 'package:fl_astro_circle/services/notification_storage_service.dart';
@@ -532,11 +533,19 @@ class _NotificationScreenState extends State<NotificationScreen> {
             context,
             '/natalchartDetail',
             arguments: {
+              'docId': chart.id,
               'name': chart.name,
               'dateOfBirth': chart.dateOfBirth,
               'timeOfBirth': chart.timeOfBirth,
               'location': chart.location,
               'planetsData': chart.planetsData,
+              'sunSign': chart.sunSign,
+              'moonSign': chart.moonSign,
+              'risingSign': chart.risingSign,
+              'sunTeaser': chart.sunTeaser,
+              'moonTeaser': chart.moonTeaser,
+              'risingTeaser': chart.risingTeaser,
+              'fromNotifications': true,
             },
           );
         },
@@ -562,10 +571,11 @@ class _NotificationScreenState extends State<NotificationScreen> {
                   borderRadius: BorderRadius.circular(10.0),
                   color: const Color(0xFF1F2449),
                 ),
-                child: const Icon(
-                  Icons.auto_awesome,
-                  color: primaryColor,
-                  size: 30,
+                child: Center(
+                  child: CustomPaint(
+                    size: const Size(36, 36),
+                    painter: _NatalChartIconPainter(),
+                  ),
                 ),
               ),
               widthSpace,
@@ -604,13 +614,15 @@ class _NotificationScreenState extends State<NotificationScreen> {
                           ),
                       ],
                     ),
-                    heightBox(3),
-                    Text(
-                      '${chart.location} • ${chart.timeOfBirth}',
-                      style: regualr14Grey,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                    if (chart.sunSign != null) ...[
+                      heightBox(3),
+                      Text(
+                        '☉ ${chart.sunSign}${chart.moonSign != null ? ' • ☽ ${chart.moonSign}' : ''}',
+                        style: regualr14Grey,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                     heightBox(3),
                     Text(
                       chart.getTimeAgo(),
@@ -841,7 +853,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
           ),
           child: Row(
             children: [
-              // Показываем число судьбы
+              // Показываем число судьбы с космической иконкой
               Container(
                 height: 60,
                 width: 60,
@@ -849,20 +861,10 @@ class _NotificationScreenState extends State<NotificationScreen> {
                   borderRadius: BorderRadius.circular(10.0),
                   color: const Color(0xFF1F2449),
                 ),
-                child: Container(
-                  margin: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(6),
-                    color: primaryColor,
-                  ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    '${numerology.luckyNumber}',
-                    style: const TextStyle(
-                      color: whiteColor,
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                    ),
+                child: Center(
+                  child: CustomPaint(
+                    size: const Size(50, 50),
+                    painter: _NumerologyIconPainter(luckyNumber: numerology.luckyNumber),
                   ),
                 ),
               ),
@@ -967,6 +969,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
   }
 }
 
+
 // Вспомогательные классы для сортировки уведомлений
 enum _NotificationType { universe, natal, compatibility, numerology }
 
@@ -982,4 +985,144 @@ class _NotificationItem {
     required this.isRead,
     required this.createdAt,
   });
+}
+
+/// Custom painter для иконки натальной карты
+class _NatalChartIconPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.width / 2;
+    
+    final paint = Paint()
+      ..color = primaryColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5;
+    
+    // Внешний круг
+    canvas.drawCircle(center, radius - 1, paint);
+    
+    // Внутренний круг
+    canvas.drawCircle(center, radius * 0.7, paint..strokeWidth = 1);
+    
+    // 12 делений (знаки зодиака)
+    for (int i = 0; i < 12; i++) {
+      final angle = (i * 30) * pi / 180;
+      final outerPoint = Offset(
+        center.dx + (radius - 1) * cos(angle),
+        center.dy + (radius - 1) * sin(angle),
+      );
+      final innerPoint = Offset(
+        center.dx + radius * 0.7 * cos(angle),
+        center.dy + radius * 0.7 * sin(angle),
+      );
+      canvas.drawLine(outerPoint, innerPoint, paint..strokeWidth = 0.8);
+    }
+    
+    // Центральная точка
+    canvas.drawCircle(center, 2, paint..style = PaintingStyle.fill);
+    
+    // Геометрические линии (аспекты)
+    paint.style = PaintingStyle.stroke;
+    paint.strokeWidth = 0.5;
+    paint.color = primaryColor.withValues(alpha: 0.6);
+    
+    // Треугольник
+    final triangleRadius = radius * 0.5;
+    for (int i = 0; i < 3; i++) {
+      final angle1 = (i * 120 - 90) * pi / 180;
+      final angle2 = ((i + 1) * 120 - 90) * pi / 180;
+      final p1 = Offset(
+        center.dx + triangleRadius * cos(angle1),
+        center.dy + triangleRadius * sin(angle1),
+      );
+      final p2 = Offset(
+        center.dx + triangleRadius * cos(angle2),
+        center.dy + triangleRadius * sin(angle2),
+      );
+      canvas.drawLine(p1, p2, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+/// Custom painter для иконки нумерологии
+class _NumerologyIconPainter extends CustomPainter {
+  final int luckyNumber;
+  
+  _NumerologyIconPainter({required this.luckyNumber});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.width / 2;
+    
+    final paint = Paint()
+      ..color = primaryColor.withValues(alpha: 0.3)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1;
+    
+    // Внешнее свечение/орбита
+    canvas.drawCircle(center, radius - 2, paint);
+    
+    // Второе кольцо
+    paint.color = primaryColor.withValues(alpha: 0.5);
+    canvas.drawCircle(center, radius * 0.75, paint);
+    
+    // Звёздочки по кругу (9 точек для чисел 1-9)
+    paint.style = PaintingStyle.fill;
+    paint.color = primaryColor.withValues(alpha: 0.6);
+    for (int i = 0; i < 9; i++) {
+      final angle = (i * 40 - 90) * pi / 180;
+      final starPos = Offset(
+        center.dx + (radius - 5) * cos(angle),
+        center.dy + (radius - 5) * sin(angle),
+      );
+      // Подсветить звезду для активного числа
+      if (i + 1 == luckyNumber) {
+        paint.color = primaryColor;
+        canvas.drawCircle(starPos, 3, paint);
+      } else {
+        paint.color = primaryColor.withValues(alpha: 0.4);
+        canvas.drawCircle(starPos, 1.5, paint);
+      }
+    }
+    
+    // Центральный круг с градиентом
+    final centerPaint = Paint()
+      ..shader = RadialGradient(
+        colors: [
+          primaryColor.withValues(alpha: 0.8),
+          primaryColor.withValues(alpha: 0.4),
+        ],
+      ).createShader(Rect.fromCircle(center: center, radius: radius * 0.45));
+    canvas.drawCircle(center, radius * 0.45, centerPaint);
+    
+    // Рисуем число в центре
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: '$luckyNumber',
+        style: const TextStyle(
+          color: whiteColor,
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+    textPainter.layout();
+    textPainter.paint(
+      canvas,
+      Offset(
+        center.dx - textPainter.width / 2,
+        center.dy - textPainter.height / 2,
+      ),
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _NumerologyIconPainter oldDelegate) => 
+      oldDelegate.luckyNumber != luckyNumber;
 }

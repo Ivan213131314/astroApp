@@ -2,9 +2,7 @@ import 'package:fl_astro_circle/localization/localization_const.dart';
 import 'package:fl_astro_circle/theme/theme.dart';
 import 'package:fl_astro_circle/services/notification_storage_service.dart';
 import 'package:fl_astro_circle/pages/natalChart/natal_chart_ai_service.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 
 class NatalChartDetailScreen extends StatefulWidget {
   const NatalChartDetailScreen({super.key});
@@ -30,9 +28,6 @@ class _NatalChartDetailScreenState extends State<NatalChartDetailScreen> {
   // ID документа
   String? _docId;
   
-  // Флаг перехода с экрана уведомлений
-  bool _fromNotifications = false;
-  
   bool _initialized = false;
 
   @override
@@ -51,7 +46,6 @@ class _NatalChartDetailScreenState extends State<NatalChartDetailScreen> {
       
       chartData = args;
       _docId = args['docId'];
-      _fromNotifications = args['fromNotifications'] == true;
       
       // Читаем данные из arguments
       _sunSign = args['sunSign'];
@@ -62,7 +56,8 @@ class _NatalChartDetailScreenState extends State<NatalChartDetailScreen> {
       _risingTeaser = args['risingTeaser'];
       
       debugPrint('After assignment - _sunSign: $_sunSign');
-      debugPrint('After assignment - _sunTeaser: ${_sunTeaser?.substring(0, 50)}...');
+      final teaserPreview = _sunTeaser != null && _sunTeaser!.length > 50 ? _sunTeaser!.substring(0, 50) : (_sunTeaser ?? '');
+      debugPrint('After assignment - _sunTeaser: $teaserPreview...');
       
       // Если тизеры не переданы через args, но есть docId - загружаем из хранилища
       if (_sunTeaser == null && _docId != null) {
@@ -120,14 +115,6 @@ class _NatalChartDetailScreenState extends State<NatalChartDetailScreen> {
     return '${date.day} ${months[date.month - 1]} ${date.year}';
   }
 
-  final _bottomNavItems = [
-    LineAwesomeIcons.home_solid,
-    Icons.rocket_launch_rounded,
-    CupertinoIcons.heart_fill,
-    LineAwesomeIcons.bell,
-    LineAwesomeIcons.user,
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -158,53 +145,6 @@ class _NatalChartDetailScreenState extends State<NatalChartDetailScreen> {
           _buildHeader(),
           _buildContent(),
         ],
-      ),
-      bottomNavigationBar: _fromNotifications ? null : _buildBottomNavigationBar(),
-    );
-  }
-
-  Widget _buildBottomNavigationBar() {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        vertical: fixPadding,
-        horizontal: fixPadding * 2.0,
-      ),
-      width: double.maxFinite,
-      decoration: BoxDecoration(
-        color: scaffoldBgColor,
-        boxShadow: [
-          BoxShadow(
-            color: recBgColor.withValues(alpha: 0.45),
-            blurRadius: 6,
-          )
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: List.generate(_bottomNavItems.length, (index) {
-          return InkWell(
-            onTap: () {
-              Navigator.of(context).pushNamedAndRemoveUntil(
-                '/bottombar',
-                (route) => false,
-                arguments: {'selectedIndex': index},
-              );
-            },
-            child: Container(
-              height: 45,
-              width: 45,
-              decoration: BoxDecoration(
-                color: Colors.transparent,
-                shape: BoxShape.circle,
-              ),
-              alignment: Alignment.center,
-              child: Icon(
-                _bottomNavItems[index],
-                color: whiteF4Color,
-              ),
-            ),
-          );
-        }),
       ),
     );
   }

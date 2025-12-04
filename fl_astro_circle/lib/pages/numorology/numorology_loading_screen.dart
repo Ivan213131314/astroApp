@@ -233,7 +233,6 @@ class NumerologyResultWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
     final docId = args?['docId'] as String?;
-    final fromNotifications = args?['fromNotifications'] == true;
     
     // Пробуем получить result как NumerologyResult или как Map
     NumerologyResult? result;
@@ -266,7 +265,6 @@ class NumerologyResultWrapper extends StatelessWidget {
     return NumerologyResultScreen(
       result: result,
       docId: docId,
-      fromNotifications: fromNotifications,
     );
   }
 }

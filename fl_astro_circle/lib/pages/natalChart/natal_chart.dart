@@ -844,82 +844,125 @@ class _NatalChartLoadingWrapperState extends State<_NatalChartLoadingWrapper> {
   }
 
   Future<Map<String, dynamic>> _calculateNatalChart() async {
-    // 1. Сначала проверяем локальный кэш
-    final cached = await _loadFromCache();
-    if (cached != null && cached['sunTeaser'] != null) {
-      _result = cached;
-      await Future.delayed(const Duration(milliseconds: 800));
-      return cached;
-    }
-
-    // 2. Вычисляем знаки зодиака
-    final sunSign = _calculateSunSign(widget.dateOfBirth);
-    final moonSign = _calculateMoonSign(widget.dateOfBirth);
-    final risingSign = _calculateRisingSign(widget.dateOfBirth, widget.timeOfBirth);
-
-    // 3. Генерируем AI тизеры параллельно
-    final language = _language ?? 'English';
-    final birthDateFormatted = _formatBirthDate(widget.dateOfBirth);
-    
-    NatalChartTeasers? teasers;
     try {
-      teasers = await _aiService.generateAllTeasers(
-        sunSign: sunSign,
-        moonSign: moonSign,
-        risingSign: risingSign,
-        language: language,
-        name: widget.name,
-        birthDate: birthDateFormatted,
-        birthTime: widget.timeOfBirth,
-        location: widget.location,
-      );
-    } catch (e) {
-      debugPrint('Error generating AI teasers: $e');
-      // Fallback teasers if AI fails
-      teasers = NatalChartTeasers(
-        sunTeaser: 'Your Sun in $sunSign reveals the core of who you are - your vital essence and life purpose. There are hidden depths to your solar identity waiting to be discovered...',
-        moonTeaser: 'With Moon in $moonSign, your emotional landscape holds mysteries even you may not fully understand. Your inner world pulses with lunar wisdom...',
-        risingTeaser: 'Your Rising Sign in $risingSign shapes how the world first sees you, yet there is so much more beneath this celestial mask...',
-      );
+      debugPrint('=== _calculateNatalChart: Starting ===');
+      
+      // 1. Сначала проверяем локальный кэш
+      final cached = await _loadFromCache();
+      if (cached != null && cached['sunTeaser'] != null) {
+        debugPrint('=== _calculateNatalChart: Found in cache ===');
+        _result = cached;
+        await Future.delayed(const Duration(milliseconds: 800));
+        return cached;
+      }
+
+      // 2. Вычисляем знаки зодиака
+      final sunSign = _calculateSunSign(widget.dateOfBirth);
+      final moonSign = _calculateMoonSign(widget.dateOfBirth);
+      final risingSign = _calculateRisingSign(widget.dateOfBirth, widget.timeOfBirth);
+      
+      debugPrint('=== Signs calculated: Sun=$sunSign, Moon=$moonSign, Rising=$risingSign ===');
+
+      // 3. Генерируем AI тизеры параллельно
+      final language = _language ?? 'English';
+      final birthDateFormatted = _formatBirthDate(widget.dateOfBirth);
+      
+      NatalChartTeasers? teasers;
+      try {
+        debugPrint('=== Generating AI teasers... ===');
+        teasers = await _aiService.generateAllTeasers(
+          sunSign: sunSign,
+          moonSign: moonSign,
+          risingSign: risingSign,
+          language: language,
+          name: widget.name,
+          birthDate: birthDateFormatted,
+          birthTime: widget.timeOfBirth,
+          location: widget.location,
+        );
+        debugPrint('=== AI teasers generated successfully ===');
+      } catch (e) {
+        debugPrint('Error generating AI teasers: $e');
+        // Fallback teasers if AI fails
+        teasers = NatalChartTeasers(
+          sunTeaser: 'Your Sun in $sunSign reveals the core of who you are - your vital essence and life purpose. There are hidden depths to your solar identity waiting to be discovered...',
+          moonTeaser: 'With Moon in $moonSign, your emotional landscape holds mysteries even you may not fully understand. Your inner world pulses with lunar wisdom...',
+          risingTeaser: 'Your Rising Sign in $risingSign shapes how the world first sees you, yet there is so much more beneath this celestial mask...',
+        );
+      }
+
+      // 4. Формируем результат
+      _result = {
+        'name': widget.name,
+        'dateOfBirth': widget.dateOfBirth,
+        'timeOfBirth': widget.timeOfBirth ?? '',
+        'location': widget.location ?? '',
+        'sunSign': sunSign,
+        'moonSign': moonSign,
+        'risingSign': risingSign,
+        'sunTeaser': teasers.sunTeaser,
+        'moonTeaser': teasers.moonTeaser,
+        'risingTeaser': teasers.risingTeaser,
+      };
+      
+      debugPrint('=== _calculateNatalChart: Result created ===');
+      debugPrint('Name: ${widget.name}');
+      debugPrint('Sun: $sunSign, Moon: $moonSign, Rising: $risingSign');
+      debugPrint('SunTeaser length: ${teasers.sunTeaser.length}');
+
+      // 5. Сохраняем в локальный кэш (не блокирующий)
+      try {
+        await _saveToCache(_result!);
+      } catch (e) {
+        debugPrint('Error saving to cache: $e');
+      }
+
+      // 6. Сохраняем в Firebase и получаем docId (не блокирующий)
+      try {
+        final docId = await _saveToFirebase(
+          sunSign: sunSign,
+          moonSign: moonSign,
+          risingSign: risingSign,
+          sunTeaser: teasers.sunTeaser,
+          moonTeaser: teasers.moonTeaser,
+          risingTeaser: teasers.risingTeaser,
+        );
+        
+        if (docId != null) {
+          _result!['docId'] = docId;
+        }
+      } catch (e) {
+        debugPrint('Error saving to Firebase: $e');
+      }
+
+      debugPrint('=== _calculateNatalChart: Completed successfully ===');
+      return _result!;
+    } catch (e, stackTrace) {
+      debugPrint('=== _calculateNatalChart: CRITICAL ERROR ===');
+      debugPrint('Error: $e');
+      debugPrint('StackTrace: $stackTrace');
+      
+      // Создаём минимальный fallback результат, чтобы экран детализации все равно открылся
+      final sunSign = _calculateSunSign(widget.dateOfBirth);
+      final moonSign = _calculateMoonSign(widget.dateOfBirth);
+      final risingSign = _calculateRisingSign(widget.dateOfBirth, widget.timeOfBirth);
+      
+      _result = {
+        'name': widget.name,
+        'dateOfBirth': widget.dateOfBirth,
+        'timeOfBirth': widget.timeOfBirth ?? '',
+        'location': widget.location ?? '',
+        'sunSign': sunSign,
+        'moonSign': moonSign,
+        'risingSign': risingSign,
+        'sunTeaser': 'Your Sun in $sunSign reveals the core of who you are.',
+        'moonTeaser': 'Your Moon in $moonSign shapes your emotional world.',
+        'risingTeaser': 'Your Rising Sign in $risingSign is how the world sees you.',
+      };
+      
+      debugPrint('=== Fallback result created ===');
+      return _result!;
     }
-
-    // 4. Формируем результат
-    _result = {
-      'name': widget.name,
-      'dateOfBirth': widget.dateOfBirth,
-      'timeOfBirth': widget.timeOfBirth ?? '',
-      'location': widget.location ?? '',
-      'sunSign': sunSign,
-      'moonSign': moonSign,
-      'risingSign': risingSign,
-      'sunTeaser': teasers.sunTeaser,
-      'moonTeaser': teasers.moonTeaser,
-      'risingTeaser': teasers.risingTeaser,
-    };
-    
-    debugPrint('=== _calculateNatalChart: Result created ===');
-    debugPrint('Name: ${widget.name}');
-    debugPrint('Sun: $sunSign, Moon: $moonSign, Rising: $risingSign');
-    debugPrint('SunTeaser length: ${teasers.sunTeaser.length}');
-
-    // 5. Сохраняем в локальный кэш
-    await _saveToCache(_result!);
-
-    // 6. Сохраняем в Firebase и получаем docId
-    final docId = await _saveToFirebase(
-      sunSign: sunSign,
-      moonSign: moonSign,
-      risingSign: risingSign,
-      sunTeaser: teasers.sunTeaser,
-      moonTeaser: teasers.moonTeaser,
-      risingTeaser: teasers.risingTeaser,
-    );
-    
-    if (docId != null) {
-      _result!['docId'] = docId;
-    }
-
-    return _result!;
   }
 
   void _onLoadingComplete() {
@@ -928,7 +971,8 @@ class _NatalChartLoadingWrapperState extends State<_NatalChartLoadingWrapper> {
     if (_result != null) {
       debugPrint('_result keys: ${_result!.keys.toList()}');
       debugPrint('sunSign: ${_result!['sunSign']}');
-      debugPrint('sunTeaser: ${_result!['sunTeaser']?.toString().substring(0, 50)}...');
+      final sunTeaser = _result!['sunTeaser']?.toString() ?? '';
+      debugPrint('sunTeaser: ${sunTeaser.length > 50 ? sunTeaser.substring(0, 50) : sunTeaser}...');
     }
     
     if (_result != null && mounted) {

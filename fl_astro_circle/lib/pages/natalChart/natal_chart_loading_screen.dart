@@ -269,14 +269,15 @@ class _NatalChartLoadingScreenState extends State<NatalChartLoadingScreen>
             alignment: Alignment.center,
             children: [
               // Stars background
-              ..._sparkles.map((sparkle) => Positioned(
-                    left: 160 + sparkle.x,
-                    top: 160 + sparkle.y,
+              ..._sparkles.asMap().entries.map((entry) => Positioned(
+                    key: ValueKey('sparkle_${entry.key}_${entry.value.x.toStringAsFixed(2)}_${entry.value.y.toStringAsFixed(2)}'),
+                    left: 160 + entry.value.x,
+                    top: 160 + entry.value.y,
                     child: Opacity(
-                      opacity: sparkle.opacity.clamp(0.0, 1.0),
+                      opacity: entry.value.opacity.clamp(0.0, 1.0),
                       child: Container(
-                        width: sparkle.size,
-                        height: sparkle.size,
+                        width: entry.value.size,
+                        height: entry.value.size,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: Colors.white,
@@ -313,9 +314,11 @@ class _NatalChartLoadingScreenState extends State<NatalChartLoadingScreen>
               ),
 
               // Planets
-              ..._planets.map((planet) {
+              ..._planets.asMap().entries.map((entry) {
+                final planet = entry.value;
                 final angle = _planetRotation.value * planet.speed + planet.startAngle;
                 return Transform.translate(
+                  key: ValueKey('planet_${entry.key}'),
                   offset: Offset(
                     planet.orbitRadius * cos(angle),
                     planet.orbitRadius * sin(angle),
@@ -325,9 +328,11 @@ class _NatalChartLoadingScreenState extends State<NatalChartLoadingScreen>
               }),
 
               // Satellites
-              ..._satellites.map((satellite) {
+              ..._satellites.asMap().entries.map((entry) {
+                final satellite = entry.value;
                 final angle = _satelliteRotation.value * satellite.speed + satellite.startAngle;
                 return Transform.translate(
+                  key: ValueKey('satellite_${entry.key}'),
                   offset: Offset(
                     satellite.orbitRadius * cos(angle),
                     satellite.orbitRadius * sin(angle) * 0.7,
