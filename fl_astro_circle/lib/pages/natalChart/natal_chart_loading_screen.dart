@@ -116,21 +116,21 @@ class _NatalChartLoadingScreenState extends State<NatalChartLoadingScreen>
 
   void _initSatellites() {
     _satellites.addAll([
-      _Satellite(orbitRadius: 95, speed: 1.2, startAngle: 0),
-      _Satellite(orbitRadius: 125, speed: 0.8, startAngle: pi * 0.5),
-      _Satellite(orbitRadius: 155, speed: 0.5, startAngle: pi),
+      _Satellite(orbitRadius: 80, speed: 1.2, startAngle: 0),
+      _Satellite(orbitRadius: 105, speed: 0.8, startAngle: pi * 0.5),
+      _Satellite(orbitRadius: 130, speed: 0.5, startAngle: pi),
     ]);
   }
 
   void _initPlanets() {
     // Создаём планеты на разных орбитах
     _planets.addAll([
-      _Planet(orbitRadius: 70, speed: 0.3, startAngle: 0, color: Colors.orange, size: 8, name: '☉'), // Sun
-      _Planet(orbitRadius: 85, speed: 0.5, startAngle: pi * 0.3, color: Colors.grey, size: 5, name: '☿'), // Mercury
-      _Planet(orbitRadius: 100, speed: 0.4, startAngle: pi * 0.7, color: Colors.pink[200]!, size: 6, name: '♀'), // Venus
-      _Planet(orbitRadius: 115, speed: 0.35, startAngle: pi * 1.2, color: Colors.red, size: 6, name: '♂'), // Mars
-      _Planet(orbitRadius: 135, speed: 0.2, startAngle: pi * 1.5, color: Colors.amber, size: 10, name: '♃'), // Jupiter
-      _Planet(orbitRadius: 155, speed: 0.15, startAngle: pi * 1.8, color: Colors.yellow[700]!, size: 9, name: '♄'), // Saturn
+      _Planet(orbitRadius: 55, speed: 0.3, startAngle: 0, color: Colors.orange, size: 7, name: '☉'), // Sun
+      _Planet(orbitRadius: 68, speed: 0.5, startAngle: pi * 0.3, color: Colors.grey, size: 4, name: '☿'), // Mercury
+      _Planet(orbitRadius: 82, speed: 0.4, startAngle: pi * 0.7, color: Colors.pink[200]!, size: 5, name: '♀'), // Venus
+      _Planet(orbitRadius: 95, speed: 0.35, startAngle: pi * 1.2, color: Colors.red, size: 5, name: '♂'), // Mars
+      _Planet(orbitRadius: 110, speed: 0.2, startAngle: pi * 1.5, color: Colors.amber, size: 8, name: '♃'), // Jupiter
+      _Planet(orbitRadius: 125, speed: 0.15, startAngle: pi * 1.8, color: Colors.yellow[700]!, size: 7, name: '♄'), // Saturn
     ]);
   }
 
@@ -223,21 +223,30 @@ class _NatalChartLoadingScreenState extends State<NatalChartLoadingScreen>
           ),
         ),
         child: SafeArea(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Spacer(flex: 2),
-              _buildAnimatedChart(),
-              const Spacer(),
-              _buildStaticText(),
-              heightSpace,
-              heightSpace,
-              _buildProgressBar(),
-              heightSpace,
-              heightSpace,
-              _buildDynamicText(),
-              const Spacer(flex: 2),
-            ],
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(height: constraints.maxHeight * 0.08),
+                      _buildAnimatedChart(),
+                      SizedBox(height: constraints.maxHeight * 0.05),
+                      _buildStaticText(),
+                      heightSpace,
+                      heightSpace,
+                      _buildProgressBar(),
+                      heightSpace,
+                      heightSpace,
+                      _buildDynamicText(),
+                      SizedBox(height: constraints.maxHeight * 0.08),
+                    ],
+                  ),
+                ),
+              );
+            },
           ),
         ),
       ),
@@ -246,8 +255,8 @@ class _NatalChartLoadingScreenState extends State<NatalChartLoadingScreen>
 
   Widget _buildAnimatedChart() {
     return SizedBox(
-      height: 380,
-      width: 380,
+      height: 320,
+      width: 320,
       child: AnimatedBuilder(
         animation: Listenable.merge([
           _rotationController,
@@ -261,8 +270,8 @@ class _NatalChartLoadingScreenState extends State<NatalChartLoadingScreen>
             children: [
               // Stars background
               ..._sparkles.map((sparkle) => Positioned(
-                    left: 190 + sparkle.x,
-                    top: 190 + sparkle.y,
+                    left: 160 + sparkle.x,
+                    top: 160 + sparkle.y,
                     child: Opacity(
                       opacity: sparkle.opacity.clamp(0.0, 1.0),
                       child: Container(
@@ -287,7 +296,7 @@ class _NatalChartLoadingScreenState extends State<NatalChartLoadingScreen>
               Transform.rotate(
                 angle: _rotation.value * 0.1,
                 child: CustomPaint(
-                  size: const Size(360, 360),
+                  size: const Size(300, 300),
                   painter: _ZodiacWheelPainter(
                     progress: _displayProgress,
                   ),
@@ -296,7 +305,7 @@ class _NatalChartLoadingScreenState extends State<NatalChartLoadingScreen>
 
               // Orbital paths
               CustomPaint(
-                size: const Size(380, 380),
+                size: const Size(320, 320),
                 painter: _OrbitPainter(
                   progress: _displayProgress,
                   color: primaryColor.withValues(alpha: 0.2),
@@ -330,7 +339,7 @@ class _NatalChartLoadingScreenState extends State<NatalChartLoadingScreen>
               // Signal waves
               if (_displayProgress > 0.2)
                 CustomPaint(
-                  size: const Size(380, 380),
+                  size: const Size(320, 320),
                   painter: _SignalWavePainter(
                     progress: _displayProgress,
                     rotation: _satelliteRotation.value,
@@ -661,7 +670,7 @@ class _OrbitPainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height / 2);
 
     // Planet orbits
-    final orbits = [70.0, 85.0, 100.0, 115.0, 135.0, 155.0];
+    final orbits = [55.0, 68.0, 82.0, 95.0, 110.0, 125.0];
     for (final radius in orbits) {
       canvas.drawCircle(center, radius, paint..strokeWidth = 0.5);
     }
@@ -688,7 +697,7 @@ class _SignalWavePainter extends CustomPainter {
 
     // Draw signal beams from satellites to center
     for (int i = 0; i < 3; i++) {
-      final satelliteRadius = [95.0, 125.0, 155.0][i];
+      final satelliteRadius = [80.0, 105.0, 130.0][i];
       final speed = [1.2, 0.8, 0.5][i];
       final startAngle = [0.0, pi * 0.5, pi][i];
       final angle = rotation * speed + startAngle;
@@ -728,3 +737,4 @@ class _SignalWavePainter extends CustomPainter {
     return oldDelegate.rotation != rotation || oldDelegate.progress != progress;
   }
 }
+

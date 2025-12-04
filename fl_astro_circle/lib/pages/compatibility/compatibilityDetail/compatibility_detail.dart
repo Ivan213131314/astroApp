@@ -28,6 +28,9 @@ class _CompatibilityDetailScreenState extends State<CompatibilityDetailScreen> {
   // ID документа
   String? _docId;
   
+  // Флаг перехода с экрана уведомлений
+  bool _fromNotifications = false;
+  
   bool _initialized = false;
 
   @override
@@ -39,6 +42,7 @@ class _CompatibilityDetailScreenState extends State<CompatibilityDetailScreen> {
     if (args != null && args is Map<String, dynamic>) {
       compatibilityData = args;
       _docId = args['docId'];
+      _fromNotifications = args['fromNotifications'] == true;
       
       // Читаем тизеры из arguments
       _loveTeaser = args['loveTeaser'];
@@ -185,7 +189,7 @@ class _CompatibilityDetailScreenState extends State<CompatibilityDetailScreen> {
           contentList(),
         ],
       ),
-      bottomNavigationBar: _buildBottomNavigationBar(),
+      bottomNavigationBar: _fromNotifications ? null : _buildBottomNavigationBar(),
     );
   }
 

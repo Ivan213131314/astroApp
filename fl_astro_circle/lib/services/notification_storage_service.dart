@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:rxdart/rxdart.dart';
 
 class NotificationStorageService {
   static final NotificationStorageService _instance = NotificationStorageService._internal();
@@ -351,6 +352,43 @@ class NotificationStorageService {
     count += numerologySnap.docs.length;
     
     return count;
+  }
+
+  /// Stream для получения количества непрочитанных уведомлений в реальном времени
+  Stream<int> getUnreadCountStream() {
+    if (_userId == null) return Stream.value(0);
+
+    // Слушаем все 4 коллекции
+    final universeStream = _getUserCollection('universe_messages')
+        .where('isRead', isEqualTo: false)
+        .snapshots()
+        .map((snap) => snap.docs.length);
+
+    final natalStream = _getUserCollection('natal_charts')
+        .where('isRead', isEqualTo: false)
+        .snapshots()
+        .map((snap) => snap.docs.length);
+
+    final compatStream = _getUserCollection('compatibility')
+        .where('isRead', isEqualTo: false)
+        .snapshots()
+        .map((snap) => snap.docs.length);
+
+    final numerologyStream = _getUserCollection('numerology')
+        .where('isRead', isEqualTo: false)
+        .snapshots()
+        .map((snap) => snap.docs.length);
+
+    // Комбинируем все 4 стрима - при изменении любого пересчитывается сумма
+    return Rx.combineLatest4(
+      universeStream,
+      natalStream,
+      compatStream,
+      numerologyStream,
+      (int universe, int natal, int compat, int numerology) {
+        return universe + natal + compat + numerology;
+      },
+    );
   }
 }
 

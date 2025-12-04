@@ -10,11 +10,13 @@ import 'numorology_service.dart';
 class NumerologyResultScreen extends StatefulWidget {
   final NumerologyResult result;
   final String? docId;
+  final bool fromNotifications;
 
   const NumerologyResultScreen({
     super.key,
     required this.result,
     this.docId,
+    this.fromNotifications = false,
   });
 
   @override
@@ -138,7 +140,7 @@ class _NumerologyResultScreenState extends State<NumerologyResultScreen> {
           )
         ],
       ),
-      bottomNavigationBar: _buildBottomNavigationBar(),
+      bottomNavigationBar: widget.fromNotifications ? null : _buildBottomNavigationBar(),
     );
   }
 
@@ -453,5 +455,6 @@ class _NumerologyResultScreenState extends State<NumerologyResultScreen> {
     );
   }
 }
+
 
 

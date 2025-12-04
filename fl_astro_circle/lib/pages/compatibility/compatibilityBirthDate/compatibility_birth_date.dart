@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:math';
+
 import 'package:dotted_border/dotted_border.dart';
 import 'package:fl_astro_circle/localization/localization_const.dart';
 import 'package:fl_astro_circle/pages/compatibility/compatibilityBirthDate/compatibility_loading_screen.dart';
@@ -7,7 +10,7 @@ import 'package:fl_astro_circle/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
-import 'dart:math';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CompatibilityBirthDateScreen extends StatefulWidget {
   const CompatibilityBirthDateScreen({super.key});
@@ -89,6 +92,40 @@ class _CompatibilityBirthDateScreenState
   String get sign2 => _args?['sign2'] ?? '';
   String get sign2Image => _args?['sign2Image'] ?? 'assets/home/image-1.png';
 
+  // ===== Локальный кэш через SharedPreferences =====
+  
+  String _getCacheKey(String name1, String name2, String birthDate1, String birthDate2) {
+    final key = '${name1.toLowerCase().trim()}_${name2.toLowerCase().trim()}_'
+        '${birthDate1}_${birthDate2}_${sign1}_${sign2}';
+    return 'compatibility_${key.hashCode}';
+  }
+
+  Future<void> _saveToCache(String key, Map<String, dynamic> data) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(key, jsonEncode(data));
+      debugPrint('Compatibility saved to cache: $key');
+    } catch (e) {
+      debugPrint('Error saving compatibility to cache: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>?> _loadFromCache(String key) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final jsonStr = prefs.getString(key);
+      if (jsonStr != null) {
+        debugPrint('Compatibility loaded from cache: $key');
+        return jsonDecode(jsonStr) as Map<String, dynamic>;
+      }
+    } catch (e) {
+      debugPrint('Error loading compatibility from cache: $e');
+    }
+    return null;
+  }
+
+  // ===== Конец кэша =====
+
   void _showLoadingAndNavigate() async {
     // Валидация имён
     final name1 = _person1NameController.text.trim();
@@ -113,8 +150,20 @@ class _CompatibilityBirthDateScreenState
     
     final birthDate1Iso = _person1Date.toIso8601String();
     final birthDate2Iso = _person2Date.toIso8601String();
+    final cacheKey = _getCacheKey(name1, name2, birthDate1Iso, birthDate2Iso);
     
-    // Проверяем существующую запись в БД
+    // 1. Сначала проверяем локальный кэш
+    final cached = await _loadFromCache(cacheKey);
+    if (cached != null && mounted) {
+      Navigator.pushNamed(
+        context,
+        '/compatibilityDetail',
+        arguments: cached,
+      );
+      return;
+    }
+    
+    // 2. Проверяем существующую запись в Firebase
     final existing = await _storageService.findExistingCompatibility(
       name1: name1,
       name2: name2,
@@ -123,32 +172,37 @@ class _CompatibilityBirthDateScreenState
     );
     
     if (existing != null && existing.hasAllTeasers && mounted) {
-      // Найдена существующая запись - переходим сразу без генерации
+      // Найдена существующая запись - сохраняем в кэш и переходим
+      final resultData = {
+        'docId': existing.id,
+        'sign1': existing.sign1,
+        'sign1Image': existing.sign1Image,
+        'sign2': existing.sign2,
+        'sign2Image': existing.sign2Image,
+        'person1Name': existing.name1,
+        'person2Name': existing.name2,
+        'person1BirthDate': existing.birthDate1,
+        'person2BirthDate': existing.birthDate2,
+        'lovePercent': existing.lovePercent,
+        'businessPercent': existing.businessPercent,
+        'healthPercent': existing.healthPercent,
+        'loveTeaser': existing.loveTeaser,
+        'businessTeaser': existing.businessTeaser,
+        'healthTeaser': existing.healthTeaser,
+      };
+      
+      // Сохраняем в локальный кэш
+      await _saveToCache(cacheKey, resultData);
+      
       Navigator.pushNamed(
         context,
         '/compatibilityDetail',
-        arguments: {
-          'docId': existing.id,
-          'sign1': existing.sign1,
-          'sign1Image': existing.sign1Image,
-          'sign2': existing.sign2,
-          'sign2Image': existing.sign2Image,
-          'person1Name': existing.name1,
-          'person2Name': existing.name2,
-          'person1BirthDate': existing.birthDate1,
-          'person2BirthDate': existing.birthDate2,
-          'lovePercent': existing.lovePercent,
-          'businessPercent': existing.businessPercent,
-          'healthPercent': existing.healthPercent,
-          'loveTeaser': existing.loveTeaser,
-          'businessTeaser': existing.businessTeaser,
-          'healthTeaser': existing.healthTeaser,
-        },
+        arguments: resultData,
       );
       return;
     }
     
-    // Запускаем генерацию тизеров (параллельно с анимацией)
+    // 3. Генерируем новую совместимость
     final contentFuture = _generateTeasers();
     
     if (!mounted) return;
@@ -164,7 +218,7 @@ class _CompatibilityBirthDateScreenState
             sign1Name: sign1,
             sign2Name: sign2,
             contentFuture: contentFuture,
-            onComplete: () => _navigateToResult(),
+            onComplete: () => _navigateToResult(cacheKey),
           );
         },
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
@@ -247,7 +301,7 @@ class _CompatibilityBirthDateScreenState
     }
   }
 
-  Future<void> _navigateToResult() async {
+  Future<void> _navigateToResult(String cacheKey) async {
     try {
       final random = Random();
       final lovePercent = 0.5 + random.nextDouble() * 0.5;
@@ -259,7 +313,7 @@ class _CompatibilityBirthDateScreenState
       final birthDate1Iso = _person1Date.toIso8601String();
       final birthDate2Iso = _person2Date.toIso8601String();
 
-      // Сохраняем с именами и датами
+      // Сохраняем в Firebase
       final docId = await _storageService.saveCompatibility(
         sign1: sign1,
         sign1Image: sign1Image,
@@ -274,7 +328,7 @@ class _CompatibilityBirthDateScreenState
         birthDate2: birthDate2Iso,
       );
       
-      // Сохраняем тизеры
+      // Сохраняем тизеры в Firebase
       if (_generatedContent != null) {
         await _storageService.updateCompatibilityContent(
           docId,
@@ -284,29 +338,35 @@ class _CompatibilityBirthDateScreenState
         );
       }
 
+      // Подготавливаем данные результата
+      final resultData = {
+        'docId': docId,
+        'sign1': sign1,
+        'sign1Image': sign1Image,
+        'sign2': sign2,
+        'sign2Image': sign2Image,
+        'person1Name': name1,
+        'person2Name': name2,
+        'person1BirthDate': birthDate1Iso,
+        'person2BirthDate': birthDate2Iso,
+        'lovePercent': lovePercent,
+        'businessPercent': businessPercent,
+        'healthPercent': healthPercent,
+        'loveTeaser': _generatedContent?['loveTeaser'],
+        'businessTeaser': _generatedContent?['businessTeaser'],
+        'healthTeaser': _generatedContent?['healthTeaser'],
+      };
+      
+      // Сохраняем в локальный кэш
+      await _saveToCache(cacheKey, resultData);
+
       if (!mounted) return;
 
       // Replace loading screen with result
       Navigator.pushReplacementNamed(
         context,
         '/compatibilityDetail',
-        arguments: {
-          'docId': docId,
-          'sign1': sign1,
-          'sign1Image': sign1Image,
-          'sign2': sign2,
-          'sign2Image': sign2Image,
-          'person1Name': name1,
-          'person2Name': name2,
-          'person1BirthDate': birthDate1Iso,
-          'person2BirthDate': birthDate2Iso,
-          'lovePercent': lovePercent,
-          'businessPercent': businessPercent,
-          'healthPercent': healthPercent,
-          'loveTeaser': _generatedContent?['loveTeaser'],
-          'businessTeaser': _generatedContent?['businessTeaser'],
-          'healthTeaser': _generatedContent?['healthTeaser'],
-        },
+        arguments: resultData,
       );
     } catch (e) {
       Navigator.pop(context); // Close loading screen

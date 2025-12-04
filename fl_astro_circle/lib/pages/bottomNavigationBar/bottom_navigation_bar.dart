@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:fl_astro_circle/localization/localization_const.dart';
 import 'package:fl_astro_circle/pages/screens.dart';
+import 'package:fl_astro_circle/services/notification_storage_service.dart';
 import 'package:fl_astro_circle/theme/theme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +18,7 @@ class BottomBar extends StatefulWidget {
 
 class _BottomBarState extends State<BottomBar> {
   DateTime? backPressTime;
+  final NotificationStorageService _notificationService = NotificationStorageService();
 
   final itemList = [
     LineAwesomeIcons.home_solid,
@@ -78,32 +80,77 @@ class _BottomBarState extends State<BottomBar> {
           )
         ],
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: List.generate(itemList.length, (index) {
-          return InkWell(
-            onTap: () {
-              setState(() {
-                selectedIndex = index;
-              });
-            },
+      child: StreamBuilder<int>(
+        stream: _notificationService.getUnreadCountStream(),
+        builder: (context, snapshot) {
+          final unreadCount = snapshot.data ?? 0;
+          
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: List.generate(itemList.length, (index) {
+              return InkWell(
+                onTap: () {
+                  setState(() {
+                    selectedIndex = index;
+                  });
+                },
+                child: Container(
+                  height: 45,
+                  width: 45,
+                  decoration: BoxDecoration(
+                    color: selectedIndex == index ? primaryColor : Colors.transparent,
+                    shape: BoxShape.circle,
+                  ),
+                  alignment: Alignment.center,
+                  child: index == 3 
+                      ? _buildNotificationIcon(unreadCount)
+                      : Icon(
+                          itemList[index],
+                          color: whiteF4Color,
+                        ),
+                ),
+              );
+            }),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildNotificationIcon(int unreadCount) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Icon(
+          itemList[3],
+          color: whiteF4Color,
+        ),
+        if (unreadCount > 0)
+          Positioned(
+            right: -6,
+            top: -6,
             child: Container(
-              height: 45,
-              width: 45,
-              decoration: BoxDecoration(
-                color:
-                    selectedIndex == index ? primaryColor : Colors.transparent,
+              padding: const EdgeInsets.all(4),
+              decoration: const BoxDecoration(
+                color: redColor,
                 shape: BoxShape.circle,
               ),
-              alignment: Alignment.center,
-              child: Icon(
-                itemList[index],
-                color: whiteF4Color,
+              constraints: const BoxConstraints(
+                minWidth: 18,
+                minHeight: 18,
+              ),
+              child: Text(
+                unreadCount > 99 ? '99+' : '$unreadCount',
+                style: const TextStyle(
+                  color: whiteColor,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
               ),
             ),
-          );
-        }),
-      ),
+          ),
+      ],
     );
   }
 

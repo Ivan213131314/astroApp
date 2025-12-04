@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:math';
+
 import 'package:fl_astro_circle/localization/localization_const.dart';
 import 'package:fl_astro_circle/services/notification_storage_service.dart';
 import 'package:flutter/cupertino.dart';
@@ -6,7 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:scroll_date_picker/scroll_date_picker.dart';
 import 'package:google_places_flutter/google_places_flutter.dart';
 import 'package:google_places_flutter/model/prediction.dart';
-import 'dart:math';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../theme/theme.dart';
 import 'natal_chart_loading_screen.dart';
@@ -661,6 +664,57 @@ class _NatalChartLoadingWrapperState extends State<_NatalChartLoadingWrapper> {
     _calculationFuture = _calculateNatalChart();
   }
 
+  // Генерация уникального ключа кэша на основе входных данных
+  String _getCacheKey() {
+    final key = '${widget.name.toLowerCase().trim()}_'
+        '${widget.dateOfBirth.year}-${widget.dateOfBirth.month}-${widget.dateOfBirth.day}_'
+        '${widget.timeOfBirth ?? ''}_'
+        '${widget.location ?? ''}';
+    return 'natal_chart_${key.hashCode}';
+  }
+
+  // Сохранение в локальный кэш
+  Future<void> _saveToCache(Map<String, dynamic> data) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      // Конвертируем DateTime в строку для JSON
+      final cacheData = Map<String, dynamic>.from(data);
+      if (cacheData['dateOfBirth'] is DateTime) {
+        cacheData['dateOfBirth'] = (cacheData['dateOfBirth'] as DateTime).toIso8601String();
+      }
+      await prefs.setString(_getCacheKey(), jsonEncode(cacheData));
+      debugPrint('Natal chart saved to cache: ${_getCacheKey()}');
+    } catch (e) {
+      debugPrint('Error saving to cache: $e');
+    }
+  }
+
+  // Загрузка из локального кэша
+  Future<Map<String, dynamic>?> _loadFromCache() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final jsonStr = prefs.getString(_getCacheKey());
+      if (jsonStr != null) {
+        final data = jsonDecode(jsonStr) as Map<String, dynamic>;
+        // Конвертируем строку обратно в DateTime
+        if (data['dateOfBirth'] is String) {
+          data['dateOfBirth'] = DateTime.parse(data['dateOfBirth'] as String);
+        }
+        // Конвертируем planetsData обратно в List<Map<String, dynamic>>
+        if (data['planetsData'] is List) {
+          data['planetsData'] = (data['planetsData'] as List)
+              .map((e) => Map<String, dynamic>.from(e as Map))
+              .toList();
+        }
+        debugPrint('Natal chart loaded from cache: ${_getCacheKey()}');
+        return data;
+      }
+    } catch (e) {
+      debugPrint('Error loading from cache: $e');
+    }
+    return null;
+  }
+
   List<Map<String, dynamic>> _generatePlanetsData() {
     final random = Random();
     final planets = ["Sun", "Mercury", "Venus", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Pluto"];
@@ -676,13 +730,8 @@ class _NatalChartLoadingWrapperState extends State<_NatalChartLoadingWrapper> {
     }).toList();
   }
 
-  Future<Map<String, dynamic>> _calculateNatalChart() async {
-    // Имитация задержки для анимации (минимум 3 секунды)
-    await Future.delayed(const Duration(seconds: 3));
-    
-    final planetsData = _generatePlanetsData();
-    
-    // Сохраняем в Firebase
+  // Сохранение в Firebase в фоне (не блокирует UI)
+  Future<void> _saveToFirebase(List<Map<String, dynamic>> planetsData) async {
     try {
       await _storageService.saveNatalChart(
         name: widget.name,
@@ -691,9 +740,26 @@ class _NatalChartLoadingWrapperState extends State<_NatalChartLoadingWrapper> {
         location: widget.location ?? '',
         planetsData: planetsData,
       );
+      debugPrint('Natal chart saved to Firebase');
     } catch (e) {
-      debugPrint('Error saving natal chart: $e');
+      debugPrint('Error saving natal chart to Firebase: $e');
     }
+  }
+
+  Future<Map<String, dynamic>> _calculateNatalChart() async {
+    // 1. Сначала проверяем локальный кэш
+    final cached = await _loadFromCache();
+    if (cached != null) {
+      _result = cached;
+      // Небольшая задержка чтобы анимация была видна
+      await Future.delayed(const Duration(milliseconds: 800));
+      return cached;
+    }
+
+    // 2. Если нет в кэше - генерируем новую карту
+    await Future.delayed(const Duration(seconds: 3));
+    
+    final planetsData = _generatePlanetsData();
     
     _result = {
       'name': widget.name,
@@ -702,6 +768,12 @@ class _NatalChartLoadingWrapperState extends State<_NatalChartLoadingWrapper> {
       'location': widget.location ?? '',
       'planetsData': planetsData,
     };
+
+    // 3. Сохраняем в локальный кэш
+    await _saveToCache(_result!);
+    
+    // 4. Сохраняем в Firebase (в фоне, не блокируем UI)
+    _saveToFirebase(planetsData);
     
     return _result!;
   }

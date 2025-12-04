@@ -1,7 +1,9 @@
+import 'dart:convert';
 import 'dart:math';
 import 'package:fl_astro_circle/theme/theme.dart';
 import 'package:fl_astro_circle/services/notification_storage_service.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'numorology_service.dart';
 import 'numorology_result_screen.dart';
 
@@ -22,6 +24,48 @@ class _NumerologyLoadingWrapperState extends State<NumerologyLoadingWrapper> {
   final NotificationStorageService _storageService = NotificationStorageService();
   late NumerologyService _service;
   late String _language;
+
+  // ===== Локальный кэш через SharedPreferences =====
+  
+  String _getCacheKey(DateTime birthDate) {
+    final key = '${birthDate.year}-${birthDate.month}-${birthDate.day}';
+    return 'numerology_$key';
+  }
+
+  Future<void> _saveToCache(String key, NumerologyResult result, String? docId) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final data = {
+        'luckyNumber': result.luckyNumber,
+        'birthDate': result.birthDate,
+        'traits': result.traits,
+        'aboutCharacter': result.aboutCharacter,
+        'aboutBehavior': result.aboutBehavior,
+        'aboutResponsibility': result.aboutResponsibility,
+        'docId': docId,
+      };
+      await prefs.setString(key, jsonEncode(data));
+      debugPrint('Numerology saved to cache: $key');
+    } catch (e) {
+      debugPrint('Error saving numerology to cache: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>?> _loadFromCache(String key) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final jsonStr = prefs.getString(key);
+      if (jsonStr != null) {
+        debugPrint('Numerology loaded from cache: $key');
+        return jsonDecode(jsonStr) as Map<String, dynamic>;
+      }
+    } catch (e) {
+      debugPrint('Error loading numerology from cache: $e');
+    }
+    return null;
+  }
+
+  // ===== Конец кэша =====
 
   @override
   void didChangeDependencies() {
@@ -58,13 +102,28 @@ class _NumerologyLoadingWrapperState extends State<NumerologyLoadingWrapper> {
 
   Future<NumerologyResult> _generateOrLoadNumerology() async {
     final formattedDate = '${_birthDate!.day.toString().padLeft(2, '0')}-${_birthDate!.month.toString().padLeft(2, '0')}-${_birthDate!.year}';
+    final cacheKey = _getCacheKey(_birthDate!);
     
-    // Проверяем есть ли уже сохраненный результат для этой даты
+    // 1. Сначала проверяем локальный кэш
+    final cached = await _loadFromCache(cacheKey);
+    if (cached != null) {
+      _result = NumerologyResult(
+        luckyNumber: cached['luckyNumber'] as int,
+        birthDate: cached['birthDate'] as String,
+        traits: Map<String, double>.from(cached['traits'] as Map),
+        aboutCharacter: cached['aboutCharacter'] as String,
+        aboutBehavior: cached['aboutBehavior'] as String,
+        aboutResponsibility: cached['aboutResponsibility'] as String,
+      );
+      _docId = cached['docId'] as String?;
+      return _result!;
+    }
+    
+    // 2. Проверяем Firebase
     try {
       final existing = await _storageService.findExistingNumerology(birthDate: formattedDate);
       
       if (existing != null) {
-        // Используем сохраненные данные
         _result = NumerologyResult(
           luckyNumber: existing.luckyNumber,
           birthDate: existing.birthDate,
@@ -74,13 +133,17 @@ class _NumerologyLoadingWrapperState extends State<NumerologyLoadingWrapper> {
           aboutResponsibility: existing.aboutResponsibility,
         );
         _docId = existing.id;
+        
+        // Сохраняем в локальный кэш
+        await _saveToCache(cacheKey, _result!, _docId);
+        
         return _result!;
       }
     } catch (e) {
       debugPrint('Error checking existing numerology: $e');
     }
     
-    // Генерируем новый результат
+    // 3. Генерируем новый результат
     try {
       final result = await _service.generateNumerology(
         birthDate: _birthDate!,
@@ -99,8 +162,11 @@ class _NumerologyLoadingWrapperState extends State<NumerologyLoadingWrapper> {
           aboutResponsibility: result.aboutResponsibility,
         );
       } catch (e) {
-        debugPrint('Error saving numerology: $e');
+        debugPrint('Error saving numerology to Firebase: $e');
       }
+      
+      // Сохраняем в локальный кэш
+      await _saveToCache(cacheKey, result, _docId);
       
       return result;
     } catch (e) {
@@ -122,6 +188,10 @@ class _NumerologyLoadingWrapperState extends State<NumerologyLoadingWrapper> {
         aboutBehavior: 'As a Life Path $luckyNumber, your behavior patterns reflect a balance between independence and cooperation.',
         aboutResponsibility: 'Your sense of responsibility is deeply connected to your life purpose. Life Path Number $luckyNumber indicates a path of growth.',
       );
+      
+      // Сохраняем fallback в кэш тоже
+      await _saveToCache(cacheKey, _result!, null);
+      
       return _result!;
     }
   }
@@ -163,6 +233,7 @@ class NumerologyResultWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
     final docId = args?['docId'] as String?;
+    final fromNotifications = args?['fromNotifications'] == true;
     
     // Пробуем получить result как NumerologyResult или как Map
     NumerologyResult? result;
@@ -192,7 +263,11 @@ class NumerologyResultWrapper extends StatelessWidget {
       );
     }
     
-    return NumerologyResultScreen(result: result, docId: docId);
+    return NumerologyResultScreen(
+      result: result,
+      docId: docId,
+      fromNotifications: fromNotifications,
+    );
   }
 }
 
@@ -808,5 +883,6 @@ class _SignalWavePainter extends CustomPainter {
     return oldDelegate.rotation != rotation || oldDelegate.progress != progress;
   }
 }
+
 
 

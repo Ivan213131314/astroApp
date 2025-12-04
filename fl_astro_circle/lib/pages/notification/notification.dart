@@ -672,6 +672,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
               'loveTeaser': compat.loveTeaser,
               'businessTeaser': compat.businessTeaser,
               'healthTeaser': compat.healthTeaser,
+              'fromNotifications': true,
             },
           );
         },
@@ -821,6 +822,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
             arguments: {
               'result': _convertToNumerologyResult(numerology),
               'docId': numerology.id,
+              'fromNotifications': true,
             },
           );
         },
