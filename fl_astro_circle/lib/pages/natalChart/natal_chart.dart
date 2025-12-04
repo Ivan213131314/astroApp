@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:math';
 
 import 'package:fl_astro_circle/localization/localization_const.dart';
 import 'package:fl_astro_circle/services/notification_storage_service.dart';
@@ -13,6 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../theme/theme.dart';
 import 'natal_chart_loading_screen.dart';
+import 'natal_chart_ai_service.dart';
 
 class NatalChartScreen extends StatefulWidget {
   const NatalChartScreen({super.key});
@@ -630,7 +630,6 @@ class _NatalChartScreenState extends State<NatalChartScreen> {
     );
   }
 }
-
 /// Wrapper для экрана загрузки натальной карты
 class _NatalChartLoadingWrapper extends StatefulWidget {
   final String name;
@@ -654,14 +653,39 @@ class _NatalChartLoadingWrapper extends StatefulWidget {
 }
 
 class _NatalChartLoadingWrapperState extends State<_NatalChartLoadingWrapper> {
-  late Future<Map<String, dynamic>> _calculationFuture;
+  Future<Map<String, dynamic>>? _calculationFuture;
   Map<String, dynamic>? _result;
   final NotificationStorageService _storageService = NotificationStorageService();
+  final NatalChartAiService _aiService = NatalChartAiService();
+  String _language = 'English';
+  bool _started = false;
 
   @override
-  void initState() {
-    super.initState();
-    _calculationFuture = _calculateNatalChart();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _language = _getLanguage();
+    
+    // Запускаем расчёт только один раз после получения языка
+    if (!_started) {
+      _started = true;
+      _calculationFuture = _calculateNatalChart();
+    }
+  }
+
+  String _getLanguage() {
+    final locale = Localizations.localeOf(context);
+    switch (locale.languageCode) {
+      case 'ru':
+        return 'Russian';
+      case 'es':
+        return 'Spanish';
+      case 'fr':
+        return 'French';
+      case 'de':
+        return 'German';
+      default:
+        return 'English';
+    }
   }
 
   // Генерация уникального ключа кэша на основе входных данных
@@ -677,7 +701,6 @@ class _NatalChartLoadingWrapperState extends State<_NatalChartLoadingWrapper> {
   Future<void> _saveToCache(Map<String, dynamic> data) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      // Конвертируем DateTime в строку для JSON
       final cacheData = Map<String, dynamic>.from(data);
       if (cacheData['dateOfBirth'] is DateTime) {
         cacheData['dateOfBirth'] = (cacheData['dateOfBirth'] as DateTime).toIso8601String();
@@ -696,15 +719,8 @@ class _NatalChartLoadingWrapperState extends State<_NatalChartLoadingWrapper> {
       final jsonStr = prefs.getString(_getCacheKey());
       if (jsonStr != null) {
         final data = jsonDecode(jsonStr) as Map<String, dynamic>;
-        // Конвертируем строку обратно в DateTime
         if (data['dateOfBirth'] is String) {
           data['dateOfBirth'] = DateTime.parse(data['dateOfBirth'] as String);
-        }
-        // Конвертируем planetsData обратно в List<Map<String, dynamic>>
-        if (data['planetsData'] is List) {
-          data['planetsData'] = (data['planetsData'] as List)
-              .map((e) => Map<String, dynamic>.from(e as Map))
-              .toList();
         }
         debugPrint('Natal chart loaded from cache: ${_getCacheKey()}');
         return data;
@@ -715,88 +731,235 @@ class _NatalChartLoadingWrapperState extends State<_NatalChartLoadingWrapper> {
     return null;
   }
 
-  List<Map<String, dynamic>> _generatePlanetsData() {
-    final random = Random();
-    final planets = ["Sun", "Mercury", "Venus", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Pluto"];
-    final signs = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"];
+  /// Вычисление знака зодиака по дате рождения
+  String _calculateSunSign(DateTime date) {
+    final month = date.month;
+    final day = date.day;
     
-    return planets.map((planet) {
-      return {
-        'planet': planet,
-        'degree': '${random.nextInt(30)}°',
-        'sign': signs[random.nextInt(signs.length)],
-        'house': '${random.nextInt(12) + 1}',
-      };
-    }).toList();
+    if ((month == 3 && day >= 21) || (month == 4 && day <= 19)) return 'Aries';
+    if ((month == 4 && day >= 20) || (month == 5 && day <= 20)) return 'Taurus';
+    if ((month == 5 && day >= 21) || (month == 6 && day <= 20)) return 'Gemini';
+    if ((month == 6 && day >= 21) || (month == 7 && day <= 22)) return 'Cancer';
+    if ((month == 7 && day >= 23) || (month == 8 && day <= 22)) return 'Leo';
+    if ((month == 8 && day >= 23) || (month == 9 && day <= 22)) return 'Virgo';
+    if ((month == 9 && day >= 23) || (month == 10 && day <= 22)) return 'Libra';
+    if ((month == 10 && day >= 23) || (month == 11 && day <= 21)) return 'Scorpio';
+    if ((month == 11 && day >= 22) || (month == 12 && day <= 21)) return 'Sagittarius';
+    if ((month == 12 && day >= 22) || (month == 1 && day <= 19)) return 'Capricorn';
+    if ((month == 1 && day >= 20) || (month == 2 && day <= 18)) return 'Aquarius';
+    return 'Pisces';
   }
 
-  // Сохранение в Firebase в фоне (не блокирует UI)
-  Future<void> _saveToFirebase(List<Map<String, dynamic>> planetsData) async {
+  /// Упрощенный расчет Moon Sign (без точных эфемерид использует приближение)
+  String _calculateMoonSign(DateTime date) {
+    // Упрощенный расчет: Луна проходит все 12 знаков за ~27.3 дня
+    // Начальная точка: 1 января 2000 - Луна в Скорпионе
+    final referenceDate = DateTime(2000, 1, 1);
+    final daysDiff = date.difference(referenceDate).inDays;
+    final moonCycle = 27.3;
+    final signsFromReference = (daysDiff / (moonCycle / 12)).floor() % 12;
+    
+    final signs = ['Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces', 
+                   'Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra'];
+    return signs[signsFromReference];
+  }
+
+  /// Упрощенный расчет Rising Sign (зависит от времени рождения)
+  String _calculateRisingSign(DateTime date, String? timeOfBirth) {
+    // Rising sign меняется каждые ~2 часа
+    // Если время неизвестно - используем Sun Sign
+    if (timeOfBirth == null || timeOfBirth.isEmpty || timeOfBirth == "I don't know") {
+      return _calculateSunSign(date);
+    }
+    
+    // Пытаемся распарсить время
+    int hour = 12; // default
     try {
-      await _storageService.saveNatalChart(
+      // Форматы: "10:30 AM", "22:30", etc.
+      final timeLower = timeOfBirth.toLowerCase();
+      if (timeLower.contains('am') || timeLower.contains('pm')) {
+        final parts = timeLower.replaceAll(RegExp(r'[ap]m'), '').trim().split(':');
+        hour = int.parse(parts[0]);
+        if (timeLower.contains('pm') && hour != 12) hour += 12;
+        if (timeLower.contains('am') && hour == 12) hour = 0;
+      } else {
+        final parts = timeOfBirth.split(':');
+        hour = int.parse(parts[0]);
+      }
+    } catch (e) {
+      hour = 12;
+    }
+    
+    // Rising sign основан на времени + Sun sign
+    final sunSignIndex = _getSignIndex(_calculateSunSign(date));
+    final risingOffset = (hour / 2).floor();
+    final risingIndex = (sunSignIndex + risingOffset) % 12;
+    
+    final signs = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 
+                   'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'];
+    return signs[risingIndex];
+  }
+
+  int _getSignIndex(String sign) {
+    final signs = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 
+                   'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'];
+    return signs.indexOf(sign);
+  }
+
+  String _formatBirthDate(DateTime date) {
+    final months = ['January', 'February', 'March', 'April', 'May', 'June',
+                    'July', 'August', 'September', 'October', 'November', 'December'];
+    return '${months[date.month - 1]} ${date.day}, ${date.year}';
+  }
+
+  // Сохранение в Firebase
+  Future<String?> _saveToFirebase({
+    required String sunSign,
+    required String moonSign,
+    required String risingSign,
+    String? sunTeaser,
+    String? moonTeaser,
+    String? risingTeaser,
+  }) async {
+    try {
+      final docId = await _storageService.saveNatalChart(
         name: widget.name,
         dateOfBirth: widget.dateOfBirth,
         timeOfBirth: widget.timeOfBirth ?? '',
         location: widget.location ?? '',
-        planetsData: planetsData,
+        planetsData: [], // Пустой список, т.к. используем AI
+        sunSign: sunSign,
+        moonSign: moonSign,
+        risingSign: risingSign,
+        sunTeaser: sunTeaser,
+        moonTeaser: moonTeaser,
+        risingTeaser: risingTeaser,
       );
-      debugPrint('Natal chart saved to Firebase');
+      debugPrint('Natal chart saved to Firebase with ID: $docId');
+      return docId;
     } catch (e) {
       debugPrint('Error saving natal chart to Firebase: $e');
+      return null;
     }
   }
 
   Future<Map<String, dynamic>> _calculateNatalChart() async {
     // 1. Сначала проверяем локальный кэш
     final cached = await _loadFromCache();
-    if (cached != null) {
+    if (cached != null && cached['sunTeaser'] != null) {
       _result = cached;
-      // Небольшая задержка чтобы анимация была видна
       await Future.delayed(const Duration(milliseconds: 800));
       return cached;
     }
 
-    // 2. Если нет в кэше - генерируем новую карту
-    await Future.delayed(const Duration(seconds: 3));
+    // 2. Вычисляем знаки зодиака
+    final sunSign = _calculateSunSign(widget.dateOfBirth);
+    final moonSign = _calculateMoonSign(widget.dateOfBirth);
+    final risingSign = _calculateRisingSign(widget.dateOfBirth, widget.timeOfBirth);
+
+    // 3. Генерируем AI тизеры параллельно
+    final language = _language ?? 'English';
+    final birthDateFormatted = _formatBirthDate(widget.dateOfBirth);
     
-    final planetsData = _generatePlanetsData();
-    
+    NatalChartTeasers? teasers;
+    try {
+      teasers = await _aiService.generateAllTeasers(
+        sunSign: sunSign,
+        moonSign: moonSign,
+        risingSign: risingSign,
+        language: language,
+        name: widget.name,
+        birthDate: birthDateFormatted,
+        birthTime: widget.timeOfBirth,
+        location: widget.location,
+      );
+    } catch (e) {
+      debugPrint('Error generating AI teasers: $e');
+      // Fallback teasers if AI fails
+      teasers = NatalChartTeasers(
+        sunTeaser: 'Your Sun in $sunSign reveals the core of who you are - your vital essence and life purpose. There are hidden depths to your solar identity waiting to be discovered...',
+        moonTeaser: 'With Moon in $moonSign, your emotional landscape holds mysteries even you may not fully understand. Your inner world pulses with lunar wisdom...',
+        risingTeaser: 'Your Rising Sign in $risingSign shapes how the world first sees you, yet there is so much more beneath this celestial mask...',
+      );
+    }
+
+    // 4. Формируем результат
     _result = {
       'name': widget.name,
       'dateOfBirth': widget.dateOfBirth,
       'timeOfBirth': widget.timeOfBirth ?? '',
       'location': widget.location ?? '',
-      'planetsData': planetsData,
+      'sunSign': sunSign,
+      'moonSign': moonSign,
+      'risingSign': risingSign,
+      'sunTeaser': teasers.sunTeaser,
+      'moonTeaser': teasers.moonTeaser,
+      'risingTeaser': teasers.risingTeaser,
     };
+    
+    debugPrint('=== _calculateNatalChart: Result created ===');
+    debugPrint('Name: ${widget.name}');
+    debugPrint('Sun: $sunSign, Moon: $moonSign, Rising: $risingSign');
+    debugPrint('SunTeaser length: ${teasers.sunTeaser.length}');
 
-    // 3. Сохраняем в локальный кэш
+    // 5. Сохраняем в локальный кэш
     await _saveToCache(_result!);
+
+    // 6. Сохраняем в Firebase и получаем docId
+    final docId = await _saveToFirebase(
+      sunSign: sunSign,
+      moonSign: moonSign,
+      risingSign: risingSign,
+      sunTeaser: teasers.sunTeaser,
+      moonTeaser: teasers.moonTeaser,
+      risingTeaser: teasers.risingTeaser,
+    );
     
-    // 4. Сохраняем в Firebase (в фоне, не блокируем UI)
-    _saveToFirebase(planetsData);
-    
+    if (docId != null) {
+      _result!['docId'] = docId;
+    }
+
     return _result!;
   }
 
   void _onLoadingComplete() {
+    debugPrint('=== _onLoadingComplete called ===');
+    debugPrint('_result is null: ${_result == null}');
+    if (_result != null) {
+      debugPrint('_result keys: ${_result!.keys.toList()}');
+      debugPrint('sunSign: ${_result!['sunSign']}');
+      debugPrint('sunTeaser: ${_result!['sunTeaser']?.toString().substring(0, 50)}...');
+    }
+    
     if (_result != null && mounted) {
       Navigator.pushReplacementNamed(
         context,
         '/natalchartDetail',
         arguments: _result,
       );
+    } else {
+      debugPrint('ERROR: _result is null or not mounted!');
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    // Показываем загрузку пока Future не создан
+    if (_calculationFuture == null) {
+      return const Scaffold(
+        backgroundColor: Color(0xFF1a0a3e),
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+    
     return NatalChartLoadingScreen(
       name: widget.name,
       dateOfBirth: widget.dateOfBirth,
       timeOfBirth: widget.timeOfBirth,
       location: widget.location,
-      calculationFuture: _calculationFuture,
+      calculationFuture: _calculationFuture!,
       onComplete: _onLoadingComplete,
     );
   }
 }
+

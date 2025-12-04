@@ -74,6 +74,12 @@ class NotificationStorageService {
     required String timeOfBirth,
     required String location,
     required List<Map<String, dynamic>> planetsData,
+    String? sunSign,
+    String? moonSign,
+    String? risingSign,
+    String? sunTeaser,
+    String? moonTeaser,
+    String? risingTeaser,
   }) async {
     final docRef = await _getUserCollection('natal_charts').add({
       'name': name,
@@ -81,6 +87,12 @@ class NotificationStorageService {
       'timeOfBirth': timeOfBirth,
       'location': location,
       'planetsData': planetsData,
+      'sunSign': sunSign,
+      'moonSign': moonSign,
+      'risingSign': risingSign,
+      'sunTeaser': sunTeaser,
+      'moonTeaser': moonTeaser,
+      'risingTeaser': risingTeaser,
       'isRead': false,
       'createdAt': FieldValue.serverTimestamp(),
     });
@@ -106,6 +118,40 @@ class NotificationStorageService {
 
   Future<void> deleteNatalChart(String docId) async {
     await _getUserCollection('natal_charts').doc(docId).delete();
+  }
+
+  /// Обновить AI-контент для натальной карты
+  Future<void> updateNatalChartContent(
+    String docId, {
+    String? sunTeaser,
+    String? sunDetail,
+    String? moonTeaser,
+    String? moonDetail,
+    String? risingTeaser,
+    String? risingDetail,
+  }) async {
+    final updates = <String, dynamic>{};
+    if (sunTeaser != null) updates['sunTeaser'] = sunTeaser;
+    if (sunDetail != null) updates['sunDetail'] = sunDetail;
+    if (moonTeaser != null) updates['moonTeaser'] = moonTeaser;
+    if (moonDetail != null) updates['moonDetail'] = moonDetail;
+    if (risingTeaser != null) updates['risingTeaser'] = risingTeaser;
+    if (risingDetail != null) updates['risingDetail'] = risingDetail;
+    
+    if (updates.isNotEmpty) {
+      await _getUserCollection('natal_charts').doc(docId).update(updates);
+    }
+  }
+
+  /// Получить данные натальной карты по ID
+  Future<NatalChartData?> getNatalChartById(String docId) async {
+    if (_userId == null) return null;
+    
+    final doc = await _getUserCollection('natal_charts').doc(docId).get();
+    if (doc.exists) {
+      return NatalChartData.fromFirestore(doc);
+    }
+    return null;
   }
 
   // ==================== Compatibility ====================
@@ -450,6 +496,19 @@ class NatalChartData {
   final List<Map<String, dynamic>> planetsData;
   final bool isRead;
   final DateTime createdAt;
+  
+  // Знаки зодиака
+  final String? sunSign;
+  final String? moonSign;
+  final String? risingSign;
+  
+  // AI-сгенерированный контент
+  final String? sunTeaser;
+  final String? sunDetail;
+  final String? moonTeaser;
+  final String? moonDetail;
+  final String? risingTeaser;
+  final String? risingDetail;
 
   NatalChartData({
     required this.id,
@@ -460,6 +519,15 @@ class NatalChartData {
     required this.planetsData,
     required this.isRead,
     required this.createdAt,
+    this.sunSign,
+    this.moonSign,
+    this.risingSign,
+    this.sunTeaser,
+    this.sunDetail,
+    this.moonTeaser,
+    this.moonDetail,
+    this.risingTeaser,
+    this.risingDetail,
   });
 
   factory NatalChartData.fromFirestore(DocumentSnapshot doc) {
@@ -473,7 +541,34 @@ class NatalChartData {
       planetsData: List<Map<String, dynamic>>.from(data['planetsData'] ?? []),
       isRead: data['isRead'] ?? false,
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      sunSign: data['sunSign'],
+      moonSign: data['moonSign'],
+      risingSign: data['risingSign'],
+      sunTeaser: data['sunTeaser'],
+      sunDetail: data['sunDetail'],
+      moonTeaser: data['moonTeaser'],
+      moonDetail: data['moonDetail'],
+      risingTeaser: data['risingTeaser'],
+      risingDetail: data['risingDetail'],
     );
+  }
+
+  /// Проверить, есть ли все тизеры
+  bool get hasAllTeasers => 
+      sunTeaser != null && moonTeaser != null && risingTeaser != null;
+
+  /// Проверить, есть ли детальный контент для категории
+  bool hasDetail(String category) {
+    switch (category) {
+      case 'sun':
+        return sunDetail != null;
+      case 'moon':
+        return moonDetail != null;
+      case 'rising':
+        return risingDetail != null;
+      default:
+        return false;
+    }
   }
 
   String getTimeAgo() {

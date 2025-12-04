@@ -1,8 +1,10 @@
 import 'package:fl_astro_circle/localization/localization_const.dart';
 import 'package:fl_astro_circle/theme/theme.dart';
-import 'package:fl_astro_circle/widget/column_builder.dart';
+import 'package:fl_astro_circle/services/notification_storage_service.dart';
+import 'package:fl_astro_circle/pages/natalChart/natal_chart_ai_service.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:readmore/readmore.dart';
+import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 
 class NatalChartDetailScreen extends StatefulWidget {
   const NatalChartDetailScreen({super.key});
@@ -13,235 +15,465 @@ class NatalChartDetailScreen extends StatefulWidget {
 
 class _NatalChartDetailScreenState extends State<NatalChartDetailScreen> {
   Map<String, dynamic>? chartData;
-  List<Map<String, dynamic>> planetsData = [];
+  final NotificationStorageService _storageService = NotificationStorageService();
+  
+  // AI-контент (тизеры)
+  String? _sunTeaser;
+  String? _moonTeaser;
+  String? _risingTeaser;
+  
+  // Знаки зодиака
+  String? _sunSign;
+  String? _moonSign;
+  String? _risingSign;
+  
+  // ID документа
+  String? _docId;
+  
+  // Флаг перехода с экрана уведомлений
+  bool _fromNotifications = false;
+  
+  bool _initialized = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    if (_initialized) return;
+    
     final args = ModalRoute.of(context)?.settings.arguments;
+    debugPrint('=== NatalChartDetailScreen didChangeDependencies ===');
+    debugPrint('args is null: ${args == null}');
+    debugPrint('args type: ${args.runtimeType}');
+    
     if (args != null && args is Map<String, dynamic>) {
+      debugPrint('args keys: ${args.keys.toList()}');
+      debugPrint('sunSign from args: ${args['sunSign']}');
+      
       chartData = args;
-      planetsData = List<Map<String, dynamic>>.from(args['planetsData'] ?? []);
+      _docId = args['docId'];
+      _fromNotifications = args['fromNotifications'] == true;
+      
+      // Читаем данные из arguments
+      _sunSign = args['sunSign'];
+      _moonSign = args['moonSign'];
+      _risingSign = args['risingSign'];
+      _sunTeaser = args['sunTeaser'];
+      _moonTeaser = args['moonTeaser'];
+      _risingTeaser = args['risingTeaser'];
+      
+      debugPrint('After assignment - _sunSign: $_sunSign');
+      debugPrint('After assignment - _sunTeaser: ${_sunTeaser?.substring(0, 50)}...');
+      
+      // Если тизеры не переданы через args, но есть docId - загружаем из хранилища
+      if (_sunTeaser == null && _docId != null) {
+        _loadTeasersFromStorage();
+      }
+    } else {
+      debugPrint('ERROR: args is null or not Map!');
+    }
+    _initialized = true;
+  }
+
+  Future<void> _loadTeasersFromStorage() async {
+    final saved = await _storageService.getNatalChartById(_docId!);
+    if (saved != null && mounted) {
+      setState(() {
+        _sunSign = saved.sunSign;
+        _moonSign = saved.moonSign;
+        _risingSign = saved.risingSign;
+        _sunTeaser = saved.sunTeaser;
+        _moonTeaser = saved.moonTeaser;
+        _risingTeaser = saved.risingTeaser;
+      });
     }
   }
 
-  List<Map<String, dynamic>> get planetsList {
-    if (planetsData.isEmpty) {
-      // Fallback to default data if no data passed
-      return [
-        {
-          "title": translation('natal_chart_detail.planets'),
-          "list": ["Sun", "Mercury", "Venus", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Pluto"]
-        },
-        {
-          "title": translation('natal_chart_detail.position_degree'),
-          "list": ["10°", "12°", "14°", "10°", "05°", "03°", "02°", "15°", "10°"]
-        },
-        {
-          "title": translation('natal_chart_detail.sign'),
-          "list": ["Aries", "Leo", "Libra", "Scorpio", "Capricorn", "Pisces", "Cancer", "Aquarius", "Aries"]
-        },
-        {
-          "title": translation('natal_chart_detail.position_hour'),
-          "list": ["05", "03", "06", "04", "04", "03", "02", "07", "05"]
-        },
-      ];
-    }
-
-    // Transform planetsData to display format
-    return [
-      {
-        "title": translation('natal_chart_detail.planets'),
-        "list": planetsData.map((p) => p['planet'] as String).toList()
+  void _navigateToDeepDetail(NatalChartCategory category, String teaser, String sign) {
+    Navigator.pushNamed(
+      context,
+      '/natalChartDeepDetail',
+      arguments: {
+        'docId': _docId,
+        'category': category.name,
+        'teaser': teaser,
+        'sign': sign,
+        'name': name,
+        'dateOfBirth': dateOfBirth,
+        'timeOfBirth': timeOfBirth,
+        'location': location,
       },
-      {
-        "title": translation('natal_chart_detail.position_degree'),
-        "list": planetsData.map((p) => p['degree'] as String).toList()
-      },
-      {
-        "title": translation('natal_chart_detail.sign'),
-        "list": planetsData.map((p) => p['sign'] as String).toList()
-      },
-      {
-        "title": translation('natal_chart_detail.position_hour'),
-        "list": planetsData.map((p) => p['house'] as String).toList()
-      },
-    ];
+    );
   }
+
+  String get name => chartData?['name'] ?? '';
+  DateTime? get dateOfBirth => chartData?['dateOfBirth'] is DateTime 
+      ? chartData!['dateOfBirth'] 
+      : (chartData?['dateOfBirth'] is String 
+          ? DateTime.tryParse(chartData!['dateOfBirth']) 
+          : null);
+  String get timeOfBirth => chartData?['timeOfBirth'] ?? '';
+  String get location => chartData?['location'] ?? '';
+
+  String _formatDate(DateTime? date) {
+    if (date == null) return 'Unknown';
+    final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return '${date.day} ${months[date.month - 1]} ${date.year}';
+  }
+
+  final _bottomNavItems = [
+    LineAwesomeIcons.home_solid,
+    Icons.rocket_launch_rounded,
+    CupertinoIcons.heart_fill,
+    LineAwesomeIcons.bell,
+    LineAwesomeIcons.user,
+  ];
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: scaffoldBgColor,
+        centerTitle: false,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         automaticallyImplyLeading: false,
         titleSpacing: 20.0,
-        title: backButton(context),
-        centerTitle: false,
+        title: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            backButton(context),
+            widthSpace,
+            width5Space,
+            Expanded(
+              child: Text(
+                getTranslation(context, 'natal_chart_detail.natal_chart'),
+                style: bold18White,
+              ),
+            ),
+          ],
+        ),
       ),
       body: ListView(
-        physics: const BouncingScrollPhysics(),
         padding: EdgeInsets.zero,
         children: [
-          if (chartData != null) ...[
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: fixPadding * 2.0),
+          _buildHeader(),
+          _buildContent(),
+        ],
+      ),
+      bottomNavigationBar: _fromNotifications ? null : _buildBottomNavigationBar(),
+    );
+  }
+
+  Widget _buildBottomNavigationBar() {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        vertical: fixPadding,
+        horizontal: fixPadding * 2.0,
+      ),
+      width: double.maxFinite,
+      decoration: BoxDecoration(
+        color: scaffoldBgColor,
+        boxShadow: [
+          BoxShadow(
+            color: recBgColor.withValues(alpha: 0.45),
+            blurRadius: 6,
+          )
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: List.generate(_bottomNavItems.length, (index) {
+          return InkWell(
+            onTap: () {
+              Navigator.of(context).pushNamedAndRemoveUntil(
+                '/bottombar',
+                (route) => false,
+                arguments: {'selectedIndex': index},
+              );
+            },
+            child: Container(
+              height: 45,
+              width: 45,
+              decoration: BoxDecoration(
+                color: Colors.transparent,
+                shape: BoxShape.circle,
+              ),
+              alignment: Alignment.center,
+              child: Icon(
+                _bottomNavItems[index],
+                color: whiteF4Color,
+              ),
+            ),
+          );
+        }),
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Padding(
+      padding: const EdgeInsets.all(fixPadding * 2.0),
+      child: Column(
+        children: [
+          // Zodiac wheel image
+          Image.asset(
+            "assets/natalDetail/natalchartImage.png",
+            height: 180,
+            fit: BoxFit.contain,
+          ),
+          heightSpace,
+          heightSpace,
+          // User info
+          Text(
+            name,
+            style: bold20White,
+            textAlign: TextAlign.center,
+          ),
+          height5Space,
+          Text(
+            '${_formatDate(dateOfBirth)} • ${timeOfBirth.isNotEmpty ? timeOfBirth : "Time unknown"}',
+            style: regualr14Grey,
+            textAlign: TextAlign.center,
+          ),
+          if (location.isNotEmpty) ...[
+            height5Space,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.location_on, color: greyColor, size: 14),
+                const SizedBox(width: 4),
+                Flexible(
+                  child: Text(
+                    location,
+                    style: regualr14Grey,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildContent() {
+    return Container(
+      width: double.maxFinite,
+      padding: const EdgeInsets.all(fixPadding * 2.0),
+      decoration: const BoxDecoration(
+        color: blueShade1,
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(20.0),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Signs summary
+          _buildSignsSummary(),
+          heightSpace,
+          heightSpace,
+          
+          // Sun Sign Section
+          _buildCategorySection(
+            title: getTranslation(context, 'natal_chart_detail.title1'),
+            subtitle: _sunSign ?? 'Unknown',
+            color: Colors.orange,
+            teaser: _sunTeaser,
+            category: NatalChartCategory.sunSign,
+            icon: Icons.wb_sunny,
+          ),
+          heightSpace,
+          heightSpace,
+          
+          // Moon Sign Section
+          _buildCategorySection(
+            title: getTranslation(context, 'natal_chart_detail.title2'),
+            subtitle: _moonSign ?? 'Unknown',
+            color: Colors.blueGrey,
+            teaser: _moonTeaser,
+            category: NatalChartCategory.moonSign,
+            icon: Icons.nightlight_round,
+          ),
+          heightSpace,
+          heightSpace,
+          
+          // Rising Sign Section
+          _buildCategorySection(
+            title: getTranslation(context, 'natal_chart_detail.title3'),
+            subtitle: _risingSign ?? 'Unknown',
+            color: primaryColor,
+            teaser: _risingTeaser,
+            category: NatalChartCategory.risingSign,
+            icon: Icons.arrow_upward,
+          ),
+          heightSpace,
+          heightSpace,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSignsSummary() {
+    return Container(
+      padding: const EdgeInsets.all(fixPadding * 1.5),
+      decoration: BoxDecoration(
+        color: recBgColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: primaryColor.withValues(alpha: 0.2)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _buildSignBadge('☉', _sunSign ?? '?', Colors.orange),
+          _buildSignBadge('☽', _moonSign ?? '?', Colors.blueGrey),
+          _buildSignBadge('↑', _risingSign ?? '?', primaryColor),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSignBadge(String symbol, String sign, Color color) {
+    return Column(
+      children: [
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.2),
+            shape: BoxShape.circle,
+            border: Border.all(color: color, width: 2),
+          ),
+          child: Center(
+            child: Text(
+              symbol,
+              style: TextStyle(
+                color: color,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+        height5Space,
+        Text(
+          sign,
+          style: regualr14Grey,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCategorySection({
+    required String title,
+    required String subtitle,
+    required Color color,
+    required String? teaser,
+    required NatalChartCategory category,
+    required IconData icon,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(icon, color: color, size: 20),
+            ),
+            widthSpace,
+            Expanded(
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    chartData!['name'] ?? '',
-                    style: bold20White,
-                    textAlign: TextAlign.center,
+                    title,
+                    style: medium18White,
                   ),
-                  height5Space,
                   Text(
-                    '${chartData!['location'] ?? ''} • ${chartData!['timeOfBirth'] ?? ''}',
-                    style: regualr14Grey,
-                    textAlign: TextAlign.center,
+                    subtitle,
+                    style: TextStyle(
+                      color: color,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ],
               ),
             ),
-            heightSpace,
           ],
-          Text(
-            getTranslation(context, 'natal_chart_detail.natal_chart'),
-            style: medium18White,
-            textAlign: TextAlign.center,
+        ),
+        height5Space,
+        Container(
+          height: 3,
+          width: 45,
+          margin: const EdgeInsets.only(left: 48),
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(2),
           ),
-          Center(
-            child: Image.asset(
-              "assets/natalDetail/natalchartImage.png",
-              height: size.height * 0.35,
-              fit: BoxFit.cover,
-            ),
-          ),
-          planetsListContent(),
-          heightSpace,
-          heightSpace,
-          detailTextWidget(
-              getTranslation(context, 'natal_chart_detail.title1'), "08°"),
-          heightSpace,
-          heightSpace,
-          detailTextWidget(
-              getTranslation(context, 'natal_chart_detail.title2'), "22°"),
-          heightSpace,
-          heightSpace,
-          detailTextWidget(
-              getTranslation(context, 'natal_chart_detail.title3'), "17°"),
-          heightSpace,
-          heightSpace,
-        ],
-      ),
+        ),
+        heightSpace,
+        Text(
+          teaser ?? 'Loading cosmic insights...',
+          style: regualr14Grey,
+        ),
+        heightSpace,
+        if (teaser != null)
+          _buildGoDeeper(color, category, teaser, subtitle, icon),
+      ],
     );
   }
 
-  detailTextWidget(String title, String degree) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: fixPadding * 2.0),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: medium16White,
-                    ),
-                    height5Space,
-                    Container(
-                      height: 5,
-                      width: 45,
-                      color: primaryColor,
-                    )
-                  ],
-                ),
+  Widget _buildGoDeeper(Color color, NatalChartCategory category, String teaser, String sign, IconData icon) {
+    return GestureDetector(
+      onTap: () => _navigateToDeepDetail(category, teaser, sign),
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: fixPadding * 1.5,
+          vertical: fixPadding,
+        ),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [color.withValues(alpha: 0.8), color],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+          ),
+          borderRadius: BorderRadius.circular(25),
+          boxShadow: [
+            BoxShadow(
+              color: color.withValues(alpha: 0.3),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: whiteColor, size: 18),
+            const SizedBox(width: 8),
+            const Text(
+              'Go Deeper',
+              style: TextStyle(
+                color: whiteColor,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
               ),
-              width5Space,
-              Text(
-                degree,
-                style: medium18White,
-              )
-            ],
-          ),
-          heightSpace,
-          ReadMoreText(
-            "Lorem ipsum dolor sit amet consectetur. In vitae in volutpat eu lectus. Eget aliquet pharetra nunc lacus. Mauris at mattis laoreet quam. Cursus risus nisl nulla et magna maecenasid id. Enim nibh quisque tellus urna justo. Egestas id pharetrah morbi quam in eu. Mattis mattis odio velit volutpat blandit a pellentesque scelerisque vestibulum eget ",
-            moreStyle: regualr14Primary,
-            lessStyle: regualr14Primary,
-            trimExpandedText:
-                getTranslation(context, 'natal_chart_detail.show_less'),
-            trimCollapsedText:
-                getTranslation(context, 'natal_chart_detail.read_more'),
-            style: regualr14Grey,
-          )
-        ],
+            ),
+            const SizedBox(width: 4),
+            const Icon(Icons.arrow_forward, color: whiteColor, size: 16),
+          ],
+        ),
       ),
     );
   }
 
-  planetsListContent() {
-    final list = planetsList;
-    return Container(
-      width: double.maxFinite,
-      color: blueShade1,
-      padding: const EdgeInsets.symmetric(
-          vertical: fixPadding * 2.0, horizontal: fixPadding * 1.5),
-      child: Column(
-        children: [
-          Row(
-            children: List.generate(
-              list.length,
-              (index) {
-                return Expanded(
-                  child: Text(
-                    list[index]['title'].toString(),
-                    style: medium16White,
-                    textAlign: TextAlign.center,
-                  ),
-                );
-              },
-            ),
-          ),
-          Row(
-            children: List.generate(
-              list.length,
-              (index) {
-                List itemData = list[index]['list'] as List;
-                return Expanded(
-                  child: Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: fixPadding / 2),
-                    child: ColumnBuilder(
-                        itemBuilder: (context, i) {
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(
-                                vertical: fixPadding),
-                            child: Text(
-                              itemData[i].toString(),
-                              style:
-                                  index == 0 ? regualr15GreyD4 : regualr14Grey,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          );
-                        },
-                        itemCount: itemData.length),
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  backButton(BuildContext context) {
+  Widget backButton(BuildContext context) {
     return GestureDetector(
       onTap: () {
         Navigator.pop(context);

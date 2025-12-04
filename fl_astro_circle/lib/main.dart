@@ -349,6 +349,13 @@ class _MyAppState extends State<MyApp> {
         return PageTransition(
           child: const NatalChartDetailScreen(),
           type: PageTransitionType.rightToLeft,
+          settings: settings,
+        );
+      case '/natalChartDeepDetail':
+        return PageTransition(
+          child: const NatalChartDeepDetailScreen(),
+          type: PageTransitionType.rightToLeft,
+          settings: settings,
         );
       case '/message':
         return PageTransition(
