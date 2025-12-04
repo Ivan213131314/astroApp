@@ -299,13 +299,6 @@ The healing potential of this pairing is profound. When $sign1 and $sign2 commit
     }
   }
 
-  final _bottomNavItems = [
-    LineAwesomeIcons.home_solid,
-    Icons.rocket_launch_rounded,
-    CupertinoIcons.heart_fill,
-    LineAwesomeIcons.bell,
-    LineAwesomeIcons.user,
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -319,56 +312,9 @@ The healing potential of this pairing is profound. When $sign1 and $sign2 commit
           ),
         ],
       ),
-      bottomNavigationBar: _buildBottomNavigationBar(),
     );
   }
 
-  Widget _buildBottomNavigationBar() {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        vertical: fixPadding,
-        horizontal: fixPadding * 2.0,
-      ),
-      width: double.maxFinite,
-      decoration: BoxDecoration(
-        color: scaffoldBgColor,
-        boxShadow: [
-          BoxShadow(
-            color: recBgColor.withValues(alpha: 0.45),
-            blurRadius: 6,
-          )
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: List.generate(_bottomNavItems.length, (index) {
-          final isSelected = index == 2; // Compatibility
-          return InkWell(
-            onTap: () {
-              Navigator.of(context).pushNamedAndRemoveUntil(
-                '/bottombar',
-                (route) => false,
-                arguments: {'selectedIndex': index},
-              );
-            },
-            child: Container(
-              height: 45,
-              width: 45,
-              decoration: BoxDecoration(
-                color: isSelected ? primaryColor : Colors.transparent,
-                shape: BoxShape.circle,
-              ),
-              alignment: Alignment.center,
-              child: Icon(
-                _bottomNavItems[index],
-                color: whiteF4Color,
-              ),
-            ),
-          );
-        }),
-      ),
-    );
-  }
 
   Widget _buildSliverAppBar() {
     return SliverAppBar(
