@@ -1,4 +1,7 @@
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:fl_astro_circle/localization/localization_const.dart';
+import 'package:fl_astro_circle/services/palm_reading_service.dart';
 import 'package:flutter/material.dart';
 import 'package:readmore/readmore.dart';
 
@@ -12,8 +15,30 @@ class PlamReaderDetailScreen extends StatefulWidget {
 }
 
 class _PlamReaderDetailScreenState extends State<PlamReaderDetailScreen> {
+  PalmReadingResult? _result;
+  bool _initialized = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialized) {
+      _initialized = true;
+      final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      _result = args?['result'] as PalmReadingResult?;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (_result == null) {
+      return const Scaffold(
+        backgroundColor: scaffoldBgColor,
+        body: Center(
+          child: Text('Error: No data', style: TextStyle(color: Colors.white)),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: blueShade1,
       body: CustomScrollView(
@@ -31,14 +56,6 @@ class _PlamReaderDetailScreenState extends State<PlamReaderDetailScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 backButton(context),
-                // widthSpace,
-                // width5Space,
-                // Expanded(
-                //   child: Text(
-                //     getTranslation(context, "plam_reader_detail.horoscope"),
-                //     style: bold18White,
-                //   ),
-                // ),
               ],
             ),
             flexibleSpace: FlexibleSpaceBar(
@@ -53,20 +70,28 @@ class _PlamReaderDetailScreenState extends State<PlamReaderDetailScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      detailWidget(getTranslation(
-                          context, 'plam_reader_detail.life_line')),
+                      detailWidget(
+                        getTranslation(context, 'plam_reader_detail.life_line'),
+                        _result!.lifeLine,
+                      ),
                       heightSpace,
                       heightSpace,
-                      detailWidget(getTranslation(
-                          context, 'plam_reader_detail.heart_line')),
+                      detailWidget(
+                        getTranslation(context, 'plam_reader_detail.heart_line'),
+                        _result!.heartLine,
+                      ),
                       heightSpace,
                       heightSpace,
-                      detailWidget(getTranslation(
-                          context, 'plam_reader_detail.money_line')),
+                      detailWidget(
+                        getTranslation(context, 'plam_reader_detail.money_line'),
+                        _result!.moneyLine,
+                      ),
                       heightSpace,
                       heightSpace,
-                      detailWidget(getTranslation(
-                          context, 'plam_reader_detail.health_line'))
+                      detailWidget(
+                        getTranslation(context, 'plam_reader_detail.health_line'),
+                        _result!.healthLine,
+                      )
                     ],
                   ),
                 )
@@ -78,7 +103,7 @@ class _PlamReaderDetailScreenState extends State<PlamReaderDetailScreen> {
     );
   }
 
-  detailWidget(String title) {
+  detailWidget(String title, String content) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -94,7 +119,7 @@ class _PlamReaderDetailScreenState extends State<PlamReaderDetailScreen> {
         ),
         heightSpace,
         ReadMoreText(
-          "Lorem ipsum dolor sit amet consectetur. In vitae in volutpat eu lectus. Eget aliquet pharetra nunc lacus. Mauris at mattis laoreet quam. Cursus risus nisl nulla et magna maecenasid id. Enim nibh quisque tellus urna justo. Egestas id pharetrah morbi quam in eu. Mattis mattis odio velit volutpat blandit a pellentesque scelerisque vestibulum eget pulvinar. Eu sit gh Lorem ipsum dolor sit amet consectetur. In vitae in volutpat eu lectus. Eget aliquet pharetra nunc lacus. Mauris at mattis laoreet quam. Cursus risus nisl nulla et magna maecenasid id. Enim nibh quisque tellus urna justo. Egestas id pharetrah morbi quam in eu. Mattis mattis odio velit volutpat blandit a pellentesque scelerisque vestibulum eget",
+          content,
           style: regualr14Grey,
           moreStyle: regualr14Primary,
           lessStyle: regualr14Primary,
@@ -126,15 +151,24 @@ class _PlamReaderDetailScreenState extends State<PlamReaderDetailScreen> {
           Container(
             height: 185,
             width: 185,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: primaryColor,
               shape: BoxShape.circle,
-              image: DecorationImage(
-                image: AssetImage("assets/plamreader/handImage.png"),
-                fit: BoxFit.cover,
-              ),
+              border: Border.all(color: primaryColor, width: 3),
             ),
-          )
+            child: ClipOval(
+              child: _result?.imageBase64 != null
+                  ? Image.memory(
+                      base64Decode(_result!.imageBase64!),
+                      fit: BoxFit.cover,
+                    )
+                  : const Icon(
+                      Icons.back_hand,
+                      size: 100,
+                      color: whiteColor,
+                    ),
+            ),
+          ),
         ],
       ),
     );

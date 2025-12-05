@@ -207,7 +207,9 @@
     },
     "plam_reader": {
         "take_photo_hand": "Take photo of your hand",
-        "take_photo": "Take photo"
+        "take_photo": "Take photo",
+        "analyzing_palm": "AI is analyzing your palm...",
+        "camera_error": "Camera error. Please try again."
     },
     "plam_reader_detail": {
         "horoscope": "Horoscope",

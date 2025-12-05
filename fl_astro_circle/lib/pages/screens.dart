@@ -42,6 +42,7 @@ export 'package:fl_astro_circle/pages/compatibility/compatibilityBirthDate/compa
 export 'package:fl_astro_circle/pages/compatibility/compatibilityDetail/compatibility_detail.dart';
 export 'package:fl_astro_circle/pages/compatibility/compatibilityDetail/compatibility_deep_detail.dart';
 export 'package:fl_astro_circle/pages/plamReader/plam_reader.dart';
+export 'package:fl_astro_circle/pages/plamReader/plam_reader_loading_screen.dart';
 export 'package:fl_astro_circle/pages/plamReaderDetail/plam_reader_detail.dart';
 export 'package:fl_astro_circle/pages/natalChart/natal_chart.dart';
 export 'package:fl_astro_circle/pages/natalChartDetail/natal_chart_detail.dart';

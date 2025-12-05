@@ -335,10 +335,17 @@ class _MyAppState extends State<MyApp> {
           child: const PlamReaderScreen(),
           type: PageTransitionType.rightToLeft,
         );
+      case '/plamReaderLoading':
+        return PageTransition(
+          child: const PlamReaderLoadingScreen(),
+          type: PageTransitionType.fade,
+          settings: settings,
+        );
       case '/plamReaderDetail':
         return PageTransition(
           child: const PlamReaderDetailScreen(),
           type: PageTransitionType.rightToLeft,
+          settings: settings,
         );
       case '/natalchart':
         return PageTransition(

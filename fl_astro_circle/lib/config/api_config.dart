@@ -16,10 +16,16 @@ class ApiConfig {
   /// Альтернативы: 'google/gemma-7b-it:free', 'meta-llama/llama-3-8b-instruct:free'
   static const String aiModel = 'mistralai/mistral-7b-instruct:free';
   
+  /// Модель для Vision (бесплатная экспериментальная Gemini 2.0)
+  /// Используется для анализа изображений (например, ладони)
+  /// Альтернативы: 'google/gemini-pro-vision' (платная, более точная)
+  static const String visionModel = 'google/gemini-2.0-flash-exp:free';
+  
   /// App info для OpenRouter
   static const String appName = 'Astro Circle';
   static const String appUrl = 'https://astrocircle.app';
 }
+
 
 
 

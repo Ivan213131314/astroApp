@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:fl_astro_circle/localization/localization_const.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../theme/theme.dart';
 
@@ -67,8 +69,34 @@ class _PlamReaderScreenState extends State<PlamReaderScreen> {
 
   takePhotoButton() {
     return InkWell(
-      onTap: () {
-        Navigator.pushNamed(context, '/plamReaderDetail');
+      onTap: () async {
+        try {
+          final ImagePicker picker = ImagePicker();
+          final XFile? photo = await picker.pickImage(
+            source: ImageSource.camera,
+            imageQuality: 85,
+          );
+
+          if (photo != null && mounted) {
+            Navigator.pushNamed(
+              context,
+              '/plamReaderLoading',
+              arguments: {
+                'imageFile': File(photo.path),
+              },
+            );
+          }
+        } catch (e) {
+          debugPrint('Error taking photo: $e');
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(getTranslation(context, 'plam_reader.camera_error')),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        }
       },
       child: Container(
         width: double.maxFinite,
