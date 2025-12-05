@@ -26,6 +26,7 @@ export 'package:fl_astro_circle/pages/splash.dart';
 export 'package:fl_astro_circle/pages/search/search.dart';
 export 'package:fl_astro_circle/pages/horoscope/horoscope.dart';
 export 'package:fl_astro_circle/pages/horoscopeDetail/horoscope_detail.dart';
+export 'package:fl_astro_circle/pages/horoscopeDetail/horoscope_deep_detail_screen.dart';
 export 'package:fl_astro_circle/pages/astrologers/astrologers.dart';
 export 'package:fl_astro_circle/pages/astrologersDetail/astrologers_detail.dart';
 export 'package:fl_astro_circle/pages/chat/chat.dart';

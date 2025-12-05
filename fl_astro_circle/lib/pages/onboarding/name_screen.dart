@@ -1,5 +1,6 @@
 import 'package:fl_astro_circle/theme/theme.dart';
 import 'package:flutter/material.dart';
+import 'package:fl_astro_circle/services/user_service.dart';
 
 class NameScreen extends StatefulWidget {
   const NameScreen({super.key});
@@ -159,7 +160,10 @@ class _NameScreenState extends State<NameScreen> {
   Widget nextButton() {
     return InkWell(
       onTap: nameController.text.isNotEmpty
-          ? () {
+          ? () async {
+              final userService = UserService();
+              await userService.saveUserName(nameController.text);
+              if (!mounted) return;
               Navigator.pushNamed(context, '/onboardingBirthChartQuestion');
             }
           : null,

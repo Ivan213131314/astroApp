@@ -1,10 +1,12 @@
 import 'package:fl_astro_circle/localization/localization_const.dart';
 import 'package:fl_astro_circle/theme/theme.dart';
 import 'package:fl_astro_circle/services/auth_service.dart';
+import 'package:fl_astro_circle/services/user_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:io';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -15,7 +17,32 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final AuthService _authService = AuthService();
+  final UserService _userService = UserService();
+  String userName = 'User';
+  String? _userPhotoPath;
+  
   @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+  
+  Future<void> _loadUserData() async {
+    final name = await _userService.getUserName();
+    final photoPath = await _userService.getLocalProfilePhotoPath();
+    
+    if (name != null && name.isNotEmpty) {
+      setState(() {
+        userName = name;
+      });
+    }
+    
+    if (photoPath != null) {
+      setState(() {
+        _userPhotoPath = photoPath;
+      });
+    }
+  }
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     return Scaffold(
@@ -206,22 +233,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Container(
             height: size.height * 0.1,
             width: size.height * 0.1,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               shape: BoxShape.circle,
               image: DecorationImage(
-                image: AssetImage("assets/profile/profileImage.png"),
+                image: _userPhotoPath != null
+                    ? FileImage(File(_userPhotoPath!)) as ImageProvider
+                    : const AssetImage("assets/profile/profileImage.png"),
                 fit: BoxFit.cover,
               ),
             ),
           ),
           widthSpace,
           widthSpace,
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Leslie Alexander",
+                  userName,
                   style: medium16WhiteF4,
                 ),
                 heightSpace,
@@ -234,8 +263,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           widthSpace,
           InkWell(
-            onTap: () {
-              Navigator.pushNamed(context, '/editProfile');
+            onTap: () async {
+              await Navigator.pushNamed(context, '/editProfile');
+              // Перезагружаем данные после возврата с экрана редактирования
+              _loadUserData();
             },
             child: const Icon(
               LineAwesomeIcons.edit,

@@ -1,6 +1,9 @@
 import 'package:fl_astro_circle/localization/localization_const.dart';
 import 'package:fl_astro_circle/theme/theme.dart';
+import 'package:fl_astro_circle/services/user_service.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -10,16 +13,37 @@ class EditProfileScreen extends StatefulWidget {
 }
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
+  final UserService _userService = UserService();
+  final ImagePicker _imagePicker = ImagePicker();
+  
   TextEditingController nameController = TextEditingController();
   TextEditingController numberController = TextEditingController();
-  TextEditingController emailController = TextEditingController();
+  
+  File? _selectedImage;
+  String? _currentPhotoPath;
 
   @override
   void initState() {
-    nameController.text = "Leslie alexander";
-    numberController.text = "+91 91234567890)";
-    emailController.text = "lesliealexander@mail.com";
     super.initState();
+    numberController.text = "+91 91234567890)";
+    _loadUserData();
+  }
+  
+  Future<void> _loadUserData() async {
+    final name = await _userService.getUserName();
+    final photoPath = await _userService.getLocalProfilePhotoPath();
+    
+    if (name != null && name.isNotEmpty) {
+      setState(() {
+        nameController.text = name;
+      });
+    }
+    
+    if (photoPath != null) {
+      setState(() {
+        _currentPhotoPath = photoPath;
+      });
+    }
   }
 
   @override
@@ -65,9 +89,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           mobileNumberField(),
           heightSpace,
           heightSpace,
-          emailField(),
-          heightSpace,
-          heightSpace,
           heightSpace,
           heightSpace,
           heightSpace,
@@ -79,7 +100,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   updateButton() {
     return InkWell(
-      onTap: () {
+      onTap: () async {
+        // Сохраняем фото если выбрано новое
+        if (_selectedImage != null) {
+          await _userService.saveLocalProfilePhoto(_selectedImage!);
+        }
+        
+        // Сохраняем имя пользователя
+        if (nameController.text.isNotEmpty) {
+          await _userService.saveUserName(nameController.text);
+        }
+        if (!mounted) return;
         Navigator.pop(context);
       },
       child: Container(
@@ -105,40 +136,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
-  emailField() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          getTranslation(context, 'edit_profile.email_address'),
-          style: bold16WhiteF4,
-        ),
-        heightSpace,
-        Container(
-          width: double.maxFinite,
-          decoration: BoxDecoration(
-            color: recBgColor,
-            borderRadius: BorderRadius.circular(10.0),
-          ),
-          child: TextField(
-            style: medium15WhiteF4,
-            cursorColor: primaryColor,
-            controller: emailController,
-            keyboardType: TextInputType.emailAddress,
-            decoration: InputDecoration(
-              border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(
-                vertical: fixPadding * 1.4,
-                horizontal: fixPadding * 2.0,
-              ),
-              hintText: getTranslation(context, 'edit_profile.enter_email'),
-              hintStyle: medium15Grey,
-            ),
-          ),
-        )
-      ],
-    );
-  }
 
   mobileNumberField() {
     return Column(
@@ -220,10 +217,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             Container(
               height: size.height * 0.15,
               width: size.height * 0.15,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 image: DecorationImage(
-                  image: AssetImage("assets/profile/profileImage.png"),
+                  image: _getProfileImage(),
                   fit: BoxFit.cover,
                 ),
               ),
@@ -261,6 +258,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       ),
     );
   }
+  
+  ImageProvider _getProfileImage() {
+    if (_selectedImage != null) {
+      return FileImage(_selectedImage!);
+    } else if (_currentPhotoPath != null) {
+      return FileImage(File(_currentPhotoPath!));
+    } else {
+      return const AssetImage("assets/profile/profileImage.png");
+    }
+  }
 
   changephotoBottomSheet() {
     return showModalBottomSheet(
@@ -288,15 +295,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               heightSpace,
               heightSpace,
               imageOptionWidget(Icons.camera_alt, const Color(0xFF1E4799),
-                  getTranslation(context, 'edit_profile.camera')),
+                  getTranslation(context, 'edit_profile.camera'), _pickImageFromCamera),
               heightSpace,
               heightSpace,
               imageOptionWidget(Icons.photo, const Color(0xFF1E996D),
-                  getTranslation(context, 'edit_profile.gallery')),
+                  getTranslation(context, 'edit_profile.gallery'), _pickImageFromGallery),
               heightSpace,
               heightSpace,
               imageOptionWidget(Icons.delete, const Color(0xFFEF1717),
-                  getTranslation(context, 'edit_profile.remove_image')),
+                  getTranslation(context, 'edit_profile.remove_image'), _removePhoto),
             ],
           ),
         );
@@ -304,11 +311,55 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
-  imageOptionWidget(IconData icon, Color color, String title) {
+  Future<void> _pickImageFromCamera() async {
+    Navigator.pop(context);
+    try {
+      final XFile? image = await _imagePicker.pickImage(
+        source: ImageSource.camera,
+        imageQuality: 80,
+      );
+      
+      if (image != null) {
+        setState(() {
+          _selectedImage = File(image.path);
+        });
+      }
+    } catch (e) {
+      print('Error picking image from camera: $e');
+    }
+  }
+  
+  Future<void> _pickImageFromGallery() async {
+    Navigator.pop(context);
+    try {
+      final XFile? image = await _imagePicker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 80,
+      );
+      
+      if (image != null) {
+        setState(() {
+          _selectedImage = File(image.path);
+        });
+      }
+    } catch (e) {
+      print('Error picking image from gallery: $e');
+    }
+  }
+  
+  Future<void> _removePhoto() async {
+    Navigator.pop(context);
+    setState(() {
+      _selectedImage = null;
+      _currentPhotoPath = null;
+    });
+    
+    await _userService.deleteLocalProfilePhoto();
+  }
+
+  imageOptionWidget(IconData icon, Color color, String title, VoidCallback onTap) {
     return InkWell(
-      onTap: () {
-        Navigator.pop(context);
-      },
+      onTap: onTap,
       child: Row(
         children: [
           Container(

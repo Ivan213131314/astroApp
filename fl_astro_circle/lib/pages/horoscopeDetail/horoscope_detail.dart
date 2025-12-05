@@ -2,6 +2,7 @@ import 'package:fl_astro_circle/localization/localization_const.dart';
 import 'package:fl_astro_circle/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
+import 'horoscope_deep_detail_screen.dart';
 
 class HoroscopeDetailScreen extends StatefulWidget {
   const HoroscopeDetailScreen({super.key});
@@ -70,6 +71,25 @@ class _HoroscopeDetailScreenState extends State<HoroscopeDetailScreen> {
       "value": 0.95,
     }
   ];
+
+  void _navigateToDeepDetail(HoroscopeCategory category, String teaser) {
+    final timePeriod = selectedindex == 0
+        ? getTranslation(context, 'horoscope_detail.today')
+        : (selectedindex == 1
+            ? getTranslation(context, 'horoscope_detail.tomorrow')
+            : getTranslation(context, 'horoscope_detail.this_week'));
+
+    Navigator.pushNamed(
+      context,
+      '/horoscopeDeepDetail',
+      arguments: {
+        'zodiacSign': getTranslation(context, 'horoscope_detail.virgo'),
+        'timePeriod': timePeriod,
+        'category': category.name,
+        'teaser': teaser,
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -140,6 +160,13 @@ class _HoroscopeDetailScreenState extends State<HoroscopeDetailScreen> {
             style: regualr14Grey,
           ),
           heightSpace,
+          _buildGoDeeper(
+            primaryColor,
+            HoroscopeCategory.overall,
+            "Lorem ipsum dolor sit amet consectetur. In vitae in volutpat eu lectus.",
+            Icons.auto_awesome,
+          ),
+          heightSpace,
           heightSpace,
           titleWidget(getTranslation(context, 'horoscope_detail.love_passion'),
               redColor),
@@ -147,6 +174,13 @@ class _HoroscopeDetailScreenState extends State<HoroscopeDetailScreen> {
           const Text(
             "Lorem ipsum dolor sit amet consectetur. In vitae in volutpat eu lectus. Eget aliquet pharetra nunc lacus. Mauris at mattis laoreet quam. Cursus risus nisl nulla et magna maecenasid id. Enim nibh quisque tellus urna justo. Egestas id pharetrah morbi quam in eu. Mattis mattis odio velit volutpat blandit a pellentesque scelerisque vestibulum eget pulvinar. Eu sit gh ",
             style: regualr14Grey,
+          ),
+          heightSpace,
+          _buildGoDeeper(
+            redColor,
+            HoroscopeCategory.love,
+            "Lorem ipsum dolor sit amet consectetur. In vitae in volutpat eu lectus.",
+            Icons.favorite,
           ),
           heightSpace,
           heightSpace,
@@ -159,15 +193,60 @@ class _HoroscopeDetailScreenState extends State<HoroscopeDetailScreen> {
             style: regualr14Grey,
           ),
           heightSpace,
-          heightSpace,
-          titleWidget(
-              getTranslation(context, 'horoscope_detail.health'), primaryColor),
-          heightSpace,
-          const Text(
-            "Lorem ipsum dolor sit amet consectetur. In vitae in volutpat eu lectus. Eget aliquet pharetra nunc lacus. Mauris at mattis laoreet quam. Cursus risus nisl nulla et magna maecenasid id. Enim nibh quisque tellus urna justo. Egestas id pharetrah morbi quam in eu. Mattis mattis odio velit volutpat blandit a pellentesque scelerisque vestibulum eget pulvinar. Eu sit gh ",
-            style: regualr14Grey,
+          _buildGoDeeper(
+            greenColor,
+            HoroscopeCategory.business,
+            "Lorem ipsum dolor sit amet consectetur. In vitae in volutpat eu lectus.",
+            Icons.business_center,
           ),
+          heightSpace,
+          heightSpace,
         ],
+      ),
+    );
+  }
+
+  Widget _buildGoDeeper(
+      Color color, HoroscopeCategory category, String teaser, IconData icon) {
+    return GestureDetector(
+      onTap: () => _navigateToDeepDetail(category, teaser),
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: fixPadding * 1.5,
+          vertical: fixPadding,
+        ),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [color.withValues(alpha: 0.8), color],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+          ),
+          borderRadius: BorderRadius.circular(25),
+          boxShadow: [
+            BoxShadow(
+              color: color.withValues(alpha: 0.3),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: whiteColor, size: 18),
+            const SizedBox(width: 8),
+            const Text(
+              'Go Deeper',
+              style: TextStyle(
+                color: whiteColor,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(width: 4),
+            const Icon(Icons.arrow_forward, color: whiteColor, size: 16),
+          ],
+        ),
       ),
     );
   }

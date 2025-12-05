@@ -2,6 +2,9 @@ import 'package:fl_astro_circle/localization/localization_const.dart';
 import 'package:fl_astro_circle/theme/theme.dart';
 import 'package:fl_astro_circle/widget/column_builder.dart';
 import 'package:flutter/material.dart';
+import 'package:fl_astro_circle/services/user_service.dart';
+import 'dart:io';
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -11,6 +14,32 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  String userName = 'user';
+  String? _userPhotoPath;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserName();
+  }
+
+  Future<void> _loadUserName() async {
+    final userService = UserService();
+    final name = await userService.getUserName();
+    final photoPath = await userService.getLocalProfilePhotoPath();
+    
+    if (name != null && name.isNotEmpty) {
+      setState(() {
+        userName = name;
+      });
+    }
+    
+    if (photoPath != null) {
+      setState(() {
+        _userPhotoPath = photoPath;
+      });
+    }
+  }
   final horoscope = [
     {
       "image": "assets/home/image-1.png",
@@ -140,8 +169,10 @@ class _HomeScreenState extends State<HomeScreen> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(color: whiteF4Color, width: 1),
-                image: const DecorationImage(
-                  image: AssetImage("assets/home/profileImage.png"),
+                image: DecorationImage(
+                  image: _userPhotoPath != null
+                      ? FileImage(File(_userPhotoPath!)) as ImageProvider
+                      : const AssetImage("assets/home/profileImage.png"),
                   fit: BoxFit.cover,
                 ),
               ),
@@ -153,7 +184,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    getTranslation(context, 'home.hello_user'),
+                    'Hello $userName',
                     style: medium14WhiteF4,
                   ),
                   Text(
@@ -165,14 +196,6 @@ class _HomeScreenState extends State<HomeScreen> {
             )
           ],
         ),
-        actions: [
-          IconButton(
-            onPressed: () {
-              Navigator.pushNamed(context, '/search');
-            },
-            icon: const Icon(Icons.search),
-          ),
-        ],
       ),
       body: ListView(
         physics: const BouncingScrollPhysics(),

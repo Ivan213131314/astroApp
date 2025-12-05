@@ -4,6 +4,7 @@ import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'dart:math';
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
+import 'package:fl_astro_circle/services/user_service.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -133,6 +134,10 @@ class AuthService {
       _auth.signOut(),
       _googleSignIn.signOut(),
     ]);
+    
+    // Очищаем данные пользователя из кэша
+    final userService = UserService();
+    await userService.clearUserData();
   }
 
   String generateNonce([int length = 32]) {
