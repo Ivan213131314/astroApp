@@ -33,12 +33,12 @@ const PERIODS = ['today', 'tomorrow', 'this_week'];
  */
 function generatePrompt(zodiacSign, period) {
     const periodText = {
-        'today': 'на сегодня',
-        'tomorrow': 'на завтра',
-        'this_week': 'на эту неделю'
+        'today': 'for today',
+        'tomorrow': 'for tomorrow',
+        'this_week': 'for this week'
     }[period];
 
-    return `Ты профессиональный астролог. Создай детальный гороскоп для знака зодиака ${zodiacSign} ${periodText}.
+    return `You are a professional astrologer. Create a detailed horoscope for the zodiac sign ${zodiacSign} ${periodText}.
 
 CRITICAL: You MUST return ONLY a single valid JSON object.
 
@@ -48,46 +48,46 @@ Strict rules:
 - No explanations, comments, or extra text
 - Output ONLY the JSON object
 - JSON must be complete, valid, and properly closed
-- All text fields must be in Russian
+- All text fields must be in ENGLISH language
 
 Required JSON structure:
 {
   "overall": {
-    "score": <число от 1 до 100>,
-    "text": "<краткое описание общего прогноза, 2-3 предложения>",
-    "deepText": "<детальный анализ, 4-5 предложений с конкретными советами>"
+    "score": <number from 1 to 100>,
+    "text": "<brief description of overall forecast, 2-3 sentences>",
+    "deepText": "<detailed analysis, 4-5 sentences with specific advice>"
   },
   "love": {
-    "score": <число от 1 до 100>,
-    "text": "<краткое описание любовного прогноза, 2-3 предложения>",
-    "deepText": "<детальный анализ личной жизни, 4-5 предложений>"
+    "score": <number from 1 to 100>,
+    "text": "<brief description of love forecast, 2-3 sentences>",
+    "deepText": "<detailed analysis of personal life, 4-5 sentences>"
   },
   "business": {
-    "score": <число от 1 до 100>,
-    "text": "<краткое описание карьерного прогноза, 2-3 предложения>",
-    "deepText": "<детальный анализ карьеры и финансов, 4-5 предложений>"
+    "score": <number from 1 to 100>,
+    "text": "<brief description of career forecast, 2-3 sentences>",
+    "deepText": "<detailed analysis of career and finances, 4-5 sentences>"
   },
   "health": {
-    "score": <число от 1 до 100>,
-    "text": "<краткое описание прогноза здоровья, 2-3 предложения>",
-    "deepText": "<детальный анализ здоровья и самочувствия, 4-5 предложений>"
+    "score": <number from 1 to 100>,
+    "text": "<brief description of health forecast, 2-3 sentences>",
+    "deepText": "<detailed analysis of health and wellbeing, 4-5 sentences>"
   }
 }
 
 Rules:
-- Все тексты НА РУССКОМ ЯЗЫКЕ
-- Scores должны быть целыми числами от 1 до 100
-- Тексты должны быть уникальными и конкретными
-- Используй астрологическую терминологию
-- JSON должен быть полным и валидным
-- Закрой все скобки правильно
+- All texts must be in ENGLISH language
+- Scores must be integers from 1 to 100
+- Texts must be unique and specific
+- Use astrological terminology
+- JSON must be complete and valid
+- Close all brackets properly
 
 If you cannot generate a full response, return this fallback EXACTLY:
 {
-  "overall": {"score": 50, "text": "Временно недоступен", "deepText": "Временно недоступен"},
-  "love": {"score": 50, "text": "Временно недоступен", "deepText": "Временно недоступен"},
-  "business": {"score": 50, "text": "Временно недоступен", "deepText": "Временно недоступен"},
-  "health": {"score": 50, "text": "Временно недоступен", "deepText": "Временно недоступен"}
+  "overall": {"score": 50, "text": "Temporarily unavailable", "deepText": "Temporarily unavailable"},
+  "love": {"score": 50, "text": "Temporarily unavailable", "deepText": "Temporarily unavailable"},
+  "business": {"score": 50, "text": "Temporarily unavailable", "deepText": "Temporarily unavailable"},
+  "health": {"score": 50, "text": "Temporarily unavailable", "deepText": "Temporarily unavailable"}
 }
 
 START YOUR RESPONSE WITH { AND END WITH }`;
@@ -164,23 +164,23 @@ async function generateHoroscopeWithAI(zodiacSign, period) {
         return {
             overall: {
                 score: 75,
-                text: 'Сегодня звезды благоприятствуют новым начинаниям. Будьте открыты к возможностям.',
-                deepText: 'Планетарные аспекты указывают на период позитивных изменений. Используйте это время для самосовершенствования и развития. Доверяйте своей интуиции.'
+                text: 'The stars favor new beginnings today. Be open to opportunities.',
+                deepText: 'Planetary aspects indicate a period of positive change. Use this time for self-improvement and development. Trust your intuition and embrace the cosmic energies surrounding you.'
             },
             love: {
                 score: 80,
-                text: 'В отношениях ожидается гармония и понимание.',
-                deepText: 'Венера находится в благоприятном положении, что создает прекрасные условия для романтики и укрепления связей.'
+                text: 'Harmony and understanding are expected in relationships.',
+                deepText: 'Venus is in a favorable position, creating excellent conditions for romance and strengthening bonds. This is an ideal time to express your feelings and deepen emotional connections with loved ones.'
             },
             business: {
                 score: 70,
-                text: 'Профессиональные дела требуют внимания и концентрации.',
-                deepText: 'Марс придает энергии для достижения карьерных целей. Это хорошее время для важных решений.'
+                text: 'Professional matters require attention and concentration.',
+                deepText: 'Mars provides energy to achieve career goals. This is a good time for important decisions. Focus on strategic planning and building professional relationships that will serve you long-term.'
             },
             health: {
                 score: 75,
-                text: 'Общее самочувствие стабильное, следите за режимом дня.',
-                deepText: 'Луна влияет на эмоциональное состояние. Уделите внимание отдыху и восстановлению сил.'
+                text: 'Overall well-being is stable, monitor your daily routine.',
+                deepText: 'The Moon influences your emotional state. Pay attention to rest and recovery. Balance physical activity with relaxation to maintain optimal health and energy levels.'
             }
         };
     }

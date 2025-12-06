@@ -16,6 +16,7 @@ class _HoroscopeDeepDetailScreenState extends State<HoroscopeDeepDetailScreen> {
   String? _timePeriod;
   HoroscopeCategory? _category;
   String? _teaser;
+  HoroscopeData? _horoscopeData;
   bool _initialized = false;
 
   @override
@@ -28,6 +29,7 @@ class _HoroscopeDeepDetailScreenState extends State<HoroscopeDeepDetailScreen> {
       _zodiacSign = args['zodiacSign'] as String?;
       _timePeriod = args['timePeriod'] as String?;
       _teaser = args['teaser'] as String?;
+      _horoscopeData = args['horoscopeData'] as HoroscopeData?;
 
       final categoryName = args['category'] as String?;
       if (categoryName != null) {
@@ -40,62 +42,26 @@ class _HoroscopeDeepDetailScreenState extends State<HoroscopeDeepDetailScreen> {
     _initialized = true;
   }
 
-  String _getMockDetail() {
-    final sign = _zodiacSign ?? 'Your Sign';
-    final period = _timePeriod ?? 'today';
+  String _getDeepDetail() {
+    // Check if we have the necessary data
+    if (_horoscopeData == null || _category == null) {
+      return 'Детальный анализ временно недоступен. Попробуйте позже.';
+    }
 
-    switch (_category) {
-      case HoroscopeCategory.overall:
-        return '''The cosmic energies surrounding $sign $period are particularly powerful and transformative.
-
-The planetary alignments create a unique opportunity for personal growth and self-discovery. You may find yourself drawn to new perspectives and ways of thinking that challenge your usual patterns.
-
-This is an excellent time to trust your intuition and follow your inner guidance. The universe is conspiring in your favor, even if circumstances don't immediately appear that way.
-
-Pay attention to synchronicities and meaningful coincidences that occur throughout your day. These are messages from the cosmos, guiding you toward your highest path.
-
-Your natural strengths are amplified during this period, making it easier to accomplish tasks that usually require more effort. Use this energy wisely to make progress on important goals.
-
-Challenges that arise are opportunities for growth rather than obstacles. Approach difficulties with curiosity and an open mind, knowing that each experience is teaching you something valuable.
-
-The overall theme for $sign $period is transformation through awareness. Stay present, remain flexible, and trust in the journey.''';
-
-      case HoroscopeCategory.love:
-        return '''Matters of the heart take center stage for $sign $period, bringing both excitement and depth to your romantic life.
-
-If you're in a relationship, this is a powerful time for deepening your connection and understanding your partner on a more profound level. Honest communication opens doors to greater intimacy.
-
-Single individuals may find unexpected romantic opportunities presenting themselves. Be open to connections that don't fit your usual type—the universe may surprise you with someone special.
-
-Venus and Mars create a harmonious dance in your chart, enhancing your natural charm and magnetism. You're radiating an attractive energy that others can't help but notice.
-
-Past relationship patterns may come up for review and healing. This is your opportunity to release what no longer serves you and create space for healthier dynamics.
-
-Self-love is equally important during this time. The relationship you have with yourself sets the tone for all other relationships in your life. Treat yourself with the kindness and respect you deserve.
-
-For those exploring new relationships, take your time. True connection develops through shared experiences and genuine vulnerability, not rushed decisions.
-
-The cosmic message for $sign $period in matters of love is to lead with your heart while keeping your wisdom engaged.''';
-
-      case HoroscopeCategory.business:
-        return '''Professional opportunities and career advancement are highlighted for $sign $period, bringing potential for significant progress.
-
-Your creative problem-solving abilities are particularly sharp now. Innovative ideas flow easily, and you have the clarity to see solutions that others might miss.
-
-This is an excellent time for networking and building professional relationships. Connections made during this period could prove valuable for years to come.
-
-Financial matters require attention and careful planning. While opportunities for increase are present, they require strategic action rather than impulsive decisions.
-
-Leadership qualities emerge naturally in your work environment. Others look to you for guidance and direction, even if you don't hold an official leadership position.
-
-Projects that have been stalled or challenging may suddenly begin to move forward. Persistence pays off, and your consistent effort is about to show tangible results.
-
-Be open to unexpected opportunities that don't fit your original plan. Sometimes the universe has better ideas than we do about our career path.
-
-The key to success for $sign $period lies in balancing ambition with patience, and confidence with humility. Trust in your abilities while remaining open to learning.''';
-
-      default:
-        return 'Detailed cosmic insights are currently unavailable.';
+    try {
+      // Get the category-specific data from HoroscopeData
+      final categoryData = _horoscopeData!.getCategoryData(_category!);
+      
+      // Return deepText if available, otherwise fall back to regular text
+      if (categoryData.deepText.isNotEmpty) {
+        return categoryData.deepText;
+      } else if (categoryData.text.isNotEmpty) {
+        return categoryData.text;
+      } else {
+        return 'Детальный анализ временно недоступен. Попробуйте позже.';
+      }
+    } catch (e) {
+      return 'Произошла ошибка при загрузке детального анализа.';
     }
   }
 
@@ -225,7 +191,7 @@ The key to success for $sign $period lies in balancing ambition with patience, a
   }
 
   Widget _buildContent() {
-    final detailContent = _getMockDetail();
+    final detailContent = _getDeepDetail();
     
     return Container(
       padding: const EdgeInsets.all(fixPadding * 2),
