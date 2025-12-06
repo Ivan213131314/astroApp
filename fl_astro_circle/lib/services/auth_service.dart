@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:math';
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
@@ -138,6 +139,15 @@ class AuthService {
     // Очищаем данные пользователя из кэша
     final userService = UserService();
     await userService.clearUserData();
+    
+    // ВАЖНО: Очищаем Firestore cache чтобы предотвратить показ уведомлений другого пользователя
+    try {
+      await FirebaseFirestore.instance.clearPersistence();
+      print('Firestore cache cleared successfully');
+    } catch (e) {
+      print('Warning: Failed to clear Firestore cache: $e');
+      // Не критично если не удалось очистить, distinct() всё равно предотвратит показ старых данных
+    }
   }
 
   String generateNonce([int length = 32]) {

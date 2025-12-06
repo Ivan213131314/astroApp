@@ -14,10 +14,10 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   
-  // Отключаем Firestore persistence чтобы предотвратить утечку кэша между пользователями
-  // Это исправляет баг когда уведомления от других аккаунтов кратковременно появляются
+  // Включаем Firestore persistence для мгновенной загрузки из кэша
+  // distinct() в стримах предотвратит показ старых данных других пользователей
   FirebaseFirestore.instance.settings = 
-      const Settings(persistenceEnabled: false);
+      const Settings(persistenceEnabled: true);
   
   // Инициализация Superwall
   Superwall.configure('pk_zZA_dWvZ0yUQUDpWQsBVO');

@@ -45,9 +45,20 @@ class NotificationStorageService {
     return _getUserCollection('universe_messages')
         .orderBy('createdAt', descending: true)
         .snapshots()
+        .handleError((error) {
+          print('Error in universe messages stream: $error');
+          return const Stream<List<UniverseMessageData>>.empty();
+        })
         .map((snapshot) => snapshot.docs
             .map((doc) => UniverseMessageData.fromFirestore(doc))
-            .toList());
+            .toList())
+        .distinct((prev, next) {
+          if (prev.length != next.length) return false;
+          for (int i = 0; i < prev.length; i++) {
+            if (prev[i].id != next[i].id) return false;
+          }
+          return true;
+        });
   }
 
   Future<void> updateUniverseMessageAudioPath(String docId, String audioFilePath) async {
@@ -105,9 +116,22 @@ class NotificationStorageService {
     return _getUserCollection('natal_charts')
         .orderBy('createdAt', descending: true)
         .snapshots()
+        .handleError((error) {
+          // Обработка ошибок (например, permission-denied)
+          print('Error in natal charts stream: $error');
+          return const Stream<List<NatalChartData>>.empty();
+        })
         .map((snapshot) => snapshot.docs
             .map((doc) => NatalChartData.fromFirestore(doc))
-            .toList());
+            .toList())
+        .distinct((prev, next) {
+          // Предотвращаем дублирование данных
+          if (prev.length != next.length) return false;
+          for (int i = 0; i < prev.length; i++) {
+            if (prev[i].id != next[i].id) return false;
+          }
+          return true;
+        });
   }
 
   Future<void> markNatalChartAsRead(String docId) async {
@@ -231,9 +255,20 @@ class NotificationStorageService {
     return _getUserCollection('compatibility')
         .orderBy('createdAt', descending: true)
         .snapshots()
+        .handleError((error) {
+          print('Error in compatibility stream: $error');
+          return const Stream<List<CompatibilityData>>.empty();
+        })
         .map((snapshot) => snapshot.docs
             .map((doc) => CompatibilityData.fromFirestore(doc))
-            .toList());
+            .toList())
+        .distinct((prev, next) {
+          if (prev.length != next.length) return false;
+          for (int i = 0; i < prev.length; i++) {
+            if (prev[i].id != next[i].id) return false;
+          }
+          return true;
+        });
   }
 
   Future<void> markCompatibilityAsRead(String docId) async {
@@ -327,9 +362,20 @@ class NotificationStorageService {
     return _getUserCollection('numerology')
         .orderBy('createdAt', descending: true)
         .snapshots()
+        .handleError((error) {
+          print('Error in numerology stream: $error');
+          return const Stream<List<NumerologyData>>.empty();
+        })
         .map((snapshot) => snapshot.docs
             .map((doc) => NumerologyData.fromFirestore(doc))
-            .toList());
+            .toList())
+        .distinct((prev, next) {
+          if (prev.length != next.length) return false;
+          for (int i = 0; i < prev.length; i++) {
+            if (prev[i].id != next[i].id) return false;
+          }
+          return true;
+        });
   }
 
   Future<void> markNumerologyAsRead(String docId) async {

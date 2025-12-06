@@ -1,6 +1,5 @@
 import 'dart:math';
 import 'package:fl_astro_circle/localization/localization_const.dart';
-import 'package:fl_astro_circle/services/universe_message_service.dart';
 import 'package:fl_astro_circle/services/notification_storage_service.dart';
 import 'package:fl_astro_circle/services/cosmic_audio_generator.dart';
 import 'package:fl_astro_circle/services/superwall_service.dart';
@@ -9,6 +8,7 @@ import 'package:fl_astro_circle/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:rxdart/rxdart.dart';
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
@@ -18,25 +18,16 @@ class NotificationScreen extends StatefulWidget {
 }
 
 class _NotificationScreenState extends State<NotificationScreen> {
-  final UniverseMessageService messageService = UniverseMessageService();
   final NotificationStorageService storageService = NotificationStorageService();
   final CosmicAudioGenerator audioGenerator = CosmicAudioGenerator();
   String? currentPlayingId;
   
   // Сохраняем callback для правильной очистки
-  late final VoidCallback _messageServiceListener;
   late final VoidCallback _audioGeneratorListener;
 
   @override
   void initState() {
     super.initState();
-    messageService.loadResponses();
-    
-    _messageServiceListener = () {
-      if (mounted) {
-        setState(() {});
-      }
-    };
     
     _audioGeneratorListener = () {
       if (mounted) {
@@ -44,14 +35,12 @@ class _NotificationScreenState extends State<NotificationScreen> {
       }
     };
     
-    messageService.addListener(_messageServiceListener);
     audioGenerator.setOnStateChanged(_audioGeneratorListener);
   }
 
   @override
   void dispose() {
     // Очищаем listeners чтобы предотвратить утечку памяти
-    messageService.removeListener(_messageServiceListener);
     audioGenerator.dispose();
     super.dispose();
   }
@@ -105,10 +94,10 @@ class _NotificationScreenState extends State<NotificationScreen> {
     );
     
     if (response.audioFilePath == null && filePath != null) {
-      await messageService.updateAudioFilePath(response.id, filePath);
+      await storageService.updateUniverseMessageAudioPath(response.id, filePath);
     }
     
-    messageService.markAsRead(response.id);
+    storageService.markUniverseMessageAsRead(response.id);
   }
 
   Future<void> togglePlayPause(UniverseMessageData response) async {
@@ -138,38 +127,43 @@ class _NotificationScreenState extends State<NotificationScreen> {
           style: bold20White,
         ),
       ),
-      body: StreamBuilder<List<NatalChartData>>(
-        stream: storageService.getNatalChartsStream(),
-        builder: (context, natalSnapshot) {
-          return StreamBuilder<List<CompatibilityData>>(
-            stream: storageService.getCompatibilityStream(),
-            builder: (context, compatSnapshot) {
-              return StreamBuilder<List<NumerologyData>>(
-                stream: storageService.getNumerologyStream(),
-                builder: (context, numerologySnapshot) {
-                  final natalCharts = natalSnapshot.data ?? [];
-                  final compatibilities = compatSnapshot.data ?? [];
-                  final numerologies = numerologySnapshot.data ?? [];
-                  final universeMessages = messageService.responses;
-                  
-                  final hasAnyNotifications = natalCharts.isNotEmpty || 
-                      compatibilities.isNotEmpty || 
-                      numerologies.isNotEmpty ||
-                      universeMessages.isNotEmpty;
+      body: StreamBuilder<List<dynamic>>(
+        stream: Rx.combineLatest4(
+          storageService.getNatalChartsStream(),
+          storageService.getCompatibilityStream(),
+          storageService.getNumerologyStream(),
+          storageService.getUniverseMessagesStream(),
+          (natalCharts, compatibilities, numerologies, universeMessages) {
+            return [natalCharts, compatibilities, numerologies, universeMessages];
+          },
+        ),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const Center(
+              child: CircularProgressIndicator(color: primaryColor),
+            );
+          }
 
-                  if (!hasAnyNotifications) {
-                    return emptyNotificationListContent();
-                  }
+          final data = snapshot.data!;
+          final natalCharts = data[0] as List<NatalChartData>;
+          final compatibilities = data[1] as List<CompatibilityData>;
+          final numerologies = data[2] as List<NumerologyData>;
+          final universeMessages = data[3] as List<UniverseMessageData>;
 
-                  return allNotificationsContent(
-                    universeMessages: universeMessages,
-                    natalCharts: natalCharts,
-                    compatibilities: compatibilities,
-                    numerologies: numerologies,
-                  );
-                },
-              );
-            },
+          final hasAnyNotifications = natalCharts.isNotEmpty || 
+              compatibilities.isNotEmpty || 
+              numerologies.isNotEmpty ||
+              universeMessages.isNotEmpty;
+
+          if (!hasAnyNotifications) {
+            return emptyNotificationListContent();
+          }
+
+          return allNotificationsContent(
+            universeMessages: universeMessages,
+            natalCharts: natalCharts,
+            compatibilities: compatibilities,
+            numerologies: numerologies,
           );
         },
       ),
@@ -298,7 +292,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
         color: redColor,
       ),
       onDismissed: (direction) {
-        messageService.deleteResponse(response.id);
+        storageService.deleteUniverseMessage(response.id);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             backgroundColor: whiteColor,
