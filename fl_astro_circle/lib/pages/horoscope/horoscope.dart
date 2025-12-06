@@ -106,7 +106,11 @@ class _HoroscopeScreenState extends State<HoroscopeScreen> {
       itemBuilder: (context, index) {
         return GestureDetector(
           onTap: () {
-            Navigator.pushNamed(context, '/horoscopeDetail');
+            Navigator.pushNamed(
+              context,
+              '/horoscopeDetail',
+              arguments: {'signIndex': index},
+            );
           },
           child: Container(
             padding: const EdgeInsets.symmetric(

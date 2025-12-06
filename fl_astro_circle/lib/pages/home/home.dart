@@ -444,7 +444,11 @@ class _HomeScreenState extends State<HomeScreen> {
           (index) {
             return GestureDetector(
               onTap: () {
-                Navigator.pushNamed(context, '/horoscopeDetail');
+                Navigator.pushNamed(
+                  context,
+                  '/horoscopeDetail',
+                  arguments: {'signIndex': index},
+                );
               },
               child: Container(
                 height: 78,

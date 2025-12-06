@@ -1,12 +1,7 @@
 import 'package:fl_astro_circle/localization/localization_const.dart';
 import 'package:fl_astro_circle/theme/theme.dart';
 import 'package:flutter/material.dart';
-
-enum HoroscopeCategory {
-  overall,
-  love,
-  business,
-}
+import 'package:fl_astro_circle/models/horoscope_data.dart';
 
 class HoroscopeDeepDetailScreen extends StatefulWidget {
   const HoroscopeDeepDetailScreen({super.key});

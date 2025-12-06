@@ -253,6 +253,7 @@ class _MyAppState extends State<MyApp> {
         return PageTransition(
           child: const HoroscopeDetailScreen(),
           type: PageTransitionType.rightToLeft,
+          settings: settings,
         );
       case '/horoscopeDeepDetail':
         return PageTransition(

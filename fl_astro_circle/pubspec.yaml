@@ -60,6 +60,7 @@ dependencies:
   superwallkit_flutter: ^2.0.5
   http: ^1.2.0
   image_picker: ^1.0.7
+  cloud_functions: ^5.1.4
 
 dev_dependencies:
   flutter_test:
