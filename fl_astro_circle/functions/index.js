@@ -94,13 +94,16 @@ START YOUR RESPONSE WITH { AND END WITH }`;
 }
 
 /**
- * Call OpenRouter AI API to generate horoscope
+ * Call OpenRouter AI API to generate horoscope with retry logic
+ * Retries up to MAX_RETRIES times if JSON parsing fails
  */
-async function generateHoroscopeWithAI(zodiacSign, period) {
+async function generateHoroscopeWithAI(zodiacSign, period, retryCount = 0) {
+    const MAX_RETRIES = 3;
+
     try {
         const prompt = generatePrompt(zodiacSign, period);
 
-        console.log(`Generating horoscope for ${zodiacSign} (${period})...`);
+        console.log(`Generating horoscope for ${zodiacSign} (${period})... ${retryCount > 0 ? `(Attempt ${retryCount + 1}/${MAX_RETRIES})` : ''}`);
 
         const response = await axios.post(
             OPENROUTER_BASE_URL,
@@ -152,15 +155,34 @@ async function generateHoroscopeWithAI(zodiacSign, period) {
 
         console.log(`Cleaned JSON: ${jsonText.substring(0, 200)}...`);
 
+        // Try to parse JSON
         const horoscopeData = JSON.parse(jsonText);
 
-        console.log(`✓ Generated horoscope for ${zodiacSign} (${period})`);
+        // Validate that all required fields exist
+        if (!horoscopeData.overall || !horoscopeData.love || !horoscopeData.business || !horoscopeData.health) {
+            throw new Error('Missing required horoscope categories');
+        }
+
+        console.log(`✓ Successfully generated horoscope for ${zodiacSign} (${period})`);
 
         return horoscopeData;
     } catch (error) {
         console.error(`Error generating horoscope for ${zodiacSign} (${period}):`, error.message);
 
-        // Return fallback data if AI fails
+        // Retry if we haven't exceeded max retries
+        if (retryCount < MAX_RETRIES - 1) {
+            console.log(`Retrying... (${retryCount + 1}/${MAX_RETRIES - 1})`);
+
+            // Wait a bit before retrying (exponential backoff: 1s, 2s, 4s)
+            const waitTime = Math.pow(2, retryCount) * 1000;
+            await new Promise(resolve => setTimeout(resolve, waitTime));
+
+            // Recursive retry
+            return generateHoroscopeWithAI(zodiacSign, period, retryCount + 1);
+        }
+
+        // All retries failed, return fallback data
+        console.error(`All ${MAX_RETRIES} attempts failed for ${zodiacSign} (${period}), using fallback data`);
         return {
             overall: {
                 score: 75,
