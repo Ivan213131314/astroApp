@@ -476,7 +476,6 @@ The greater good you serve through your life path benefits not only yourself but
         const SizedBox(height: 30),
         for (int i = 0; i < 4; i++)
           Padding(
-            key: ValueKey('shimmer_$i'),
             padding: const EdgeInsets.only(bottom: 12),
             child: _shimmerLine(
               width: i == 3
@@ -590,7 +589,6 @@ The greater good you serve through your life path benefits not only yourself but
               // Signal waves
               for (int index = 0; index < 3; index++)
                 Builder(
-                  key: ValueKey('wave_$index'),
                   builder: (context) {
                     final delay = index * 0.3;
                     final waveProgress =

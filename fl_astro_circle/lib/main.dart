@@ -7,11 +7,17 @@ import 'package:page_transition/page_transition.dart';
 import 'package:fl_astro_circle/pages/screens.dart';
 import 'localization/localization_const.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:superwallkit_flutter/superwallkit_flutter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  
+  // Отключаем Firestore persistence чтобы предотвратить утечку кэша между пользователями
+  // Это исправляет баг когда уведомления от других аккаунтов кратковременно появляются
+  FirebaseFirestore.instance.settings = 
+      const Settings(persistenceEnabled: false);
   
   // Инициализация Superwall
   Superwall.configure('pk_zZA_dWvZ0yUQUDpWQsBVO');

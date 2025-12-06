@@ -22,25 +22,36 @@ class _NotificationScreenState extends State<NotificationScreen> {
   final NotificationStorageService storageService = NotificationStorageService();
   final CosmicAudioGenerator audioGenerator = CosmicAudioGenerator();
   String? currentPlayingId;
+  
+  // Сохраняем callback для правильной очистки
+  late final VoidCallback _messageServiceListener;
+  late final VoidCallback _audioGeneratorListener;
 
   @override
   void initState() {
     super.initState();
     messageService.loadResponses();
-    messageService.addListener(() {
+    
+    _messageServiceListener = () {
       if (mounted) {
         setState(() {});
       }
-    });
-    audioGenerator.setOnStateChanged(() {
+    };
+    
+    _audioGeneratorListener = () {
       if (mounted) {
         setState(() {});
       }
-    });
+    };
+    
+    messageService.addListener(_messageServiceListener);
+    audioGenerator.setOnStateChanged(_audioGeneratorListener);
   }
 
   @override
   void dispose() {
+    // Очищаем listeners чтобы предотвратить утечку памяти
+    messageService.removeListener(_messageServiceListener);
     audioGenerator.dispose();
     super.dispose();
   }
