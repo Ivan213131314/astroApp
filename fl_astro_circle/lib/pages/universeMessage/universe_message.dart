@@ -113,9 +113,30 @@ class _UniverseMessageScreenState extends State<UniverseMessageScreen> {
         centerTitle: false,
         automaticallyImplyLeading: false,
         titleSpacing: 20.0,
-        title: const Text(
-          'Universe Message',
-          style: bold20White,
+        title: Row(
+          children: [
+            GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: Container(
+                height: 35,
+                width: 35,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(5.0),
+                  color: recBgColor,
+                ),
+                child: const Icon(
+                  Icons.arrow_back,
+                  color: whiteColor,
+                  size: 22,
+                ),
+              ),
+            ),
+            const SizedBox(width: 16),
+            const Text(
+              'Universe Message',
+              style: bold20White,
+            ),
+          ],
         ),
         actions: [
           Padding(
