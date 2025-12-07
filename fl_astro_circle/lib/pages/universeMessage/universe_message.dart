@@ -23,6 +23,7 @@ class _UniverseMessageScreenState extends State<UniverseMessageScreen> {
   MessageStatus currentStatus = MessageStatus.idle;
   Timer? responseTimer;
   bool showReceivedDialog = false;
+  String? currentQuestionForDialog; // Track which question's response is being shown
 
   final List<String> quickSuggestions = [
     "When will I find my love?",
@@ -40,11 +41,32 @@ class _UniverseMessageScreenState extends State<UniverseMessageScreen> {
   @override
   void initState() {
     super.initState();
+    messageService.loadResponses();
+    
+    // Check for existing unread messages when screen loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkForUnreadMessages();
+    });
+    
     messageService.addListener(() {
       if (mounted) {
-        setState(() {});
+        _checkForUnreadMessages();
       }
     });
+  }
+  
+  void _checkForUnreadMessages() {
+    if (!showReceivedDialog && 
+        messageService.responses.isNotEmpty && 
+        currentStatus == MessageStatus.idle) {
+      final latestMessage = messageService.responses.first;
+      if (!latestMessage.isRead) {
+        setState(() {
+          showReceivedDialog = true;
+          currentQuestionForDialog = latestMessage.question;
+        });
+      }
+    }
   }
 
   @override
@@ -57,35 +79,24 @@ class _UniverseMessageScreenState extends State<UniverseMessageScreen> {
   void sendMessageToUniverse() {
     if (messageController.text.trim().isEmpty) return;
     
+    final questionText = messageController.text;
+    
     setState(() {
       currentStatus = MessageStatus.sending;
     });
 
-    Future.delayed(const Duration(seconds: 2), () {
+    // Анимация висит 10 секунд, потом сразу показываем диалог
+    responseTimer = Timer(const Duration(seconds: 10), () {
+      // Сохраняем сообщение в Firestore
+      messageService.addUniverseResponse(questionText);
+      
       if (mounted) {
+        currentQuestionForDialog = questionText;
         setState(() {
-          currentStatus = MessageStatus.waiting;
+          showReceivedDialog = true;
+          currentStatus = MessageStatus.idle;
         });
-        
-        // Получение ответа от вселенной через 5 секунд
-        responseTimer = Timer(const Duration(seconds: 5), () {
-          if (mounted) {
-            messageService.addUniverseResponse(messageController.text);
-            setState(() {
-              showReceivedDialog = true;
-            });
-            
-            Future.delayed(const Duration(seconds: 3), () {
-              if (mounted) {
-                setState(() {
-                  showReceivedDialog = false;
-                  currentStatus = MessageStatus.idle;
-                  messageController.clear();
-                });
-              }
-            });
-          }
-        });
+        messageController.clear();
       }
     });
   }
@@ -173,303 +184,346 @@ class _UniverseMessageScreenState extends State<UniverseMessageScreen> {
         children: [
           Center(
             child: SingleChildScrollView(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    margin: const EdgeInsets.symmetric(horizontal: fixPadding * 2),
-                    padding: const EdgeInsets.all(fixPadding * 2),
-                    decoration: BoxDecoration(
-                      color: blueShade1,
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: primaryColor.withValues(alpha: 0.3),
-                          blurRadius: 20,
-                          spreadRadius: 5,
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      children: [
-                        SizedBox(
-                          height: 60,
-                          width: 60,
-                          child: Stack(
-                            alignment: Alignment.center,
+              padding: const EdgeInsets.all(fixPadding * 2),
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 500),
+                child: currentStatus == MessageStatus.sending
+                    ? TweenAnimationBuilder<double>(
+                        key: const ValueKey('sending'),
+                        tween: Tween(begin: 0.0, end: 1.0),
+                        duration: const Duration(seconds: 10),
+                        builder: (context, value, child) {
+                          return Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              // Звездочки вокруг конверта
-                              Positioned(
-                                top: 0,
-                                left: 5,
-                                child: Icon(
-                                  Icons.star,
-                                  size: 14,
-                                  color: primaryColor.withValues(alpha: 0.7),
+                              Transform.translate(
+                                offset: Offset(0, -50 * value),
+                                child: Opacity(
+                                  opacity: 1.0 - (value > 0.8 ? (value - 0.8) * 5 : 0.0),
+                                  child: SizedBox(
+                                    height: 100,
+                                    width: 100,
+                                    child: Stack(
+                                      alignment: Alignment.center,
+                                      children: [
+                                        // Ripples
+                                        ...List.generate(3, (index) {
+                                          double localValue = (value * 5) % (1 + index * 0.5); 
+                                          // Simple cyclic ripple effect derived from main value would be tricky without separate controllers,
+                                          // but we can use the main value for expansion if we want just one wave or simplified ones.
+                                          // Let's stick to a simpler static animation or reusing the previous independent builders if we want detailed ripple loops.
+                                          // However, nesting builders is fine. Let's keep the ripples simple or use the main value.
+                                          // Re-instating the independent ripple builders for better visual quality:
+                                          return TweenAnimationBuilder<double>(
+                                            tween: Tween(begin: 0.0, end: 1.0),
+                                            duration: Duration(seconds: 1 + index),
+                                            builder: (context, rippleValue, child) {
+                                              return Container(
+                                                height: 60 + (40 * rippleValue),
+                                                width: 60 + (40 * rippleValue),
+                                                decoration: BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  border: Border.all(
+                                                    color: primaryColor.withValues(alpha: 0.5 * (1 - rippleValue)),
+                                                    width: 2,
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                            onEnd: () {}, 
+                                          );
+                                        }),
+                                        const Icon(
+                                          Icons.rocket_launch_rounded,
+                                          size: 50,
+                                          color: primaryColor,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
                               ),
-                              Positioned(
-                                top: 0,
-                                right: 5,
-                                child: Icon(
-                                  Icons.star,
-                                  size: 14,
-                                  color: primaryColor.withValues(alpha: 0.7),
+                              heightSpace,
+                              heightSpace,
+                              const Text(
+                                'Sending via satellites...',
+                                style: TextStyle(
+                                  color: whiteColor,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
-                              Positioned(
-                                bottom: 5,
-                                left: 0,
-                                child: Icon(
-                                  Icons.star,
-                                  size: 12,
-                                  color: primaryColor.withValues(alpha: 0.6),
+                              const SizedBox(height: 8),
+                              const Text(
+                                'Connecting to NASA network',
+                                style: TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 14,
                                 ),
                               ),
-                              Positioned(
-                                bottom: 5,
-                                right: 0,
-                                child: Icon(
-                                  Icons.star,
-                                  size: 12,
-                                  color: primaryColor.withValues(alpha: 0.6),
+                              heightSpace,
+                              heightSpace,
+                              // Progress Bar
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: fixPadding * 4),
+                                child: Column(
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(10),
+                                      child: LinearProgressIndicator(
+                                        value: value,
+                                        backgroundColor: whiteColor.withValues(alpha: 0.1),
+                                        valueColor: AlwaysStoppedAnimation<Color>(
+                                          primaryColor.withValues(alpha: 0.8),
+                                        ),
+                                        minHeight: 6,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      '${(value * 100).toInt()}%',
+                                      style: const TextStyle(
+                                        color: whiteColor,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ),
-                              // Конверт в центре
-                              const Icon(
-                                Icons.mail_outline_rounded,
-                                size: 38,
-                                color: primaryColor,
                               ),
                             ],
-                          ),
-                        ),
-                        heightSpace,
-                        const Text(
-                          'Ready? Send a message to space',
-                          style: bold18White,
-                          textAlign: TextAlign.center,
-                        ),
-                        heightSpace,
-                        heightSpace,
-                        const Row(
-                          children: [
-                            Icon(
-                              Icons.chat_bubble_outline,
-                              color: primaryColor,
-                              size: 20,
-                            ),
-                            widthSpace,
-                            Expanded(
-                              child: Text(
-                                'Ask anything that\'s on your mind',
-                                style: medium14WhiteF4,
-                              ),
-                            ),
-                          ],
-                        ),
-                        heightSpace,
-                        const Row(
-                          children: [
-                            Icon(
-                              Icons.lock_outline,
-                              color: primaryColor,
-                              size: 20,
-                            ),
-                            widthSpace,
-                            Expanded(
-                              child: Text(
-                                'Your message stays private and confidential',
-                                style: medium14WhiteF4,
-                              ),
-                            ),
-                          ],
-                        ),
-                        heightSpace,
-                        heightSpace,
-                        Container(
-                          padding: const EdgeInsets.all(fixPadding * 1.5),
-                          decoration: BoxDecoration(
-                            color: scaffoldBgColor.withValues(alpha: 0.5),
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          child: Text(
-                            getTooltipText(),
-                            style: regualr14Grey,
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              padding: const EdgeInsets.all(fixPadding * 2),
-              decoration: BoxDecoration(
-                color: blueShade1,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.3),
-                    blurRadius: 10,
-                    offset: const Offset(0, -5),
-                  ),
-                ],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (currentStatus == MessageStatus.idle) ...[
-                    SizedBox(
-                      height: 50,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: quickSuggestions.length,
-                        itemBuilder: (context, index) {
-                          return GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                messageController.text = quickSuggestions[index];
-                              });
-                            },
-                            child: Container(
-                              margin: const EdgeInsets.only(right: fixPadding),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: fixPadding * 1.5,
-                                vertical: fixPadding,
-                              ),
-                              decoration: BoxDecoration(
-                                color: scaffoldBgColor,
-                                borderRadius: BorderRadius.circular(25),
-                                border: Border.all(
-                                  color: primaryColor.withValues(alpha: 0.3),
-                                ),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  quickSuggestions[index],
-                                  style: medium14WhiteF4,
-                                ),
-                              ),
-                            ),
                           );
                         },
-                      ),
-                    ),
-                    heightSpace,
-                  ],
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: fixPadding * 1.5),
-                          decoration: BoxDecoration(
-                            color: scaffoldBgColor,
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          child: TextField(
-                            controller: messageController,
-                            enabled: currentStatus == MessageStatus.idle,
-                            style: regualr16WhiteF4,
-                            decoration: const InputDecoration(
-                              hintText: 'Write a message',
-                              hintStyle: regualr16Grey,
-                              border: InputBorder.none,
+                      )
+                    : Column(
+                        key: const ValueKey('idle'),
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                            height: 80,
+                            width: 80,
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Positioned(
+                                  top: 5,
+                                  left: 10,
+                                  child: Icon(
+                                    Icons.star,
+                                    size: 16,
+                                    color: primaryColor.withValues(alpha: 0.5),
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 0,
+                                  right: 15,
+                                  child: Icon(
+                                    Icons.star,
+                                    size: 14,
+                                    color: primaryColor.withValues(alpha: 0.5),
+                                  ),
+                                ),
+                                Positioned(
+                                  bottom: 10,
+                                  left: 5,
+                                  child: Icon(
+                                    Icons.star,
+                                    size: 12,
+                                    color: primaryColor.withValues(alpha: 0.4),
+                                  ),
+                                ),
+                                const Icon(
+                                  Icons.mail_outline_rounded,
+                                  size: 48,
+                                  color: primaryColor,
+                                ),
+                              ],
                             ),
-                            maxLines: 1,
                           ),
-                        ),
+                          heightSpace,
+                          const Text(
+                            'Ask the Universe',
+                            style: TextStyle(
+                              color: whiteColor,
+                              fontSize: 24,
+                              fontWeight: FontWeight.w300,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          heightSpace,
+                          heightSpace,
+
+                          if (currentStatus == MessageStatus.idle)
+                            Wrap(
+                              spacing: 8.0,
+                              runSpacing: 10.0,
+                              alignment: WrapAlignment.center,
+                              children: quickSuggestions.map((suggestion) {
+                                return GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      messageController.text = suggestion;
+                                    });
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 10,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: whiteColor.withValues(alpha: 0.05),
+                                      borderRadius: BorderRadius.circular(25),
+                                      border: Border.all(
+                                        color: whiteColor.withValues(alpha: 0.1),
+                                      ),
+                                    ),
+                                    child: Text(
+                                      suggestion,
+                                      style: const TextStyle(
+                                        color: whiteColor,
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w300,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+
+                          if (currentStatus == MessageStatus.idle)
+                            const SizedBox(height: 100), // Space for bottom bar
+                        ],
                       ),
-                      widthSpace,
-                      GestureDetector(
-                        onTap: currentStatus == MessageStatus.idle
-                            ? sendMessageToUniverse
-                            : null,
-                        child: Container(
-                          height: 50,
-                          width: 50,
-                          decoration: BoxDecoration(
-                            color: currentStatus == MessageStatus.idle
-                                ? primaryColor
-                                : greyColor,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.send_rounded,
-                            color: whiteColor,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (currentStatus != MessageStatus.idle) ...[
-                    heightSpace,
-                    Text(
-                      currentStatus == MessageStatus.sending
-                          ? 'Sending to space...'
-                          : 'Waiting for response...',
-                      style: medium14Grey,
-                    ),
-                  ],
-                ],
               ),
             ),
           ),
+          if (currentStatus == MessageStatus.idle)
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.bottomCenter,
+                    end: Alignment.topCenter,
+                    colors: [
+                      scaffoldBgColor,
+                      scaffoldBgColor.withValues(alpha: 0.0),
+                    ],
+                    stops: const [0.8, 1.0],
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: whiteColor.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(30),
+                          border: Border.all(
+                            color: whiteColor.withValues(alpha: 0.1),
+                          ),
+                        ),
+                        child: TextField(
+                          controller: messageController,
+                          enabled: currentStatus == MessageStatus.idle,
+                          style: const TextStyle(color: whiteColor),
+                          decoration: const InputDecoration(
+                            hintText: 'Write a message...',
+                            hintStyle: TextStyle(color: Colors.white38),
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                          ),
+                          maxLines: 1,
+                        ),
+                      ),
+                    ),
+                    widthSpace,
+                    GestureDetector(
+                      onTap: currentStatus == MessageStatus.idle ? sendMessageToUniverse : null,
+                      child: Container(
+                        height: 50,
+                        width: 50,
+                        decoration: BoxDecoration(
+                          color: currentStatus == MessageStatus.idle ? primaryColor : greyColor.withValues(alpha: 0.3),
+                          shape: BoxShape.circle,
+                          boxShadow: currentStatus == MessageStatus.idle
+                              ? [
+                                  BoxShadow(
+                                    color: primaryColor.withValues(alpha: 0.4),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 4),
+                                  )
+                                ]
+                              : null,
+                        ),
+                        child: const Icon(
+                          Icons.arrow_upward_rounded,
+                          color: whiteColor,
+                          size: 24,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           if (showReceivedDialog)
             Positioned.fill(
               child: Container(
-                color: Colors.black.withValues(alpha: 0.7),
+                color: Colors.black.withValues(alpha: 0.8),
                 child: Center(
                   child: Container(
                     margin: const EdgeInsets.symmetric(horizontal: fixPadding * 2),
                     padding: const EdgeInsets.all(fixPadding * 3),
                     decoration: BoxDecoration(
-                      color: blueShade1,
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: primaryColor.withValues(alpha: 0.5),
-                          blurRadius: 30,
-                          spreadRadius: 10,
-                        ),
-                      ],
+                      color: const Color(0xFF1F1F2E),
+                      borderRadius: BorderRadius.circular(25),
+                      border: Border.all(
+                        color: whiteColor.withValues(alpha: 0.1),
+                      ),
                     ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
+                    child: Stack(
                       children: [
+                        Padding(
+                          padding: const EdgeInsets.only(top: 16.0),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
                         const Icon(
                           Icons.mark_email_read_rounded,
-                          size: 80,
+                          size: 60,
                           color: greenColor,
                         ),
                         heightSpace,
                         heightSpace,
                         const Text(
-                          'Message from space received!',
-                          style: bold20White,
+                          'Message Received',
+                          style: TextStyle(
+                            color: whiteColor,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
                           textAlign: TextAlign.center,
                         ),
                         heightSpace,
                         const Text(
-                          'Check notifications to decipher',
-                          style: medium16Grey,
+                          'The universe has responded with an audio message.',
+                          style: TextStyle(
+                            color: Colors.grey,
+                            fontSize: 14,
+                          ),
                           textAlign: TextAlign.center,
                         ),
                         heightSpace,
                         heightSpace,
                         GestureDetector(
                           onTap: () async {
-                            // Показать Superwall paywall
                             await SuperwallService().showPaywall(
                               placement: "subscribe_button",
                               onPurchased: () {
-                                // После покупки переходим к расшифровке
                                 Navigator.push(
                                   context,
                                   PageTransition(
@@ -482,7 +536,6 @@ class _UniverseMessageScreenState extends State<UniverseMessageScreen> {
                                 );
                               },
                               onDeclined: () {
-                                // Пользователь отклонил - можно показать сообщение
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
                                     content: Text('Subscribe to unlock universe messages'),
@@ -496,31 +549,58 @@ class _UniverseMessageScreenState extends State<UniverseMessageScreen> {
                             width: double.infinity,
                             padding: const EdgeInsets.symmetric(
                               horizontal: fixPadding * 2,
-                              vertical: fixPadding * 1.5,
+                              vertical: 16,
                             ),
                             decoration: BoxDecoration(
                               gradient: const LinearGradient(
                                 colors: [primaryColor, Color(0xFF7B5CFA)],
                               ),
                               borderRadius: BorderRadius.circular(30),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: primaryColor.withValues(alpha: 0.4),
-                                  blurRadius: 15,
-                                  offset: const Offset(0, 5),
-                                ),
-                              ],
                             ),
-                            child: const Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.hearing, color: whiteColor, size: 20),
-                                widthSpace,
-                                Text(
-                                  'Decipher Universe Message',
-                                  style: bold16WhiteF4,
+                            child: const Center(
+                              child: Text(
+                                'Decipher Message',
+                                style: TextStyle(
+                                  color: whiteColor,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
                                 ),
-                              ],
+                              ),
+                            ),
+                          ),
+                        ),
+                            ],
+                          ),
+                        ),
+                        // Close button
+                        Positioned(
+                          top: 0,
+                          right: 0,
+                          child: GestureDetector(
+                            onTap: () {
+                              // Mark message as read when closing
+                              if (messageService.responses.isNotEmpty) {
+                                final latestMessage = messageService.responses.first;
+                                messageService.markAsRead(latestMessage.id);
+                              }
+                              setState(() {
+                                showReceivedDialog = false;
+                                currentStatus = MessageStatus.idle;
+                                currentQuestionForDialog = 'closed'; // Mark as closed to prevent reopening
+                                messageController.clear();
+                              });
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: whiteColor.withValues(alpha: 0.1),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.close,
+                                color: whiteColor,
+                                size: 20,
+                              ),
                             ),
                           ),
                         ),
