@@ -22,16 +22,16 @@ class _BottomBarState extends State<BottomBar> {
 
   final itemList = [
     LineAwesomeIcons.home_solid,
-    Icons.rocket_launch_rounded,
-    CupertinoIcons.heart_fill,
+    CupertinoIcons.heart,
+    Icons.mail_outline_rounded,
     LineAwesomeIcons.bell,
     LineAwesomeIcons.user,
   ];
 
   List pages = const [
     HomeScreen(),
-    UniverseMessageScreen(),
     CompatibilityScreen(),
+    UniverseMessageScreen(),
     NotificationScreen(),
     ProfileScreen(),
   ];
@@ -88,6 +88,10 @@ class _BottomBarState extends State<BottomBar> {
           return Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: List.generate(itemList.length, (index) {
+              final isCenterIcon = index == 2; // Center icon (mail/envelope)
+              final containerSize = isCenterIcon ? 65.0 : 45.0;
+              final iconSize = isCenterIcon ? 32.0 : 24.0;
+              
               return InkWell(
                 onTap: () {
                   setState(() {
@@ -95,18 +99,19 @@ class _BottomBarState extends State<BottomBar> {
                   });
                 },
                 child: Container(
-                  height: 45,
-                  width: 45,
+                  height: containerSize,
+                  width: containerSize,
                   decoration: BoxDecoration(
                     color: selectedIndex == index ? primaryColor : Colors.transparent,
                     shape: BoxShape.circle,
                   ),
                   alignment: Alignment.center,
                   child: index == 3 
-                      ? _buildNotificationIcon(unreadCount)
+                      ? _buildNotificationIcon(unreadCount, iconSize)
                       : Icon(
                           itemList[index],
                           color: whiteF4Color,
+                          size: iconSize,
                         ),
                 ),
               );
@@ -117,13 +122,14 @@ class _BottomBarState extends State<BottomBar> {
     );
   }
 
-  Widget _buildNotificationIcon(int unreadCount) {
+  Widget _buildNotificationIcon(int unreadCount, double iconSize) {
     return Stack(
       clipBehavior: Clip.none,
       children: [
         Icon(
           itemList[3],
           color: whiteF4Color,
+          size: iconSize,
         ),
         if (unreadCount > 0)
           Positioned(

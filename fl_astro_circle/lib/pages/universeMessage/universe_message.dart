@@ -192,10 +192,57 @@ class _UniverseMessageScreenState extends State<UniverseMessageScreen> {
                     ),
                     child: Column(
                       children: [
-                        const Icon(
-                          Icons.rocket_launch_rounded,
-                          size: 60,
-                          color: primaryColor,
+                        SizedBox(
+                          height: 60,
+                          width: 60,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              // Звездочки вокруг конверта
+                              Positioned(
+                                top: 0,
+                                left: 5,
+                                child: Icon(
+                                  Icons.star,
+                                  size: 14,
+                                  color: primaryColor.withValues(alpha: 0.7),
+                                ),
+                              ),
+                              Positioned(
+                                top: 0,
+                                right: 5,
+                                child: Icon(
+                                  Icons.star,
+                                  size: 14,
+                                  color: primaryColor.withValues(alpha: 0.7),
+                                ),
+                              ),
+                              Positioned(
+                                bottom: 5,
+                                left: 0,
+                                child: Icon(
+                                  Icons.star,
+                                  size: 12,
+                                  color: primaryColor.withValues(alpha: 0.6),
+                                ),
+                              ),
+                              Positioned(
+                                bottom: 5,
+                                right: 0,
+                                child: Icon(
+                                  Icons.star,
+                                  size: 12,
+                                  color: primaryColor.withValues(alpha: 0.6),
+                                ),
+                              ),
+                              // Конверт в центре
+                              const Icon(
+                                Icons.mail_outline_rounded,
+                                size: 38,
+                                color: primaryColor,
+                              ),
+                            ],
+                          ),
                         ),
                         heightSpace,
                         const Text(
