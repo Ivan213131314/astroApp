@@ -16,14 +16,15 @@ class UniverseMessageScreen extends StatefulWidget {
   State<UniverseMessageScreen> createState() => _UniverseMessageScreenState();
 }
 
-class _UniverseMessageScreenState extends State<UniverseMessageScreen> {
+class _UniverseMessageScreenState extends State<UniverseMessageScreen>
+    with SingleTickerProviderStateMixin {
   final TextEditingController messageController = TextEditingController();
   final UniverseMessageService messageService = UniverseMessageService();
   
+  late AnimationController _animationController;
   MessageStatus currentStatus = MessageStatus.idle;
-  Timer? responseTimer;
   bool showReceivedDialog = false;
-  String? currentQuestionForDialog; // Track which question's response is being shown
+  String? currentQuestionForDialog;
 
   final List<String> quickSuggestions = [
     "When will I find my love?",
@@ -42,6 +43,26 @@ class _UniverseMessageScreenState extends State<UniverseMessageScreen> {
   void initState() {
     super.initState();
     messageService.loadResponses();
+    
+    // Initialize animation controller
+    _animationController = AnimationController(
+      vsync: this,
+      duration: UniverseMessageService.animationDuration,
+    );
+    
+    // Check if there's an ongoing sending from service (restored after navigation)
+    if (messageService.isSending) {
+      final progress = messageService.animationProgress;
+      if (progress < 1.0) {
+        currentStatus = MessageStatus.sending;
+        messageController.text = messageService.pendingQuestion ?? '';
+        // Start animation from remaining progress
+        _animationController.forward(from: progress);
+        _setupAnimationListener();
+      }
+      // Note: If progress >= 1.0, the auto-complete timer will handle saving
+      // and we'll get notified via the listener to show unread messages
+    }
     
     // Check for existing unread messages when screen loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -72,7 +93,7 @@ class _UniverseMessageScreenState extends State<UniverseMessageScreen> {
   @override
   void dispose() {
     messageController.dispose();
-    responseTimer?.cancel();
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -81,24 +102,43 @@ class _UniverseMessageScreenState extends State<UniverseMessageScreen> {
     
     final questionText = messageController.text;
     
+    // Start sending in the service (persists across navigation)
+    messageService.startSending(questionText);
+    
     setState(() {
       currentStatus = MessageStatus.sending;
     });
 
-    // Анимация висит 10 секунд, потом сразу показываем диалог
-    responseTimer = Timer(const Duration(seconds: 10), () {
-      // Сохраняем сообщение в Firestore
-      messageService.addUniverseResponse(questionText);
-      
-      if (mounted) {
-        currentQuestionForDialog = questionText;
-        setState(() {
-          showReceivedDialog = true;
-          currentStatus = MessageStatus.idle;
-        });
-        messageController.clear();
-      }
-    });
+    // Start animation and listen for completion
+    _animationController.reset();
+    _animationController.forward();
+    _setupAnimationListener();
+  }
+  
+  void _setupAnimationListener() {
+    // Remove any existing listeners to avoid duplicates
+    _animationController.removeStatusListener(_onAnimationStatusChanged);
+    _animationController.addStatusListener(_onAnimationStatusChanged);
+  }
+  
+  void _onAnimationStatusChanged(AnimationStatus status) {
+    if (status == AnimationStatus.completed) {
+      _onAnimationComplete();
+    }
+  }
+  
+  void _onAnimationComplete() async {
+    final question = messageService.pendingQuestion ?? messageController.text;
+    await messageService.completeSending();
+    
+    if (mounted) {
+      currentQuestionForDialog = question;
+      setState(() {
+        showReceivedDialog = true;
+        currentStatus = MessageStatus.idle;
+      });
+      messageController.clear();
+    }
   }
 
   String getTooltipText() {
@@ -149,36 +189,7 @@ class _UniverseMessageScreenState extends State<UniverseMessageScreen> {
             ),
           ],
         ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 20.0),
-            child: badges.Badge(
-              showBadge: messageService.unreadCount > 0,
-              badgeContent: Text(
-                '${messageService.unreadCount}',
-                style: const TextStyle(color: whiteColor, fontSize: 10),
-              ),
-              badgeStyle: const badges.BadgeStyle(
-                badgeColor: redColor,
-                padding: EdgeInsets.all(6),
-              ),
-              child: IconButton(
-                icon: const Icon(LineAwesomeIcons.bell, color: whiteF4Color),
-                onPressed: () {
-                  messageService.markAllAsRead();
-                  Navigator.push(
-                    context,
-                    PageTransition(
-                      child: const NotificationScreen(),
-                      type: PageTransitionType.rightToLeft,
-                      duration: const Duration(milliseconds: 300),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
-        ],
+
       ),
       body: Stack(
         children: [
@@ -188,11 +199,11 @@ class _UniverseMessageScreenState extends State<UniverseMessageScreen> {
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 500),
                 child: currentStatus == MessageStatus.sending
-                    ? TweenAnimationBuilder<double>(
+                    ? AnimatedBuilder(
                         key: const ValueKey('sending'),
-                        tween: Tween(begin: 0.0, end: 1.0),
-                        duration: const Duration(seconds: 10),
-                        builder: (context, value, child) {
+                        animation: _animationController,
+                        builder: (context, child) {
+                          final value = _animationController.value;
                           return Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -206,31 +217,19 @@ class _UniverseMessageScreenState extends State<UniverseMessageScreen> {
                                     child: Stack(
                                       alignment: Alignment.center,
                                       children: [
-                                        // Ripples
+                                        // Ripples - use simple animation based on main value
                                         ...List.generate(3, (index) {
-                                          double localValue = (value * 5) % (1 + index * 0.5); 
-                                          // Simple cyclic ripple effect derived from main value would be tricky without separate controllers,
-                                          // but we can use the main value for expansion if we want just one wave or simplified ones.
-                                          // Let's stick to a simpler static animation or reusing the previous independent builders if we want detailed ripple loops.
-                                          // However, nesting builders is fine. Let's keep the ripples simple or use the main value.
-                                          // Re-instating the independent ripple builders for better visual quality:
-                                          return TweenAnimationBuilder<double>(
-                                            tween: Tween(begin: 0.0, end: 1.0),
-                                            duration: Duration(seconds: 1 + index),
-                                            builder: (context, rippleValue, child) {
-                                              return Container(
-                                                height: 60 + (40 * rippleValue),
-                                                width: 60 + (40 * rippleValue),
-                                                decoration: BoxDecoration(
-                                                  shape: BoxShape.circle,
-                                                  border: Border.all(
-                                                    color: primaryColor.withValues(alpha: 0.5 * (1 - rippleValue)),
-                                                    width: 2,
-                                                  ),
-                                                ),
-                                              );
-                                            },
-                                            onEnd: () {}, 
+                                          final rippleValue = ((value * 3) + (index * 0.3)) % 1.0;
+                                          return Container(
+                                            height: 60 + (40 * rippleValue),
+                                            width: 60 + (40 * rippleValue),
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              border: Border.all(
+                                                color: primaryColor.withValues(alpha: 0.5 * (1 - rippleValue)),
+                                                width: 2,
+                                              ),
+                                            ),
                                           );
                                         }),
                                         const Icon(

@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:fl_astro_circle/localization/localization_const.dart';
 import 'package:fl_astro_circle/pages/screens.dart';
 import 'package:fl_astro_circle/services/notification_storage_service.dart';
+import 'package:fl_astro_circle/services/universe_message_service.dart';
 import 'package:fl_astro_circle/theme/theme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +20,7 @@ class BottomBar extends StatefulWidget {
 class _BottomBarState extends State<BottomBar> {
   DateTime? backPressTime;
   final NotificationStorageService _notificationService = NotificationStorageService();
+  final UniverseMessageService _universeMessageService = UniverseMessageService();
 
   final itemList = [
     LineAwesomeIcons.home_solid,
@@ -42,6 +44,8 @@ class _BottomBarState extends State<BottomBar> {
   void initState() {
     super.initState();
     selectedIndex = widget.initialIndex;
+    // Load universe messages to show badge count
+    _universeMessageService.loadResponses();
   }
   @override
   Widget build(BuildContext context) {
@@ -82,40 +86,49 @@ class _BottomBarState extends State<BottomBar> {
       ),
       child: StreamBuilder<int>(
         stream: _notificationService.getUnreadCountStream(),
-        builder: (context, snapshot) {
-          final unreadCount = snapshot.data ?? 0;
+        builder: (context, notificationSnapshot) {
+          final notificationUnreadCount = notificationSnapshot.data ?? 0;
           
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: List.generate(itemList.length, (index) {
-              final isCenterIcon = index == 2; // Center icon (mail/envelope)
-              final containerSize = isCenterIcon ? 65.0 : 45.0;
-              final iconSize = isCenterIcon ? 32.0 : 24.0;
+          return ListenableBuilder(
+            listenable: _universeMessageService,
+            builder: (context, child) {
+              final universeUnreadCount = _universeMessageService.unreadCount;
               
-              return InkWell(
-                onTap: () {
-                  setState(() {
-                    selectedIndex = index;
-                  });
-                },
-                child: Container(
-                  height: containerSize,
-                  width: containerSize,
-                  decoration: BoxDecoration(
-                    color: selectedIndex == index ? primaryColor : Colors.transparent,
-                    shape: BoxShape.circle,
-                  ),
-                  alignment: Alignment.center,
-                  child: index == 3 
-                      ? _buildNotificationIcon(unreadCount, iconSize)
-                      : Icon(
-                          itemList[index],
-                          color: whiteF4Color,
-                          size: iconSize,
-                        ),
-                ),
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: List.generate(itemList.length, (index) {
+                  final isCenterIcon = index == 2; // Center icon (mail/envelope)
+                  final containerSize = isCenterIcon ? 65.0 : 45.0;
+                  final iconSize = isCenterIcon ? 32.0 : 24.0;
+                  
+                  return InkWell(
+                    onTap: () {
+                      setState(() {
+                        selectedIndex = index;
+                      });
+                    },
+                    child: Container(
+                      height: containerSize,
+                      width: containerSize,
+                      decoration: BoxDecoration(
+                        color: selectedIndex == index ? primaryColor : Colors.transparent,
+                        shape: BoxShape.circle,
+                      ),
+                      alignment: Alignment.center,
+                      child: index == 2
+                          ? _buildUniverseMessageIcon(universeUnreadCount, iconSize)
+                          : index == 3 
+                              ? _buildNotificationIcon(notificationUnreadCount, iconSize)
+                              : Icon(
+                                  itemList[index],
+                                  color: whiteF4Color,
+                                  size: iconSize,
+                                ),
+                    ),
+                  );
+                }),
               );
-            }),
+            },
           );
         },
       ),
@@ -135,6 +148,44 @@ class _BottomBarState extends State<BottomBar> {
           Positioned(
             right: -6,
             top: -6,
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              decoration: const BoxDecoration(
+                color: redColor,
+                shape: BoxShape.circle,
+              ),
+              constraints: const BoxConstraints(
+                minWidth: 18,
+                minHeight: 18,
+              ),
+              child: Text(
+                unreadCount > 99 ? '99+' : '$unreadCount',
+                style: const TextStyle(
+                  color: whiteColor,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildUniverseMessageIcon(int unreadCount, double iconSize) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Icon(
+          itemList[2],
+          color: whiteF4Color,
+          size: iconSize,
+        ),
+        if (unreadCount > 0)
+          Positioned(
+            right: -4,
+            top: -4,
             child: Container(
               padding: const EdgeInsets.all(4),
               decoration: const BoxDecoration(
