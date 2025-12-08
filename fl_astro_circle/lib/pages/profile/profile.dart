@@ -246,19 +246,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
           widthSpace,
           widthSpace,
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  userName,
-                  style: medium16WhiteF4,
-                ),
-                heightSpace,
-                Text(
-                  "+91 (1234567890)",
-                  style: medium14Grey,
-                )
-              ],
+            child: Text(
+              userName,
+              style: medium16WhiteF4,
             ),
           ),
           widthSpace,

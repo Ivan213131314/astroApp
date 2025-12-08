@@ -17,7 +17,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final ImagePicker _imagePicker = ImagePicker();
   
   TextEditingController nameController = TextEditingController();
-  TextEditingController numberController = TextEditingController();
   
   File? _selectedImage;
   String? _currentPhotoPath;
@@ -25,7 +24,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   void initState() {
     super.initState();
-    numberController.text = "+91 91234567890)";
     _loadUserData();
   }
   
@@ -86,11 +84,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           nameField(),
           heightSpace,
           heightSpace,
-          mobileNumberField(),
-          heightSpace,
-          heightSpace,
-          heightSpace,
-          heightSpace,
           heightSpace,
           updateButton()
         ],
@@ -137,40 +130,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
 
-  mobileNumberField() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          getTranslation(context, 'edit_profile.mobile_number'),
-          style: bold16WhiteF4,
-        ),
-        heightSpace,
-        Container(
-          width: double.maxFinite,
-          decoration: BoxDecoration(
-            color: recBgColor,
-            borderRadius: BorderRadius.circular(10.0),
-          ),
-          child: TextField(
-            style: medium15WhiteF4,
-            cursorColor: primaryColor,
-            controller: numberController,
-            keyboardType: TextInputType.phone,
-            decoration: InputDecoration(
-              border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(
-                vertical: fixPadding * 1.4,
-                horizontal: fixPadding * 2.0,
-              ),
-              hintText: getTranslation(context, 'edit_profile.enter_number'),
-              hintStyle: medium15Grey,
-            ),
-          ),
-        )
-      ],
-    );
-  }
 
   nameField() {
     return Column(
