@@ -16,10 +16,10 @@ class ApiConfig {
   /// Альтернативы: 'google/gemma-7b-it:free', 'meta-llama/llama-3-8b-instruct:free'
   static const String aiModel = 'mistralai/mistral-7b-instruct:free';
   
-  /// Модель для Vision (бесплатная экспериментальная Gemini 2.0)
+  /// Модель для Vision (Amazon Nova 2 Lite - бесплатная)
   /// Используется для анализа изображений (например, ладони)
-  /// Альтернативы: 'google/gemini-pro-vision' (платная, более точная)
-  static const String visionModel = 'google/gemini-2.0-flash-exp:free';
+  /// Альтернативы: 'google/gemini-2.0-flash-exp:free', 'nvidia/nemotron-nano-12b-v2-v1:free'
+  static const String visionModel = 'amazon/nova-2-lite-v1:free';
   
   /// App info для OpenRouter
   static const String appName = 'Astro Circle';
