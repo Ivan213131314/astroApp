@@ -3,7 +3,9 @@ import 'package:fl_astro_circle/theme/theme.dart';
 import 'package:fl_astro_circle/widget/column_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_astro_circle/services/user_service.dart';
+import 'package:fl_astro_circle/widget/cosmic_background.dart';
 import 'dart:io';
+import 'dart:ui' as ui;
 
 
 class HomeScreen extends StatefulWidget {
@@ -126,25 +128,25 @@ class _HomeScreenState extends State<HomeScreen> {
       "route": '/universeMessage'
     },
     {
-      "image": "assets/home/service1.png",
+      "image": "assets/home/numerology_premium.png",
       "title": "Numerology",
       "detail": "Know how number effect",
       "route": '/numorology'
     },
     {
-      "image": "assets/home/service2.png",
+      "image": "assets/home/compatibility_premium.png",
       "title": "Compatibility",
       "detail": "Check love and business compatibility ",
       "route": '/compatibility'
     },
     {
-      "image": "assets/home/service3.png",
+      "image": "assets/home/palm_reading_premium.png",
       "title": "Palm reading",
       "detail": "Check heartline,loveline and moneyline",
       "route": '/plamReader'
     },
     {
-      "image": "assets/home/service4.png",
+      "image": "assets/home/natal_chart_premium.png",
       "title": "Netal chart",
       "detail": "Calculate your Netal chart and check your planet position",
       'route': '/natalchart'
@@ -154,21 +156,23 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    // Ensure bottom padding for the floating nav bar
     return Scaffold(
-      backgroundColor: scaffoldBgColor,
+      backgroundColor: Colors.transparent, // Background handled by CosmicBackground
+      extendBody: true,
       appBar: AppBar(
         elevation: 0,
         automaticallyImplyLeading: false,
-        backgroundColor: scaffoldBgColor,
+        backgroundColor: Colors.transparent, // Transparent for cosmic background
         centerTitle: false,
         title: Row(
           children: [
             Container(
-              height: 35,
-              width: 35,
+              height: 40,
+              width: 40,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: whiteF4Color, width: 1),
+                border: Border.all(color: whiteColor.withOpacity(0.5), width: 1),
                 image: DecorationImage(
                   image: _userPhotoPath != null
                       ? FileImage(File(_userPhotoPath!)) as ImageProvider
@@ -178,18 +182,17 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             widthSpace,
-            width5Space,
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Hello $userName',
-                    style: medium14WhiteF4,
+                    'Hello, $userName',
+                    style: medium14White.copyWith(color: whiteColor.withOpacity(0.7)),
                   ),
                   Text(
                     "${getTranslation(context, 'home.welcome_text')} astro circle",
-                    style: medium16WhiteF4,
+                    style: medium18White.copyWith(fontWeight: FontWeight.w600),
                   )
                 ],
               ),
@@ -197,238 +200,117 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-      body: ListView(
-        physics: const BouncingScrollPhysics(),
-        padding: EdgeInsets.zero,
-        children: [
-          startNowPoster(size),
-          heightSpace,
-          titleWidget(getTranslation(context, 'home.horoscope'), () {
-            Navigator.pushNamed(context, '/horoscope');
-          }),
-          heightSpace,
-          horoscopeListContent(),
-          heightSpace,
-          heightSpace,
-          // Секция астрологов убрана
-          // titleWidget(getTranslation(context, 'home.top_astrologers'), () {
-          //   Navigator.pushNamed(context, '/astrologers');
-          // }),
-          // heightSpace,
-          // astrologersListContent(size),
-          // heightSpace,
-          otherServicesTitle(),
-          otherServicesListContent(),
-          heightSpace,
-        ],
+      body: CosmicBackground(
+        child: ListView(
+          physics: const BouncingScrollPhysics(),
+          padding: EdgeInsets.only(bottom: 100), // Padding for floating nav bar
+          children: [
+            askUniverseHero(size),
+            heightSpace,
+            titleWidget(getTranslation(context, 'home.horoscope'), () {
+              Navigator.pushNamed(context, '/horoscope');
+            }),
+            heightSpace,
+            horoscopeListContent(),
+            heightSpace,
+            heightSpace,
+            otherServicesTitle(),
+            servicesGridContent(),
+            heightSpace,
+          ],
+        ),
       ),
     );
   }
 
-  otherServicesListContent() {
-    return ColumnBuilder(
+  Widget servicesGridContent() {
+    final filteredServices = otherServicesList
+        .where((element) => element['title'] != "Ask Universe")
+        .toList();
+
+    return GridView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: fixPadding * 1.5),
+      physics: const NeverScrollableScrollPhysics(),
+      shrinkWrap: true,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        childAspectRatio: 1.4, // Rectangular landscape cards
+        crossAxisSpacing: 15,
+        mainAxisSpacing: 15,
+      ),
+      itemCount: filteredServices.length,
       itemBuilder: (context, index) {
         return GestureDetector(
           onTap: () {
             Navigator.pushNamed(
-                context, otherServicesList[index]['route'].toString());
+                context, filteredServices[index]['route'].toString());
           },
           child: Container(
-            height: 145,
-            width: double.maxFinite,
-            margin: const EdgeInsets.symmetric(
-              vertical: fixPadding,
-              horizontal: fixPadding * 2.0,
-            ),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10.0),
-              border: Border.all(color: greyColor),
-              image: DecorationImage(
-                image: AssetImage(
-                  otherServicesList[index]['image'].toString(),
-                ),
-                fit: BoxFit.cover,
-              ),
+              borderRadius: BorderRadius.circular(20.0),
+              color: whiteColor.withOpacity(0.08), // Glass effect
+              border: Border.all(color: whiteColor.withOpacity(0.1)),
             ),
-            child: Container(
-              padding: const EdgeInsets.all(fixPadding * 1.5),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10.0),
-                gradient: LinearGradient(
-                  colors: [
-                    blueShade1,
-                    const Color(0xFF514587).withValues(alpha: 0),
-                  ],
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(20.0),
+              child: Stack(
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        otherServicesList[index]['title'].toString(),
-                        style: bold18White,
-                        overflow: TextOverflow.ellipsis,
+                   // Gradient overlay
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          whiteColor.withOpacity(0.1),
+                          whiteColor.withOpacity(0.0),
+                        ],
                       ),
-                      height5Space,
-                      Padding(
-                        padding: const EdgeInsets.only(right: fixPadding * 5.0),
-                        child: Text(
-                          otherServicesList[index]['detail'].toString(),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(fixPadding * 1.5),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(0),
+                          height: 55, // Increased to match zodiac size
+                          width: 55,  // Increased to match zodiac size
+                          decoration: BoxDecoration(
+                            color: Colors.transparent, 
+                            shape: BoxShape.circle,
+                            image: DecorationImage(
+                                image: AssetImage(filteredServices[index]['image'].toString()),
+                                fit: BoxFit.contain
+                            )
+                          ),
+                        ),
+                        Text(
+                          filteredServices[index]['title'].toString(),
+                          style: medium16White,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: medium16Grey,
                         ),
-                      )
-                    ],
+                      ],
+                    ),
                   ),
-                  Container(
-                    height: 35,
-                    width: 35,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(5.0),
-                      color: grey5EColor,
-                    ),
-                    child: const Icon(
-                      Icons.arrow_forward,
-                      color: whiteColor,
-                      size: 22,
-                    ),
-                  )
                 ],
               ),
             ),
           ),
         );
       },
-      itemCount: otherServicesList.length,
     );
   }
 
   otherServicesTitle() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: fixPadding * 2.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            getTranslation(context, 'home.other_services'),
-            style: medium18White,
-          ),
-          height5Space,
-          Container(
-            height: 5,
-            width: 45,
-            color: primaryColor,
-          )
-        ],
-      ),
-    );
-  }
-
-  astrologersListContent(Size size) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.all(fixPadding),
-      physics: const BouncingScrollPhysics(),
-      child: Row(
-        children: List.generate(
-          astrologersList.length,
-          (index) {
-            return GestureDetector(
-              onTap: () {
-                Navigator.pushNamed(context, '/astrologersDetail');
-              },
-              child: Container(
-                width: size.width * 0.35,
-                padding: const EdgeInsets.all(fixPadding),
-                margin: const EdgeInsets.symmetric(horizontal: fixPadding),
-                decoration: BoxDecoration(
-                  color: recBgColor,
-                  borderRadius: BorderRadius.circular(10.0),
-                ),
-                child: Column(
-                  children: [
-                    Stack(
-                      clipBehavior: Clip.none,
-                      alignment: Alignment.center,
-                      children: [
-                        Container(
-                          height: 75,
-                          width: 75,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            image: DecorationImage(
-                              image: AssetImage(
-                                astrologersList[index]['image'].toString(),
-                              ),
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          bottom: -5,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: fixPadding / 1.5,
-                                vertical: fixPadding / 2),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20.0),
-                              color: rec48BgColor,
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(
-                                  Icons.star,
-                                  size: 15,
-                                  color: yellowColor,
-                                ),
-                                width5Space,
-                                Text(
-                                  astrologersList[index]['rate'].toString(),
-                                  style: medium13WhiteF4,
-                                )
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    heightSpace,
-                    height5Space,
-                    Text(
-                      astrologersList[index]['name'].toString(),
-                      style: regualr16White,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    Text(
-                      "${astrologersList[index]['price']}/min",
-                      style: bold14GreyD4,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    heightSpace,
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: fixPadding * 1.2, vertical: 6.0),
-                      decoration: BoxDecoration(
-                        color: grey5EColor,
-                        borderRadius: BorderRadius.circular(5.0),
-                      ),
-                      child: Text(
-                        getTranslation(context, 'home.connect'),
-                        style: medium16White,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    )
-                  ],
-                ),
-              ),
-            );
-          },
-        ),
+      child: Text(
+        getTranslation(context, 'home.other_services'),
+        style: medium18White.copyWith(color: whiteColor.withOpacity(0.9)),
       ),
     );
   }
@@ -451,32 +333,29 @@ class _HomeScreenState extends State<HomeScreen> {
                 );
               },
               child: Container(
-                height: 78,
-                width: 83,
+                height: 85,
+                width: 75,
                 margin: const EdgeInsets.symmetric(horizontal: fixPadding / 2),
-                decoration: BoxDecoration(
-                  color: recBgColor,
-                  borderRadius: BorderRadius.circular(10.0),
-                  boxShadow: [
-                    BoxShadow(
-                      color: blueShade1.withValues(alpha: 0.2),
-                      blurRadius: 12,
-                      offset: const Offset(0, 6),
-                    ),
-                  ],
-                ),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Image.asset(
-                      horoscope[index]['image'].toString(),
-                      height: 40,
+                    Container(
+                      height: 55,
+                      width: 55,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: whiteColor.withOpacity(0.08),
+                        border: Border.all(color: whiteColor.withOpacity(0.2)),
+                      ),
+                      padding: const EdgeInsets.all(10),
+                      child: Image.asset(
+                        horoscope[index]['image'].toString(),
+                        fit: BoxFit.contain,
+                      ),
                     ),
-                    height5Space,
+                    const SizedBox(height: 5),
                     Text(
                       horoscope[index]['name'].toString(),
-                      style: medium16WhiteF4,
+                      style: medium13WhiteF4.copyWith(fontSize: 12),
                       overflow: TextOverflow.ellipsis,
                     )
                   ],
@@ -492,95 +371,154 @@ class _HomeScreenState extends State<HomeScreen> {
   titleWidget(title, Function() onTap) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: fixPadding * 2.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Text(
-                  title,
-                  style: medium18White,
-                ),
-              ),
-              InkWell(
-                onTap: onTap,
-                child: Text(
-                  getTranslation(context, 'home.see_all'),
-                  style: medium15Grey,
-                ),
-              )
-            ],
+          Text(
+            title,
+            style: medium18White.copyWith(color: whiteColor.withOpacity(0.9)),
           ),
-          height5Space,
-          Container(
-            height: 5,
-            width: 45,
-            color: primaryColor,
+          InkWell(
+            onTap: onTap,
+            child: Text(
+              getTranslation(context, 'home.see_all'),
+              style: medium14White.copyWith(color: whiteColor.withOpacity(0.5)),
+            ),
           )
         ],
       ),
     );
   }
 
-  startNowPoster(Size size) {
-    return Container(
-      margin: const EdgeInsets.symmetric(
-          horizontal: fixPadding * 2.0, vertical: fixPadding),
-      padding: const EdgeInsets.symmetric(
-          horizontal: fixPadding * 2.0, vertical: fixPadding * 1.5),
-      decoration: BoxDecoration(
-        boxShadow: [
-          BoxShadow(
-            blurRadius: 6,
-            color: recBgColor.withValues(alpha: 0.25),
-          ),
-        ],
-        borderRadius: BorderRadius.circular(10.0),
-        image: const DecorationImage(
-          image: AssetImage("assets/home/poster.png"),
-          fit: BoxFit.cover,
-          matchTextDirection: true,
-        ),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            getTranslation(context, 'home.talk_to_astrology'),
-            style: bold20Black03,
-            overflow: TextOverflow.ellipsis,
-          ),
-          heightBox(7.0),
-          Text(
-            getTranslation(context, 'home.change_life'),
-            style: medium16Black03,
-            overflow: TextOverflow.ellipsis,
-          ),
-          heightSpace,
-          heightSpace,
-          GestureDetector(
-            onTap: () {
-              Navigator.pushNamed(context, '/astrologerChat');
-            },
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: fixPadding * 1.5,
-                vertical: 7.0,
-              ),
-              decoration: BoxDecoration(
-                color: const Color(0xFF2D1A07),
-                borderRadius: BorderRadius.circular(5.0),
-              ),
-              child: Text(
-                getTranslation(context, 'home.start_now'),
-                style: medium18White,
-              ),
+  Widget askUniverseHero(Size size) {
+    return GestureDetector(
+      onTap: () {
+         Navigator.pushNamed(context, '/universeMessage');
+      },
+      child: Container(
+        height: 220, // Increased height to prevent overflow
+        margin: const EdgeInsets.symmetric(
+            horizontal: fixPadding * 2.0, vertical: fixPadding),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(25.0),
+          boxShadow: [
+            BoxShadow(
+              color: primaryColor.withOpacity(0.3),
+              blurRadius: 20,
+              spreadRadius: -5,
+              offset: const Offset(0, 10),
             ),
-          )
-        ],
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(25.0),
+          child: Stack(
+            children: [
+              // Background Image
+              Container(
+                decoration: const BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage("assets/home/universe_card_bg.png"),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              // Gradient overlay for better text contrast
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent,
+                      Colors.black.withOpacity(0.6),
+                    ],
+                  ),
+                ),
+              ),
+              // Glass overlay
+              BackdropFilter(
+                filter: ui.ImageFilter.blur(sigmaX: 0.0, sigmaY: 0.0), // Removed blur to show details
+                child: Container(
+                   color: whiteColor.withOpacity(0.0),
+                ),
+              ),
+              // Animated Content 
+              Padding(
+                padding: const EdgeInsets.all(25.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.auto_awesome, 
+                      color: Color(0xFFFFCE31), // Star color
+                      size: 30,
+                    ),
+                    height5Space,
+                    const Text(
+                      "Ask the Universe",
+                      style: TextStyle(
+                        fontFamily: 'Cinzel', // Ensure font availability or use default serif
+                        fontSize: 28,
+                        fontWeight: FontWeight.w300,
+                        color: whiteColor,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black26,
+                            blurRadius: 10,
+                            offset: Offset(0, 4),
+                          )
+                        ]
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      "Receive guidance from the stars",
+                      style: medium14White.copyWith(color: whiteColor.withOpacity(0.8)),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 15),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFFFFD700), Color(0xFFFFA500)], // Gold to Orange
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(30),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFFFFD700).withOpacity(0.4),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          Text(
+                            "Send Message",
+                            style: TextStyle(
+                              color: Colors.black, // Dark text on gold
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Roboto', 
+                            ),
+                          ),
+                          SizedBox(width: 8),
+                          Icon(Icons.send_rounded, color: Colors.black, size: 16),
+                        ],
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

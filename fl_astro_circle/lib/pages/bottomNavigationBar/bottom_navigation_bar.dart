@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui' as ui;
 import 'package:fl_astro_circle/localization/localization_const.dart';
 import 'package:fl_astro_circle/pages/screens.dart';
 import 'package:fl_astro_circle/services/notification_storage_service.dart';
@@ -62,6 +63,7 @@ class _BottomBarState extends State<BottomBar> {
             statusBarColor: Colors.transparent,
             statusBarBrightness: Brightness.light),
         child: Scaffold(
+          extendBody: true, // Content behind nav bar
           body: pages.elementAt(selectedIndex),
           backgroundColor: scaffoldBgColor,
           bottomNavigationBar: bottomNavigationBar(),
@@ -72,65 +74,95 @@ class _BottomBarState extends State<BottomBar> {
 
   bottomNavigationBar() {
     return Container(
-      padding: const EdgeInsets.symmetric(
-          vertical: fixPadding, horizontal: fixPadding * 2.0),
-      width: double.maxFinite,
+      margin: const EdgeInsets.only(
+        left: fixPadding * 1.5,
+        right: fixPadding * 1.5,
+        bottom: fixPadding * 2.0,
+      ),
+      height: 80, // Explicit height for floating pill
       decoration: BoxDecoration(
-        color: scaffoldBgColor,
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(25.0),
         boxShadow: [
           BoxShadow(
-            color: recBgColor.withValues(alpha: 0.45),
-            blurRadius: 6,
+            color: black03Color.withOpacity(0.2), // Subtle shadow
+            blurRadius: 10,
+            offset: const Offset(0, 5),
           )
         ],
       ),
-      child: StreamBuilder<int>(
-        stream: _notificationService.getUnreadCountStream(),
-        builder: (context, notificationSnapshot) {
-          final notificationUnreadCount = notificationSnapshot.data ?? 0;
-          
-          return ListenableBuilder(
-            listenable: _universeMessageService,
-            builder: (context, child) {
-              final universeUnreadCount = _universeMessageService.unreadCount;
-              
-              return Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: List.generate(itemList.length, (index) {
-                  final isCenterIcon = index == 2; // Center icon (mail/envelope)
-                  final containerSize = isCenterIcon ? 65.0 : 45.0;
-                  final iconSize = isCenterIcon ? 32.0 : 24.0;
-                  
-                  return InkWell(
-                    onTap: () {
-                      setState(() {
-                        selectedIndex = index;
-                      });
-                    },
-                    child: Container(
-                      height: containerSize,
-                      width: containerSize,
-                      decoration: BoxDecoration(
-                        color: selectedIndex == index ? primaryColor : Colors.transparent,
-                        shape: BoxShape.circle,
-                      ),
-                      alignment: Alignment.center,
-                      child: index == 2
-                          ? _buildUniverseMessageIcon(universeUnreadCount, iconSize)
-                          : index == 3 
-                              ? _buildNotificationIcon(notificationUnreadCount, iconSize)
-                              : Icon(
-                                  itemList[index],
-                                  color: whiteF4Color,
-                                  size: iconSize,
-                                ),
-                    ),
-                  );
-                }),
-              );
-            },
-          );
-        },
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(25.0),
+        child: BackdropFilter(
+          filter:ui.ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: fixPadding * 1.0),
+            decoration: BoxDecoration(
+              color: recBgColor.withOpacity(0.6), // Semi-transparent background
+              borderRadius: BorderRadius.circular(25.0),
+              border: Border.all(
+                color: whiteColor.withOpacity(0.1), // Subtle glass border
+                width: 1.0,
+              ),
+            ),
+            child: StreamBuilder<int>(
+              stream: _notificationService.getUnreadCountStream(),
+              builder: (context, notificationSnapshot) {
+                final notificationUnreadCount = notificationSnapshot.data ?? 0;
+                
+                return ListenableBuilder(
+                  listenable: _universeMessageService,
+                  builder: (context, child) {
+                    final universeUnreadCount = _universeMessageService.unreadCount;
+                    
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly, // Better spacing
+                      children: List.generate(itemList.length, (index) {
+                        final isCenterIcon = index == 2;
+                        final containerSize = isCenterIcon ? 55.0 : 40.0; // Slightly larger touch target
+                        final iconSize = isCenterIcon ? 28.0 : 22.0;
+                        
+                        return InkWell(
+                          onTap: () {
+                            setState(() {
+                              selectedIndex = index;
+                            });
+                          },
+                          child: Container(
+                            height: containerSize,
+                            width: containerSize,
+                            decoration: BoxDecoration(
+                              color: selectedIndex == index 
+                                    ? primaryColor 
+                                    : (isCenterIcon ? primaryColor.withOpacity(0.5) : Colors.transparent),
+                              shape: BoxShape.circle,
+                              boxShadow: isCenterIcon ? [
+                                BoxShadow(
+                                  color: primaryColor.withOpacity(0.4),
+                                  blurRadius: 8,
+                                )
+                              ] : null,
+                            ),
+                            alignment: Alignment.center,
+                            child: index == 2
+                                ? _buildUniverseMessageIcon(universeUnreadCount, iconSize)
+                                : index == 3 
+                                    ? _buildNotificationIcon(notificationUnreadCount, iconSize)
+                                    : Icon(
+                                        itemList[index],
+                                        color: selectedIndex == index ? whiteColor : whiteColor.withOpacity(0.6),
+                                        size: iconSize,
+                                      ),
+                          ),
+                        );
+                      }),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ),
       ),
     );
   }
