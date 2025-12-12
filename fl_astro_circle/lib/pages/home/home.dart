@@ -214,6 +214,9 @@ class _HomeScreenState extends State<HomeScreen> {
             horoscopeListContent(),
             heightSpace,
             heightSpace,
+            talkToAstrologerBlock(),
+            heightSpace,
+            heightSpace,
             otherServicesTitle(),
             servicesGridContent(),
             heightSpace,
@@ -386,6 +389,117 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           )
         ],
+      ),
+    );
+  }
+
+  Widget talkToAstrologerBlock() {
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushNamed(context, '/astrologerChat');
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: fixPadding * 2.0),
+        padding: const EdgeInsets.all(fixPadding * 2.0),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20.0),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              const Color(0xFF6B3FA0).withOpacity(0.8), // Purple
+              const Color(0xFF4A2F7F).withOpacity(0.9), // Dark purple
+              const Color(0xFF2A1B4D), // Very dark purple
+            ],
+          ),
+          border: Border.all(
+            color: const Color(0xFFB388FF).withOpacity(0.3),
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF6B3FA0).withOpacity(0.4),
+              blurRadius: 15,
+              spreadRadius: -3,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            // Icon container with glow effect
+            Container(
+              height: 60,
+              width: 60,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Color(0xFFB388FF), // Light purple
+                    Color(0xFF8C6AE3), // Medium purple
+                  ],
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFFB388FF).withOpacity(0.5),
+                    blurRadius: 15,
+                    spreadRadius: 2,
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.auto_awesome,
+                color: whiteColor,
+                size: 30,
+              ),
+            ),
+            const SizedBox(width: fixPadding * 1.5),
+            // Text content
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Talk to Astrologer",
+                    style: TextStyle(
+                      color: whiteColor,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.3,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    "Get personalized cosmic guidance",
+                    style: TextStyle(
+                      color: whiteColor.withOpacity(0.7),
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Arrow icon
+            Container(
+              height: 36,
+              width: 36,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: whiteColor.withOpacity(0.1),
+                border: Border.all(
+                  color: whiteColor.withOpacity(0.2),
+                ),
+              ),
+              child: const Icon(
+                Icons.arrow_forward_ios_rounded,
+                color: whiteColor,
+                size: 16,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
