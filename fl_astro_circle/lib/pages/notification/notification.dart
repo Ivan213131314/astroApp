@@ -431,6 +431,17 @@ class _NotificationScreenState extends State<NotificationScreen> {
                           minHeight: 6,
                         ),
                       ),
+                      heightBox(12),
+                      const Text(
+                        'The message is encoded.\nOnly deeper decoding reveals its meaning.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Color(0xAAFFFFFF),
+                          fontSize: 12,
+                          fontStyle: FontStyle.italic,
+                          height: 1.4,
+                        ),
+                      ),
                     ],
                   );
                 },
@@ -492,7 +503,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                       Icon(Icons.hearing, color: whiteColor, size: 14),
                       SizedBox(width: 6),
                       Text(
-                        'Decipher',
+                        'Decipher Message',
                         style: TextStyle(
                           color: whiteColor,
                           fontSize: 12,

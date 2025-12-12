@@ -122,12 +122,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final otherServicesList = [
     {
-      "image": "assets/home/service6.png",
-      "title": "Ask Universe",
-      "detail": "Send your question to the universe via NASA satellites",
-      "route": '/universeMessage'
-    },
-    {
       "image": "assets/home/numerology_premium.png",
       "title": "Numerology",
       "detail": "Know how number effect",
@@ -150,6 +144,13 @@ class _HomeScreenState extends State<HomeScreen> {
       "title": "Netal chart",
       "detail": "Calculate your Netal chart and check your planet position",
       'route': '/natalchart'
+    },
+    {
+      "image": "assets/home/service6.png",
+      "title": "Ask Universe",
+      "detail": "Send your question to the universe via NASA satellites",
+      "route": '/universeMessage',
+      "locked": true
     }
   ];
 
@@ -214,11 +215,11 @@ class _HomeScreenState extends State<HomeScreen> {
             horoscopeListContent(),
             heightSpace,
             heightSpace,
-            talkToAstrologerBlock(),
-            heightSpace,
-            heightSpace,
             otherServicesTitle(),
             servicesGridContent(),
+            heightSpace,
+            heightSpace,
+            talkToAstrologerBlock(),
             heightSpace,
           ],
         ),
@@ -297,6 +298,24 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     ),
                   ),
+                  // Lock icon in top right corner
+                  if (filteredServices[index]['locked'] == true)
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.4),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.lock,
+                          color: whiteColor,
+                          size: 14,
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -505,7 +524,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget askUniverseHero(Size size) {
     return GestureDetector(
       onTap: () {
-         Navigator.pushNamed(context, '/universeMessage');
+         Navigator.pushNamed(context, '/universeSign');
       },
       child: Container(
         height: 180, // Reduced height
