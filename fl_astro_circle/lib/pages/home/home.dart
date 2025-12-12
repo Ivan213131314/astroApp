@@ -227,9 +227,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget servicesGridContent() {
-    final filteredServices = otherServicesList
-        .where((element) => element['title'] != "Ask Universe")
-        .toList();
+    final filteredServices = otherServicesList;
 
     return GridView.builder(
       padding: const EdgeInsets.symmetric(horizontal: fixPadding * 1.5),
@@ -510,7 +508,7 @@ class _HomeScreenState extends State<HomeScreen> {
          Navigator.pushNamed(context, '/universeMessage');
       },
       child: Container(
-        height: 220, // Increased height to prevent overflow
+        height: 180, // Reduced height
         margin: const EdgeInsets.symmetric(
             horizontal: fixPadding * 2.0, vertical: fixPadding),
         decoration: BoxDecoration(
@@ -529,11 +527,14 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Stack(
             children: [
               // Background Image
-              Container(
-                decoration: const BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage("assets/home/universe_card_bg.png"),
-                    fit: BoxFit.cover,
+              Opacity(
+                opacity: 0.5,
+                child: Container(
+                  decoration: const BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage("assets/home/universe_card_bg.png"),
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
               ),
@@ -564,14 +565,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(
-                      Icons.auto_awesome, 
-                      color: Color(0xFFFFCE31), // Star color
-                      size: 30,
-                    ),
-                    height5Space,
+
                     const Text(
-                      "Ask the Universe",
+                      "Universe Sign for Today",
                       style: TextStyle(
                         fontFamily: 'Cinzel', // Ensure font availability or use default serif
                         fontSize: 28,
@@ -614,7 +610,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: const [
                           Text(
-                            "Send Message",
+                            "Send Intention",
                             style: TextStyle(
                               color: Colors.black, // Dark text on gold
                               fontSize: 14,
