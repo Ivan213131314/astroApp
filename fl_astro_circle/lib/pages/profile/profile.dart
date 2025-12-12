@@ -99,10 +99,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               getTranslation(context, 'profile.about_us'), () {
             Navigator.pushNamed(context, '/aboutUs');
           }),
-          iconListTile(LineAwesomeIcons.gem,
-              getTranslation(context, 'profile.subscribe'), () {
-            Navigator.pushNamed(context, '/subscribe');
-          }),
+
           iconListTile(
             LineAwesomeIcons.sign_out_alt_solid,
             getTranslation(context, 'profile.logout'),
