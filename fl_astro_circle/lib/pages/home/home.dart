@@ -15,14 +15,42 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
   String userName = 'user';
   String? _userPhotoPath;
+  bool _isExploreExpanded = false;
+  late AnimationController _animationController;
+  late Animation<double> _expandAnimation;
 
   @override
   void initState() {
     super.initState();
     _loadUserName();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    );
+    _expandAnimation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOutCubic,
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  void _toggleExplore() {
+    setState(() {
+      _isExploreExpanded = !_isExploreExpanded;
+      if (_isExploreExpanded) {
+        _animationController.forward();
+      } else {
+        _animationController.reverse();
+      }
+    });
   }
 
   Future<void> _loadUserName() async {
@@ -202,25 +230,109 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       body: CosmicBackground(
-        child: ListView(
-          physics: const BouncingScrollPhysics(),
-          padding: EdgeInsets.only(bottom: 100), // Padding for floating nav bar
+        child: Column(
           children: [
-            askUniverseHero(size),
-            heightSpace,
-            titleWidget(getTranslation(context, 'home.horoscope'), () {
-              Navigator.pushNamed(context, '/horoscope');
-            }),
-            heightSpace,
-            horoscopeListContent(),
-            heightSpace,
-            heightSpace,
-            otherServicesTitle(),
-            servicesGridContent(),
-            heightSpace,
-            heightSpace,
-            talkToAstrologerBlock(),
-            heightSpace,
+            // Main scrollable content
+            Expanded(
+              child: ListView(
+                physics: const BouncingScrollPhysics(),
+                padding: EdgeInsets.only(bottom: _isExploreExpanded ? 20 : 80),
+                children: [
+                  askUniverseHero(size),
+                  heightSpace,
+                  heightSpace,
+                  titleWidget(getTranslation(context, 'home.horoscope'), () {
+                    Navigator.pushNamed(context, '/horoscope');
+                  }),
+                  heightSpace,
+                  horoscopeListContent(),
+                  heightSpace,
+                  // Expandable content with animation
+                  SizeTransition(
+                    sizeFactor: _expandAnimation,
+                    axisAlignment: -1.0,
+                    child: Column(
+                      children: [
+                        heightSpace,
+                        otherServicesTitle(),
+                        servicesGridContent(),
+                        heightSpace,
+                        heightSpace,
+                        talkToAstrologerBlock(),
+                        heightSpace,
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Fixed bottom "Explore More" button
+            Container(
+              padding: const EdgeInsets.only(bottom: 115, top: 10),
+              child: _buildExploreMoreButton(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildExploreMoreButton() {
+    return GestureDetector(
+      onTap: _toggleExplore,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: _isExploreExpanded
+                ? [
+                    const Color(0xFF4A2F7F).withOpacity(0.4),
+                    const Color(0xFF2A1B4D).withOpacity(0.5),
+                  ]
+                : [
+                    const Color(0xFF6B3FA0).withOpacity(0.4),
+                    const Color(0xFF8C6AE3).withOpacity(0.3),
+                  ],
+          ),
+          borderRadius: BorderRadius.circular(30),
+          border: Border.all(
+            color: const Color(0xFFB388FF).withOpacity(0.2),
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF6B3FA0).withOpacity(0.2),
+              blurRadius: 10,
+              spreadRadius: -2,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              _isExploreExpanded ? "Show Less" : "Explore More",
+              style: TextStyle(
+                color: whiteColor.withOpacity(0.9),
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                letterSpacing: 0.5,
+              ),
+            ),
+            const SizedBox(width: 8),
+            AnimatedRotation(
+              turns: _isExploreExpanded ? 0.5 : 0,
+              duration: const Duration(milliseconds: 300),
+              child: Icon(
+                Icons.keyboard_arrow_down_rounded,
+                color: whiteColor.withOpacity(0.9),
+                size: 22,
+              ),
+            ),
           ],
         ),
       ),
@@ -528,8 +640,8 @@ class _HomeScreenState extends State<HomeScreen> {
       },
       child: Container(
         height: 180, // Reduced height
-        margin: const EdgeInsets.symmetric(
-            horizontal: fixPadding * 2.0, vertical: fixPadding),
+        margin: const EdgeInsets.only(
+            left: fixPadding * 2.0, right: fixPadding * 2.0, top: 20, bottom: fixPadding),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(25.0),
           boxShadow: [
@@ -603,7 +715,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     const SizedBox(height: 5),
                     Text(
-                      "Receive guidance from the stars",
+                      "Your daily sign from the Universe",
                       style: medium14White.copyWith(color: whiteColor.withOpacity(0.8)),
                       textAlign: TextAlign.center,
                     ),
