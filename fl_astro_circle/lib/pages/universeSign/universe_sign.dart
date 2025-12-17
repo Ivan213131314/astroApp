@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:fl_astro_circle/pages/screens.dart';
 import 'package:fl_astro_circle/pages/universeMessage/universe_decipher_screen.dart';
 import 'package:fl_astro_circle/services/universe_sign_service.dart';
@@ -41,7 +40,9 @@ class _UniverseSignScreenState extends State<UniverseSignScreen>
   SignStatus currentStatus = SignStatus.idle;
   bool showReceivedDialog = false;
   String? currentQuestionForDialog;
+  String? currentCategoryForDialog;
   String? selectedQuestion;
+  String? selectedCategoryId;
 
   /// Category definitions with questions
   final List<SignCategory> categories = const [
@@ -165,6 +166,7 @@ class _UniverseSignScreenState extends State<UniverseSignScreen>
         setState(() {
           showReceivedDialog = true;
           currentQuestionForDialog = latestMessage.question;
+          currentCategoryForDialog = latestMessage.category;
         });
       }
     }
@@ -226,7 +228,7 @@ class _UniverseSignScreenState extends State<UniverseSignScreen>
             ...category.questions.map((question) => GestureDetector(
               onTap: () {
                 Navigator.pop(context);
-                _sendQuestion(question);
+                _sendQuestion(question, category.id);
               },
               child: Container(
                 width: double.infinity,
@@ -255,11 +257,12 @@ class _UniverseSignScreenState extends State<UniverseSignScreen>
   }
 
   /// Send selected question
-  void _sendQuestion(String question) {
-    signService.startSending(question);
+  void _sendQuestion(String question, String categoryId) {
+    signService.startSending(question, category: categoryId);
     
     setState(() {
       selectedQuestion = question;
+      selectedCategoryId = categoryId;
       currentStatus = SignStatus.sending;
     });
 
@@ -281,15 +284,18 @@ class _UniverseSignScreenState extends State<UniverseSignScreen>
   
   void _onAnimationComplete() async {
     final question = signService.pendingQuestion ?? selectedQuestion ?? '';
+    final category = selectedCategoryId;
     await signService.completeSending();
     
     if (mounted) {
       currentQuestionForDialog = question;
+      currentCategoryForDialog = category;
       setState(() {
         showReceivedDialog = true;
         currentStatus = SignStatus.idle;
       });
       selectedQuestion = null;
+      selectedCategoryId = null;
     }
   }
 
@@ -617,11 +623,13 @@ class _UniverseSignScreenState extends State<UniverseSignScreen>
                         textAlign: TextAlign.center,
                       ),
                       heightSpace,
+                                            heightSpace,
                       const Text(
-                        'The universe has sent you a sign. Decode it now.',
+                        '🔒 The message is encrypted\nThe Universe speaks in symbols, not words\nOnly those ready can decode it',
                         style: TextStyle(
                           color: Colors.grey,
-                          fontSize: 14,
+                          fontSize: 13,
+                          fontStyle: FontStyle.italic,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -637,6 +645,7 @@ class _UniverseSignScreenState extends State<UniverseSignScreen>
                                 PageTransition(
                                   child: UniverseDecipherScreen(
                                     question: currentQuestionForDialog ?? '',
+                                    category: currentCategoryForDialog,
                                   ),
                                   type: PageTransitionType.rightToLeft,
                                   duration: const Duration(milliseconds: 300),

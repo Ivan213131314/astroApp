@@ -20,6 +20,7 @@ class UniverseSignService extends ChangeNotifier {
   // Sending state - persists across navigation
   DateTime? _sendStartTime;
   String? _pendingQuestion;
+  String? _pendingCategory;
   Timer? _autoCompleteTimer;
 
   List<UniverseMessageData> get responses => _responses;
@@ -47,11 +48,12 @@ class UniverseSignService extends ChangeNotifier {
 
   /// Start sending - call this when user taps send
   /// Automatically saves message after animationDuration regardless of UI state
-  void startSending(String question) {
+  void startSending(String question, {String? category}) {
     // Cancel any existing timer
     _autoCompleteTimer?.cancel();
     
     _pendingQuestion = question;
+    _pendingCategory = category;
     _sendStartTime = DateTime.now();
     
     // Set up auto-complete timer - this will save the message even if user navigates away
@@ -66,11 +68,13 @@ class UniverseSignService extends ChangeNotifier {
   Future<void> _autoCompleteSending() async {
     if (_pendingQuestion != null) {
       final question = _pendingQuestion!;
+      final category = _pendingCategory;
       _pendingQuestion = null;
+      _pendingCategory = null;
       _sendStartTime = null;
       _autoCompleteTimer = null;
       
-      await addSignResponse(question);
+      await addSignResponse(question, category: category);
       notifyListeners();
     }
   }
@@ -83,9 +87,10 @@ class UniverseSignService extends ChangeNotifier {
     _autoCompleteTimer = null;
     
     if (_pendingQuestion != null) {
-      await addSignResponse(_pendingQuestion!);
+      await addSignResponse(_pendingQuestion!, category: _pendingCategory);
     }
     _pendingQuestion = null;
+    _pendingCategory = null;
     _sendStartTime = null;
     notifyListeners();
   }
@@ -95,6 +100,7 @@ class UniverseSignService extends ChangeNotifier {
     _autoCompleteTimer?.cancel();
     _autoCompleteTimer = null;
     _pendingQuestion = null;
+    _pendingCategory = null;
     _sendStartTime = null;
     notifyListeners();
   }
@@ -109,12 +115,13 @@ class UniverseSignService extends ChangeNotifier {
     });
   }
 
-  Future<void> addSignResponse(String question) async {
+  Future<void> addSignResponse(String question, {String? category}) async {
     final audioDuration = Random().nextInt(13) + 8; // 8-20 seconds
     await _storageService.saveUniverseMessage(
       question: question,
       audioFilePath: null,
       audioDuration: audioDuration,
+      category: category,
     );
   }
 

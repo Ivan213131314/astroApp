@@ -28,11 +28,13 @@ class NotificationStorageService {
     required String question,
     String? audioFilePath,
     required int audioDuration,
+    String? category,
   }) async {
     final docRef = await _getUserCollection('universe_messages').add({
       'question': question,
       'audioFilePath': audioFilePath,
       'audioDuration': audioDuration,
+      'category': category,
       'isRead': false,
       'createdAt': FieldValue.serverTimestamp(),
     });
@@ -491,6 +493,7 @@ class UniverseMessageData {
   final String question;
   final String? audioFilePath;
   final int audioDuration;
+  final String? category;
   final bool isRead;
   final DateTime createdAt;
 
@@ -499,9 +502,26 @@ class UniverseMessageData {
     required this.question,
     this.audioFilePath,
     required this.audioDuration,
+    this.category,
     required this.isRead,
     required this.createdAt,
   });
+
+  /// Get the emoji for the category
+  String get categoryEmoji {
+    switch (category) {
+      case 'love':
+        return '❤️';
+      case 'money':
+        return '💰';
+      case 'path':
+        return '🌿';
+      case 'decision':
+        return '🔮';
+      default:
+        return '✨';
+    }
+  }
 
   factory UniverseMessageData.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
@@ -510,6 +530,7 @@ class UniverseMessageData {
       question: data['question'] ?? '',
       audioFilePath: data['audioFilePath'],
       audioDuration: data['audioDuration'] ?? 10,
+      category: data['category'],
       isRead: data['isRead'] ?? false,
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
     );

@@ -351,9 +351,9 @@ class _NotificationScreenState extends State<NotificationScreen> {
                     children: [
                       Row(
                         children: [
-                          const Expanded(
+                          Expanded(
                             child: Text(
-                              'Universe Response 🌌 ✨',
+                              'Universe has sent you a sign ${response.categoryEmoji}',
                               style: medium16WhiteF4,
                             ),
                           ),

@@ -12,14 +12,15 @@ class ApiConfig {
   /// OpenRouter base URL
   static const String openRouterBaseUrl = 'https://openrouter.ai/api/v1/chat/completions';
   
-  /// Модель для чата (бесплатная Mistral 7B)
-  /// Альтернативы: 'google/gemma-7b-it:free', 'meta-llama/llama-3-8b-instruct:free'
-  static const String aiModel = 'mistralai/mistral-7b-instruct:free';
+  /// Модель для чата (GPT-4o Mini - платная)
+  /// Отличное качество, поддержка Vision, высокие лимиты
+  /// Стоимость: ~$0.15/1M input, $0.60/1M output
+  static const String aiModel = 'openai/gpt-4o-mini-2024-07-18';
   
-  /// Модель для Vision (Amazon Nova 2 Lite - бесплатная)
+  /// Модель для Vision (GPT-4o Mini - платная)
   /// Используется для анализа изображений (например, ладони)
   /// Альтернативы: 'google/gemini-2.0-flash-exp:free', 'nvidia/nemotron-nano-12b-v2-v1:free'
-  static const String visionModel = 'amazon/nova-2-lite-v1:free';
+  static const String visionModel = 'openai/gpt-4o-mini-2024-07-18';
   
   /// App info для OpenRouter
   static const String appName = 'Astro Circle';

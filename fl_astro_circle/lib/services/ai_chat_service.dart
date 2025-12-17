@@ -339,6 +339,105 @@ OUTPUT: Pure text only, no formatting tags.''';
     }
   }
 
+  /// Генерация ответа от вселенной (Universe Sign)
+  /// Создает мистическое персонализированное сообщение на основе категории и вопроса
+  Future<String> generateUniverseSign({
+    required String question,
+    required String category,
+    String language = 'English',
+  }) async {
+    final categoryInfo = _getUniverseSignCategoryInfo(category);
+    
+    final prompt = '''Generate a mystical, cosmic response from the Universe for this inquiry.
+
+CATEGORY: ${categoryInfo['name']} ${categoryInfo['emoji']}
+USER'S QUESTION: "$question"
+
+REQUIREMENTS:
+- Write a profound, mystical response as if the Universe itself is speaking
+- The response should feel deeply personal and meaningful
+- Include cosmic/astrological references appropriate for the ${categoryInfo['name']} category
+- Structure the response with:
+  1. An opening that acknowledges receiving their message (1 paragraph)
+  2. The main cosmic insight/answer (2-3 paragraphs)
+  3. Three specific signs they should watch for (numbered list)
+  4. A closing message of cosmic wisdom (1 paragraph)
+  5. End with 3 "cosmic metrics" using emojis (like "🌟 Cosmic Alignment: 87%")
+
+- Write in $language
+- Be mystical but not vague - give actionable insights
+- Make it feel like a personalized message from the cosmos
+- DO NOT include any special tokens or tags
+- Start directly with the response
+
+CATEGORY FOCUS:
+${categoryInfo['focus']}
+
+OUTPUT: Pure mystical text only.''';
+
+    final messages = <Map<String, String>>[
+      {'role': 'system', 'content': '''You are the Voice of the Universe - a cosmic consciousness that speaks through the stars. 
+You communicate with profound wisdom, cosmic poetry, and mystical truth.
+Your messages feel ancient yet personal, universal yet specific to the seeker.
+Never break character. Output ONLY the requested text, no tags or markers.'''},
+      {'role': 'user', 'content': prompt},
+    ];
+
+    return _sendRawMessage(messages, maxTokens: 800);
+  }
+
+  /// Информация о категориях для Universe Sign
+  Map<String, String> _getUniverseSignCategoryInfo(String category) {
+    switch (category) {
+      case 'love':
+        return {
+          'name': 'Love',
+          'emoji': '❤️',
+          'focus': '''Focus on matters of the heart:
+- Romantic connections and soulmate energy
+- Emotional healing and self-love
+- Relationship dynamics and transformations
+- Venus and Moon influences on love''',
+        };
+      case 'money':
+        return {
+          'name': 'Money & Abundance',
+          'emoji': '💰',
+          'focus': '''Focus on prosperity and abundance:
+- Financial opportunities approaching
+- Career growth and professional paths
+- Abundance mindset and manifestation
+- Jupiter and Saturn influences on wealth''',
+        };
+      case 'path':
+        return {
+          'name': 'Life Path',
+          'emoji': '🌿',
+          'focus': '''Focus on life direction and purpose:
+- Soul mission and life purpose
+- Important decisions and crossroads
+- Personal growth and spiritual evolution
+- North Node and destiny influences''',
+        };
+      case 'decision':
+        return {
+          'name': 'Decision',
+          'emoji': '🔮',
+          'focus': '''Focus on choices and clarity:
+- Guidance for important decisions
+- Trusting intuition and inner wisdom
+- Timing and cosmic alignment for action
+- Mercury and Uranus influences on clarity''',
+        };
+      default:
+        return {
+          'name': 'Cosmic Guidance',
+          'emoji': '✨',
+          'focus': 'General cosmic wisdom and universal guidance.',
+        };
+    }
+  }
+
   /// Отправка сообщений напрямую (без системного промпта из контекста)
   Future<String> _sendRawMessage(List<Map<String, String>> messages, {int maxTokens = 500}) async {
     try {
