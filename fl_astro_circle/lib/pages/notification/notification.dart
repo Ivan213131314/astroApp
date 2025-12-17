@@ -3,7 +3,7 @@ import 'package:fl_astro_circle/localization/localization_const.dart';
 import 'package:fl_astro_circle/services/notification_storage_service.dart';
 import 'package:fl_astro_circle/services/cosmic_audio_generator.dart';
 import 'package:fl_astro_circle/services/superwall_service.dart';
-import 'package:fl_astro_circle/pages/universeMessage/universe_decipher_screen.dart';
+import 'package:fl_astro_circle/pages/universeSign/universe_sign_player_screen.dart';
 import 'package:fl_astro_circle/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
@@ -283,8 +283,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
   }
 
   Widget universeMessageItem(UniverseMessageData response) {
-    final isCurrentPlaying = currentPlayingId == response.id;
-    
     return Dismissible(
       key: Key(response.id),
       background: Container(
@@ -322,25 +320,20 @@ class _NotificationScreenState extends State<NotificationScreen> {
           children: [
             Row(
               children: [
-                GestureDetector(
-                  onTap: () => togglePlayPause(response),
-                  child: Container(
-                    height: 60,
-                    width: 60,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10.0),
-                      color: const Color(0xFF1F2449),
-                      gradient: LinearGradient(
-                        colors: [primaryColor.withValues(alpha: 0.3), Colors.transparent],
-                      ),
+                Container(
+                  height: 60,
+                  width: 60,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10.0),
+                    color: const Color(0xFF1F2449),
+                    gradient: LinearGradient(
+                      colors: [primaryColor.withValues(alpha: 0.3), Colors.transparent],
                     ),
-                    child: Icon(
-                      isCurrentPlaying && audioGenerator.isPlaying
-                          ? Icons.pause
-                          : Icons.play_arrow,
-                      color: primaryColor,
-                      size: 35,
-                    ),
+                  ),
+                  child: const Icon(
+                    Icons.auto_awesome,
+                    color: primaryColor,
+                    size: 35,
                   ),
                 ),
                 widthSpace,
@@ -395,89 +388,24 @@ class _NotificationScreenState extends State<NotificationScreen> {
                 ),
               ],
             ),
-            if (isCurrentPlaying) ...[
-              heightBox(10),
-              StreamBuilder<Duration>(
-                stream: audioGenerator.positionStream,
-                builder: (context, snapshot) {
-                  final position = snapshot.data ?? Duration.zero;
-                  final totalDuration = Duration(seconds: response.audioDuration);
-                  final progress = totalDuration.inMilliseconds > 0
-                      ? position.inMilliseconds / totalDuration.inMilliseconds
-                      : 0.0;
 
-                  return Column(
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            _formatDuration(position),
-                            style: regualr14Grey,
-                          ),
-                          const Spacer(),
-                          Text(
-                            _formatDuration(totalDuration),
-                            style: regualr14Grey,
-                          ),
-                        ],
-                      ),
-                      heightBox(5),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(5),
-                        child: LinearProgressIndicator(
-                          value: progress.clamp(0.0, 1.0),
-                          backgroundColor: const Color(0xFF1F2449),
-                          valueColor: const AlwaysStoppedAnimation<Color>(primaryColor),
-                          minHeight: 6,
-                        ),
-                      ),
-                      heightBox(12),
-                      const Text(
-                        'The message is encoded.\nOnly deeper decoding reveals its meaning.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Color(0xAAFFFFFF),
-                          fontSize: 12,
-                          fontStyle: FontStyle.italic,
-                          height: 1.4,
-                        ),
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ],
             heightBox(10),
             Align(
               alignment: Alignment.centerRight,
               child: GestureDetector(
-                onTap: () async {
-                  await SuperwallService().showPaywall(
-                    placement: "subscribe_button",
-                    onPurchased: () {
-                      Navigator.push(
-                        context,
-                        PageTransition(
-                          child: UniverseDecipherScreen(question: response.question),
-                          type: PageTransitionType.rightToLeft,
-                          duration: const Duration(milliseconds: 300),
+                onTap: () {
+                    Navigator.push(
+                      context,
+                      PageTransition(
+                        child: UniverseSignPlayerScreen(
+                          question: response.question,
+                          category: response.category,
+                          messageId: response.id,
                         ),
-                      );
-                    },
-                    onDeclined: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          backgroundColor: Colors.orange,
-                          behavior: SnackBarBehavior.floating,
-                          content: Text(
-                            'Subscribe to decipher universe messages',
-                            style: medium14WhiteF4,
-                          ),
-                          duration: Duration(seconds: 2),
-                        ),
-                      );
-                    },
-                  );
+                        type: PageTransitionType.rightToLeft,
+                        duration: const Duration(milliseconds: 300),
+                      ),
+                    );
                 },
                 child: Container(
                   padding: const EdgeInsets.symmetric(
@@ -503,7 +431,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                       Icon(Icons.hearing, color: whiteColor, size: 14),
                       SizedBox(width: 6),
                       Text(
-                        'Decipher Message',
+                        'Open Sign',
                         style: TextStyle(
                           color: whiteColor,
                           fontSize: 12,

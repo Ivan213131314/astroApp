@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:fl_astro_circle/localization/localization_const.dart';
 import 'package:fl_astro_circle/pages/screens.dart';
+import 'package:fl_astro_circle/pages/universeSign/universe_sign.dart';
 import 'package:fl_astro_circle/services/notification_storage_service.dart';
 import 'package:fl_astro_circle/services/universe_message_service.dart';
 import 'package:fl_astro_circle/theme/theme.dart';
@@ -34,7 +35,7 @@ class _BottomBarState extends State<BottomBar> {
   List pages = const [
     HomeScreen(),
     CompatibilityScreen(),
-    UniverseMessageScreen(),
+    UniverseSignScreen(),
     NotificationScreen(),
     ProfileScreen(),
   ];

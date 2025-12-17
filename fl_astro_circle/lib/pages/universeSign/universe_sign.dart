@@ -1,5 +1,5 @@
 import 'package:fl_astro_circle/pages/screens.dart';
-import 'package:fl_astro_circle/pages/universeMessage/universe_decipher_screen.dart';
+import 'package:fl_astro_circle/pages/universeSign/universe_sign_player_screen.dart';
 import 'package:fl_astro_circle/services/universe_sign_service.dart';
 import 'package:fl_astro_circle/services/superwall_service.dart';
 import 'package:fl_astro_circle/theme/theme.dart';
@@ -614,7 +614,7 @@ class _UniverseSignScreenState extends State<UniverseSignScreen>
                       heightSpace,
                       heightSpace,
                       const Text(
-                        'Sign Received',
+                        'The Universe has responded',
                         style: TextStyle(
                           color: whiteColor,
                           fontSize: 20,
@@ -636,30 +636,17 @@ class _UniverseSignScreenState extends State<UniverseSignScreen>
                       heightSpace,
                       heightSpace,
                       GestureDetector(
-                        onTap: () async {
-                          await SuperwallService().showPaywall(
-                            placement: "subscribe_button",
-                            onPurchased: () {
-                              Navigator.push(
-                                context,
-                                PageTransition(
-                                  child: UniverseDecipherScreen(
-                                    question: currentQuestionForDialog ?? '',
-                                    category: currentCategoryForDialog,
-                                  ),
-                                  type: PageTransitionType.rightToLeft,
-                                  duration: const Duration(milliseconds: 300),
-                                ),
-                              );
-                            },
-                            onDeclined: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Subscribe to unlock universe signs'),
-                                  backgroundColor: Colors.orange,
-                                ),
-                              );
-                            },
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            PageTransition(
+                              child: UniverseSignPlayerScreen(
+                                question: currentQuestionForDialog ?? '',
+                                category: currentCategoryForDialog,
+                              ),
+                              type: PageTransitionType.rightToLeft,
+                              duration: const Duration(milliseconds: 300),
+                            ),
                           );
                         },
                         child: Container(
@@ -676,7 +663,7 @@ class _UniverseSignScreenState extends State<UniverseSignScreen>
                           ),
                           child: const Center(
                             child: Text(
-                              'Decode Sign',
+                              'Open Sign',
                               style: TextStyle(
                                 color: whiteColor,
                                 fontSize: 16,
