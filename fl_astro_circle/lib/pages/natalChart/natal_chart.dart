@@ -149,7 +149,7 @@ class _NatalChartScreenState extends State<NatalChartScreen> {
 
   contentText() {
     return const Text(
-      "Lorem ipsum dolor sit amet consectetur. In vitae in volutpat eu lectus. Eget aliquet pharetra nunc lacus. Mauris at mattis laoreet quam. Cursus risus nisl nulla et magna maecenasid id. Enim nibh quisque tellus urna justo. Egestas id pharetrah morbi quam in eu. Mattis mattis odio velit volutpat blandit a pellentesque scelerisque vestibulum eget pulvinar. Eu sit gh ",
+      "Your personal birth chart — using precise data from your birth moment.",
       style: regualr14Grey,
       textAlign: TextAlign.center,
     );

@@ -108,6 +108,36 @@ class _UniverseSignPlayerScreenState extends State<UniverseSignPlayerScreen> {
     }
   }
 
+  Color _getCategoryColor() {
+    switch (widget.category) {
+      case 'love':
+        return const Color(0xFFFF6B6B);
+      case 'money':
+        return const Color(0xFFFFD700);
+      case 'path':
+        return const Color(0xFF4ECB71);
+      case 'decision':
+        return const Color(0xFF9B59B6);
+      default:
+        return primaryColor;
+    }
+  }
+
+  Color _getCategorySecondaryColor() {
+    switch (widget.category) {
+      case 'love':
+        return const Color(0xFFFF4757);
+      case 'money':
+        return const Color(0xFFFFA500);
+      case 'path':
+        return const Color(0xFF2ECC71);
+      case 'decision':
+        return const Color(0xFF8E44AD);
+      default:
+        return const Color(0xFF7B5CFA);
+    }
+  }
+
   String _formatDuration(Duration duration) {
     final minutes = duration.inMinutes;
     final seconds = duration.inSeconds % 60;
@@ -116,10 +146,13 @@ class _UniverseSignPlayerScreenState extends State<UniverseSignPlayerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final categoryColor = _getCategoryColor();
+    
     return Scaffold(
       backgroundColor: scaffoldBgColor,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: scaffoldBgColor,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: false,
         automaticallyImplyLeading: false,
@@ -133,7 +166,7 @@ class _UniverseSignPlayerScreenState extends State<UniverseSignPlayerScreen> {
                 width: 35,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(5.0),
-                  color: recBgColor,
+                  color: recBgColor.withValues(alpha: 0.8),
                 ),
                 child: const Icon(
                   Icons.arrow_back,
@@ -150,55 +183,70 @@ class _UniverseSignPlayerScreenState extends State<UniverseSignPlayerScreen> {
           ],
         ),
       ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(fixPadding * 2),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Category emoji and title
-                      Text(
-                        _getCategoryEmoji(),
-                        style: const TextStyle(fontSize: 50),
-                      ),
-                      heightSpace,
-                      const Text(
-                        'A sign has arrived',
-                        style: TextStyle(
-                          color: whiteColor,
-                          fontSize: 22,
-                          fontWeight: FontWeight.w500,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              categoryColor.withValues(alpha: 0.4),
+              categoryColor.withValues(alpha: 0.15),
+              scaffoldBgColor,
+              scaffoldBgColor,
+            ],
+            stops: const [0.0, 0.2, 0.5, 1.0],
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              Expanded(
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(fixPadding * 2),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Category emoji and title
+                        Text(
+                          _getCategoryEmoji(),
+                          style: const TextStyle(fontSize: 50),
                         ),
-                      ),
-                      heightSpace,
-                      heightSpace,
-                      heightSpace,
-                      
-                      // Audio Player
-                      _buildAudioPlayer(),
-                      
-                      heightSpace,
-                      heightSpace,
-                      heightSpace,
-                      
-                      // Tooltip-styled message
-                      _buildTooltipMessage(),
-                    ],
+                        heightSpace,
+                        const Text(
+                          'A sign has arrived',
+                          style: TextStyle(
+                            color: whiteColor,
+                            fontSize: 22,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        heightSpace,
+                        heightSpace,
+                        heightSpace,
+                        
+                        // Audio Player
+                        _buildAudioPlayer(),
+                        
+                        heightSpace,
+                        heightSpace,
+                        heightSpace,
+                        
+                        // Tooltip-styled message
+                        _buildTooltipMessage(),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-            
-            // Bottom button
-            Padding(
-              padding: const EdgeInsets.all(fixPadding * 2),
-              child: _buildDecodeButton(),
-            ),
-          ],
+              
+              // Bottom button
+              Padding(
+                padding: const EdgeInsets.all(fixPadding * 2),
+                child: _buildDecodeButton(),
+              ),
+            ],
+          ),
         ),
       ),
     );

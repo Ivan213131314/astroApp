@@ -150,6 +150,12 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
   final otherServicesList = [
     {
+      "image": "assets/home/natal_chart_premium.png",
+      "title": "Netal chart",
+      "detail": "Calculate your Netal chart and check your planet position",
+      'route': '/natalchart'
+    },
+    {
       "image": "assets/home/numerology_premium.png",
       "title": "Numerology",
       "detail": "Know how number effect",
@@ -166,12 +172,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       "title": "Palm reading",
       "detail": "Check heartline,loveline and moneyline",
       "route": '/plamReader'
-    },
-    {
-      "image": "assets/home/natal_chart_premium.png",
-      "title": "Netal chart",
-      "detail": "Calculate your Netal chart and check your planet position",
-      'route': '/natalchart'
     },
     {
       "image": "assets/home/service6.png",
@@ -258,7 +258,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                         servicesGridContent(),
                         heightSpace,
                         heightSpace,
-                        talkToAstrologerBlock(),
+                        // talkToAstrologerBlock(), // Temporarily hidden
                         heightSpace,
                       ],
                     ),

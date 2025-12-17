@@ -16,8 +16,11 @@ class UniverseDecipherScreen extends StatefulWidget {
   State<UniverseDecipherScreen> createState() => _UniverseDecipherScreenState();
 }
 
-class _UniverseDecipherScreenState extends State<UniverseDecipherScreen> {
+class _UniverseDecipherScreenState extends State<UniverseDecipherScreen>
+    with SingleTickerProviderStateMixin {
   final AiChatService _aiService = AiChatService();
+  
+  late AnimationController _pulseController;
   
   bool _isLoading = true;
   String? _aiResponse;
@@ -82,7 +85,17 @@ The cosmic energy surrounding your question is exceptionally positive. The unive
   @override
   void initState() {
     super.initState();
+    _pulseController = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    )..repeat(reverse: true);
     _loadAiResponse();
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadAiResponse() async {
@@ -114,12 +127,23 @@ The cosmic energy surrounding your question is exceptionally positive. The unive
     return _fallbackMessages[index]['message']!;
   }
 
-  String _getTitle() {
-    if (_aiResponse != null) {
-      return 'Message from the Stars';
+  String _getCategoryName() {
+    switch (widget.category) {
+      case 'love':
+        return 'Love';
+      case 'money':
+        return 'Money';
+      case 'path':
+        return 'Life Path';
+      case 'decision':
+        return 'Decision';
+      default:
+        return 'You';
     }
-    final index = widget.question.hashCode.abs() % _fallbackMessages.length;
-    return _fallbackMessages[index]['title']!;
+  }
+
+  String _getTitle() {
+    return 'Your insight about ${_getCategoryName()} was decoded';
   }
 
   String _getCategoryEmoji() {
@@ -137,12 +161,45 @@ The cosmic energy surrounding your question is exceptionally positive. The unive
     }
   }
 
+  Color _getCategoryColor() {
+    switch (widget.category) {
+      case 'love':
+        return const Color(0xFFFF6B6B);
+      case 'money':
+        return const Color(0xFFFFD700);
+      case 'path':
+        return const Color(0xFF4ECB71);
+      case 'decision':
+        return const Color(0xFF9B59B6);
+      default:
+        return primaryColor;
+    }
+  }
+
+  Color _getCategorySecondaryColor() {
+    switch (widget.category) {
+      case 'love':
+        return const Color(0xFFFF4757);
+      case 'money':
+        return const Color(0xFFFFA500);
+      case 'path':
+        return const Color(0xFF2ECC71);
+      case 'decision':
+        return const Color(0xFF8E44AD);
+      default:
+        return const Color(0xFF7B5CFA);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final categoryColor = _getCategoryColor();
+    
     return Scaffold(
       backgroundColor: scaffoldBgColor,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: scaffoldBgColor,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios, color: whiteF4Color),
@@ -154,45 +211,63 @@ The cosmic energy surrounding your question is exceptionally positive. The unive
         ),
         centerTitle: true,
       ),
-      body: _isLoading ? _buildLoadingState() : _buildContent(),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              categoryColor.withValues(alpha: 0.4),
+              categoryColor.withValues(alpha: 0.15),
+              scaffoldBgColor,
+              scaffoldBgColor,
+            ],
+            stops: const [0.0, 0.2, 0.5, 1.0],
+          ),
+        ),
+        child: SafeArea(
+          child: _isLoading ? _buildLoadingState() : _buildContent(),
+        ),
+      ),
     );
   }
 
   Widget _buildLoadingState() {
+    final categoryColor = _getCategoryColor();
+    final secondaryColor = _getCategorySecondaryColor();
+    
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Animated cosmic icon
-          TweenAnimationBuilder<double>(
-            tween: Tween(begin: 0.0, end: 1.0),
-            duration: const Duration(seconds: 2),
-            builder: (context, value, child) {
-              return Transform.rotate(
-                angle: value * 2 * 3.14159,
-                child: Container(
-                  height: 100,
-                  width: 100,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      colors: [
-                        primaryColor.withValues(alpha: 0.5),
-                        const Color(0xFF7B5CFA).withValues(alpha: 0.5),
-                      ],
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: primaryColor.withValues(alpha: 0.3),
-                        blurRadius: 20,
-                        spreadRadius: 5,
-                      ),
+          // Animated cosmic icon with category color
+          AnimatedBuilder(
+            animation: _pulseController,
+            builder: (context, child) {
+              final pulseValue = 0.8 + (_pulseController.value * 0.4);
+              return Container(
+                height: 100 * pulseValue,
+                width: 100 * pulseValue,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    colors: [
+                      categoryColor.withValues(alpha: 0.5),
+                      secondaryColor.withValues(alpha: 0.5),
                     ],
                   ),
-                  child: const Icon(
-                    Icons.auto_awesome,
-                    color: whiteColor,
-                    size: 50,
+                  boxShadow: [
+                    BoxShadow(
+                      color: categoryColor.withValues(alpha: 0.3 + (_pulseController.value * 0.3)),
+                      blurRadius: 20 + (_pulseController.value * 10),
+                      spreadRadius: 5 + (_pulseController.value * 5),
+                    ),
+                  ],
+                ),
+                child: Center(
+                  child: Text(
+                    _getCategoryEmoji(),
+                    style: const TextStyle(fontSize: 50),
                   ),
                 ),
               );
@@ -220,7 +295,7 @@ The cosmic energy surrounding your question is exceptionally positive. The unive
             width: 200,
             child: LinearProgressIndicator(
               backgroundColor: whiteColor.withValues(alpha: 0.1),
-              valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
+              valueColor: AlwaysStoppedAnimation<Color>(categoryColor),
             ),
           ),
         ],
@@ -230,6 +305,8 @@ The cosmic energy surrounding your question is exceptionally positive. The unive
 
   Widget _buildContent() {
     final message = _aiResponse ?? _getFallbackMessage();
+    final categoryColor = _getCategoryColor();
+    final secondaryColor = _getCategorySecondaryColor();
     
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
@@ -238,48 +315,6 @@ The cosmic energy surrounding your question is exceptionally positive. The unive
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Вопрос пользователя
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(fixPadding * 1.5),
-              decoration: BoxDecoration(
-                color: blueShade1.withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(15),
-                border: Border.all(
-                  color: primaryColor.withValues(alpha: 0.3),
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.question_answer_outlined,
-                        color: primaryColor,
-                        size: 18,
-                      ),
-                      widthSpace,
-                      const Text(
-                        'Your Question',
-                        style: medium14Grey,
-                      ),
-                      const Spacer(),
-                      Text(
-                        _getCategoryEmoji(),
-                        style: const TextStyle(fontSize: 20),
-                      ),
-                    ],
-                  ),
-                  heightSpace,
-                  Text(
-                    widget.question,
-                    style: medium16WhiteF4,
-                  ),
-                ],
-              ),
-            ),
-
             // Error notification (if any)
             if (_error != null) ...[
               heightSpace,
@@ -311,7 +346,7 @@ The cosmic energy surrounding your question is exceptionally positive. The unive
             heightSpace,
             heightSpace,
 
-            // Заголовок расшифровки
+            // Заголовок расшифровки с цветом категории
             Center(
               child: Container(
                 padding: const EdgeInsets.symmetric(
@@ -321,32 +356,16 @@ The cosmic energy surrounding your question is exceptionally positive. The unive
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      primaryColor.withValues(alpha: 0.3),
-                      const Color(0xFF7B5CFA).withValues(alpha: 0.3),
+                      categoryColor.withValues(alpha: 0.3),
+                      secondaryColor.withValues(alpha: 0.3),
                     ],
                   ),
                   borderRadius: BorderRadius.circular(25),
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.auto_awesome,
-                      color: Color(0xFFFFD700),
-                      size: 20,
-                    ),
-                    widthSpace,
-                    Text(
-                      _getTitle(),
-                      style: bold16WhiteF4,
-                    ),
-                    widthSpace,
-                    const Icon(
-                      Icons.auto_awesome,
-                      color: Color(0xFFFFD700),
-                      size: 20,
-                    ),
-                  ],
+                child: Text(
+                  _getTitle(),
+                  style: bold16WhiteF4,
+                  textAlign: TextAlign.center,
                 ),
               ),
             ),
@@ -354,7 +373,7 @@ The cosmic energy surrounding your question is exceptionally positive. The unive
             heightSpace,
             heightSpace,
 
-            // Основное сообщение
+            // Основное сообщение с цветом категории
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(fixPadding * 2),
@@ -363,7 +382,7 @@ The cosmic energy surrounding your question is exceptionally positive. The unive
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: primaryColor.withValues(alpha: 0.2),
+                    color: categoryColor.withValues(alpha: 0.2),
                     blurRadius: 20,
                     spreadRadius: 5,
                   ),
@@ -371,23 +390,46 @@ The cosmic energy surrounding your question is exceptionally positive. The unive
               ),
               child: Column(
                 children: [
-                  // Декоративная иконка сверху
-                  Container(
-                    height: 80,
-                    width: 80,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: LinearGradient(
-                        colors: [
-                          primaryColor.withValues(alpha: 0.5),
-                          const Color(0xFF7B5CFA).withValues(alpha: 0.5),
-                        ],
+                  // Пульсирующая иконка с эмодзи категории
+                  SizedBox(
+                    height: 96,
+                    width: 96,
+                    child: Center(
+                      child: AnimatedBuilder(
+                        animation: _pulseController,
+                        builder: (context, child) {
+                          final pulseValue = 0.9 + (_pulseController.value * 0.15);
+                          return Transform.scale(
+                            scale: pulseValue,
+                            child: Container(
+                              height: 80,
+                              width: 80,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                gradient: LinearGradient(
+                                  colors: [
+                                    categoryColor.withValues(alpha: 0.5),
+                                    secondaryColor.withValues(alpha: 0.5),
+                                  ],
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: categoryColor.withValues(alpha: 0.3 + (_pulseController.value * 0.2)),
+                                    blurRadius: 15 + (_pulseController.value * 5),
+                                    spreadRadius: 2 + (_pulseController.value * 3),
+                                  ),
+                                ],
+                              ),
+                              child: Center(
+                                child: Text(
+                                  _getCategoryEmoji(),
+                                  style: const TextStyle(fontSize: 40),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
                       ),
-                    ),
-                    child: const Icon(
-                      Icons.auto_awesome,
-                      color: whiteColor,
-                      size: 40,
                     ),
                   ),
 
@@ -408,13 +450,13 @@ The cosmic energy surrounding your question is exceptionally positive. The unive
             heightSpace,
             heightSpace,
 
-            // Кнопка "Share"
+            // Кнопка "Share" с цветом категории
             GestureDetector(
               onTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Share feature coming soon!'),
-                    backgroundColor: primaryColor,
+                  SnackBar(
+                    content: const Text('Share feature coming soon!'),
+                    backgroundColor: categoryColor,
                   ),
                 );
               },
@@ -422,13 +464,13 @@ The cosmic energy surrounding your question is exceptionally positive. The unive
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: fixPadding * 1.5),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [primaryColor, Color(0xFF7B5CFA)],
+                  gradient: LinearGradient(
+                    colors: [categoryColor, secondaryColor],
                   ),
                   borderRadius: BorderRadius.circular(30),
                   boxShadow: [
                     BoxShadow(
-                      color: primaryColor.withValues(alpha: 0.4),
+                      color: categoryColor.withValues(alpha: 0.4),
                       blurRadius: 15,
                       offset: const Offset(0, 5),
                     ),

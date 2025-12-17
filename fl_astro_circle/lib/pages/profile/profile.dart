@@ -84,12 +84,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
               getTranslation(context, 'profile.netal_chart'), () {
             Navigator.pushNamed(context, '/natalchart');
           }),
-          iconListTile(
-              CupertinoIcons.chat_bubble_2,
-              "Chat with Astrologer",
-              () {
-            Navigator.pushNamed(context, '/astrologerChat');
-          }),
+          // Chat with Astrologer - temporarily hidden
+          // iconListTile(
+          //     CupertinoIcons.chat_bubble_2,
+          //     "Chat with Astrologer",
+          //     () {
+          //   Navigator.pushNamed(context, '/astrologerChat');
+          // }),
           iconListTile(
               CupertinoIcons.globe, getTranslation(context, 'profile.language'),
               () {

@@ -4,6 +4,7 @@ import 'package:fl_astro_circle/services/universe_sign_service.dart';
 import 'package:fl_astro_circle/services/superwall_service.dart';
 import 'package:fl_astro_circle/theme/theme.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:page_transition/page_transition.dart';
 
 /// Model for sign categories
@@ -178,82 +179,30 @@ class _UniverseSignScreenState extends State<UniverseSignScreen>
     super.dispose();
   }
 
-  /// Show bottom sheet with category questions
-  void _showQuestionsSheet(SignCategory category) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (context) => Container(
-        decoration: BoxDecoration(
-          color: const Color(0xFF1F1F2E),
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
-          border: Border.all(color: whiteColor.withValues(alpha: 0.1)),
-        ),
-        padding: const EdgeInsets.all(fixPadding * 2),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Handle bar
-            Container(
-              width: 40,
-              height: 4,
-              margin: const EdgeInsets.only(bottom: 20),
-              decoration: BoxDecoration(
-                color: whiteColor.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            // Category header
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  category.emoji,
-                  style: const TextStyle(fontSize: 28),
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  category.name,
-                  style: const TextStyle(
-                    color: whiteColor,
-                    fontSize: 22,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            // Questions list
-            ...category.questions.map((question) => GestureDetector(
-              onTap: () {
-                Navigator.pop(context);
-                _sendQuestion(question, category.id);
-              },
-              child: Container(
-                width: double.infinity,
-                margin: const EdgeInsets.only(bottom: 12),
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: whiteColor.withValues(alpha: 0.05),
-                  borderRadius: BorderRadius.circular(15),
-                  border: Border.all(color: whiteColor.withValues(alpha: 0.1)),
-                ),
-                child: Text(
-                  question,
-                  style: const TextStyle(
-                    color: whiteColor,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w300,
-                  ),
-                ),
-              ),
-            )),
-            const SizedBox(height: 20),
-          ],
-        ),
-      ),
-    );
+  /// Generate general question for category with today's date
+  String _generateCategoryQuestion(SignCategory category) {
+    final now = DateTime.now();
+    final dateFormat = DateFormat('MMMM d, yyyy');
+    final formattedDate = dateFormat.format(now);
+    
+    switch (category.id) {
+      case 'love':
+        return "Today is $formattedDate. What sign is the Universe sending me about love today?";
+      case 'money':
+        return "Today is $formattedDate. What sign is the Universe sending me about money and finances today?";
+      case 'path':
+        return "Today is $formattedDate. What sign is the Universe sending me about my life path today?";
+      case 'decision':
+        return "Today is $formattedDate. What sign is the Universe sending me about making decisions today?";
+      default:
+        return "Today is $formattedDate. What sign is the Universe sending me today?";
+    }
+  }
+
+  /// Handle category tap - send general question directly
+  void _onCategoryTap(SignCategory category) {
+    final question = _generateCategoryQuestion(category);
+    _sendQuestion(question, category.id);
   }
 
   /// Send selected question
@@ -535,7 +484,7 @@ class _UniverseSignScreenState extends State<UniverseSignScreen>
   /// Build individual category bubble
   Widget _buildCategoryBubble(SignCategory category) {
     return GestureDetector(
-      onTap: () => _showQuestionsSheet(category),
+      onTap: () => _onCategoryTap(category),
       child: Container(
         width: 140,
         padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
