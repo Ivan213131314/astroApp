@@ -123,21 +123,6 @@ class _UniverseSignPlayerScreenState extends State<UniverseSignPlayerScreen> {
     }
   }
 
-  Color _getCategorySecondaryColor() {
-    switch (widget.category) {
-      case 'love':
-        return const Color(0xFFFF4757);
-      case 'money':
-        return const Color(0xFFFFA500);
-      case 'path':
-        return const Color(0xFF2ECC71);
-      case 'decision':
-        return const Color(0xFF8E44AD);
-      default:
-        return const Color(0xFF7B5CFA);
-    }
-  }
-
   String _formatDuration(Duration duration) {
     final minutes = duration.inMinutes;
     final seconds = duration.inSeconds % 60;
@@ -146,104 +131,111 @@ class _UniverseSignPlayerScreenState extends State<UniverseSignPlayerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final categoryColor = _getCategoryColor();
-    
+    // Minimalist Modern Theme Colors - Purple Edition
+    // Using deep purple background to match app theme
+    final bgColor = const Color(0xFF130B29); // Deep space purple
+    final cardColor = const Color(0xFF221642); // Lighter purple for cards
+    final accentColor = _getCategoryColor(); // Vivid category color
+    final primaryAccent = const Color(0xFF7B5CFA); // App's primary purple
+
     return Scaffold(
-      backgroundColor: scaffoldBgColor,
+      backgroundColor: bgColor,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        centerTitle: false,
+        centerTitle: true,
         automaticallyImplyLeading: false,
-        titleSpacing: 20.0,
-        title: Row(
-          children: [
-            GestureDetector(
-              onTap: () => Navigator.pop(context),
-              child: Container(
-                height: 35,
-                width: 35,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(5.0),
-                  color: recBgColor.withValues(alpha: 0.8),
-                ),
-                child: const Icon(
-                  Icons.arrow_back,
-                  color: whiteColor,
-                  size: 22,
-                ),
+        title: Text(
+          'Universe Sign',
+          style: bold20White.copyWith(letterSpacing: 0.5),
+        ),
+        leading: GestureDetector(
+          onTap: () => Navigator.pop(context),
+          child: Container(
+            margin: const EdgeInsets.only(left: 20),
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: cardColor.withValues(alpha: 0.5),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.1),
               ),
             ),
-            const SizedBox(width: 16),
-            const Text(
-              'Universe Sign',
-              style: bold20White,
+            child: const Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: whiteColor,
+              size: 20,
             ),
-          ],
+          ),
         ),
       ),
       body: Container(
         decoration: BoxDecoration(
+          // Subtle gradient to add depth without clutter
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              categoryColor.withValues(alpha: 0.4),
-              categoryColor.withValues(alpha: 0.15),
-              scaffoldBgColor,
-              scaffoldBgColor,
+              const Color(0xFF1F1147),
+              const Color(0xFF130B29),
             ],
-            stops: const [0.0, 0.2, 0.5, 1.0],
           ),
         ),
         child: SafeArea(
           child: Column(
             children: [
               Expanded(
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(fixPadding * 2),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        // Category emoji and title
-                        Text(
-                          _getCategoryEmoji(),
-                          style: const TextStyle(fontSize: 50),
-                        ),
-                        heightSpace,
-                        const Text(
-                          'A sign has arrived',
-                          style: TextStyle(
-                            color: whiteColor,
-                            fontSize: 22,
-                            fontWeight: FontWeight.w500,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: fixPadding * 2.5),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Category & Title Section
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: cardColor,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: accentColor.withOpacity(0.3),
+                            width: 2,
                           ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: accentColor.withOpacity(0.15),
+                              blurRadius: 20,
+                              spreadRadius: 0,
+                            ),
+                          ],
                         ),
-                        heightSpace,
-                        heightSpace,
-                        heightSpace,
-                        
-                        // Audio Player
-                        _buildAudioPlayer(),
-                        
-                        heightSpace,
-                        heightSpace,
-                        heightSpace,
-                        
-                        // Tooltip-styled message
-                        _buildTooltipMessage(),
-                      ],
-                    ),
+                        child: Text(
+                          _getCategoryEmoji(),
+                          style: const TextStyle(fontSize: 40),
+                        ),
+                      ),
+                      heightSpace,
+                      const Text(
+                        'A sign has arrived',
+                        style: TextStyle(
+                          color: whiteColor,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 40),
+
+                      // Audio Player - Minimalist Round
+                      _buildMinimalAudioPlayer(cardColor, accentColor),
+                      
+                      const SizedBox(height: 40),
+
+                      // Encrypted Message - Clean Box
+                      _buildMinimalMessage(cardColor),
+                    ],
                   ),
                 ),
-              ),
-              
-              // Bottom button
-              Padding(
-                padding: const EdgeInsets.all(fixPadding * 2),
-                child: _buildDecodeButton(),
               ),
             ],
           ),
@@ -252,65 +244,55 @@ class _UniverseSignPlayerScreenState extends State<UniverseSignPlayerScreen> {
     );
   }
 
-  Widget _buildAudioPlayer() {
+  Widget _buildMinimalAudioPlayer(Color cardColor, Color accentColor) {
     return Container(
-      padding: const EdgeInsets.all(fixPadding * 2),
+      padding: const EdgeInsets.all(25),
       decoration: BoxDecoration(
-        color: blueShade1,
-        borderRadius: BorderRadius.circular(20),
+        color: cardColor,
+        borderRadius: BorderRadius.circular(30),
         border: Border.all(
-          color: primaryColor.withValues(alpha: 0.3),
-          width: 1,
+          color: Colors.white.withOpacity(0.05),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: primaryColor.withValues(alpha: 0.1),
-            blurRadius: 20,
-            spreadRadius: 2,
-          ),
-        ],
       ),
       child: Column(
         children: [
-          // Play button
-          GestureDetector(
-            onTap: isLoading ? null : _togglePlayPause,
-            child: Container(
-              height: 80,
-              width: 80,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: LinearGradient(
-                  colors: [
-                    primaryColor.withValues(alpha: 0.8),
-                    const Color(0xFF7B5CFA).withValues(alpha: 0.8),
-                  ],
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: primaryColor.withValues(alpha: 0.4),
-                    blurRadius: 15,
-                    spreadRadius: 2,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              GestureDetector(
+                onTap: isLoading ? null : _togglePlayPause,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  height: 70,
+                  width: 70,
+                  decoration: BoxDecoration(
+                    color: isPlaying ? accentColor : Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: (isPlaying ? accentColor : Colors.white).withOpacity(0.2),
+                        blurRadius: 15,
+                        spreadRadius: 2,
+                      ),
+                    ],
                   ),
-                ],
+                  child: isLoading
+                      ? Center(
+                          child: CircularProgressIndicator(
+                            color: isPlaying ? whiteColor : accentColor,
+                            strokeWidth: 3,
+                          ),
+                        )
+                      : Icon(
+                          isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                          color: isPlaying ? whiteColor : accentColor,
+                          size: 40,
+                        ),
+                ),
               ),
-              child: isLoading
-                  ? const CircularProgressIndicator(
-                      color: whiteColor,
-                      strokeWidth: 2,
-                    )
-                  : Icon(
-                      isPlaying ? Icons.pause : Icons.play_arrow,
-                      color: whiteColor,
-                      size: 45,
-                    ),
-            ),
+            ],
           ),
-          
-          heightSpace,
-          heightSpace,
-          
-          // Progress bar
+          const SizedBox(height: 25),
           StreamBuilder<Duration>(
             stream: audioGenerator.positionStream,
             builder: (context, snapshot) {
@@ -323,25 +305,33 @@ class _UniverseSignPlayerScreenState extends State<UniverseSignPlayerScreen> {
               return Column(
                 children: [
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(5),
+                    borderRadius: BorderRadius.circular(4),
                     child: LinearProgressIndicator(
                       value: progress.clamp(0.0, 1.0),
-                      backgroundColor: whiteColor.withValues(alpha: 0.1),
-                      valueColor: const AlwaysStoppedAnimation<Color>(primaryColor),
-                      minHeight: 6,
+                      backgroundColor: Colors.white10,
+                      valueColor: AlwaysStoppedAnimation<Color>(accentColor),
+                      minHeight: 8,
                     ),
                   ),
-                  heightBox(8),
+                  const SizedBox(height: 10),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
                         _formatDuration(position),
-                        style: regualr14Grey,
+                        style: const TextStyle(
+                          color: Colors.white54,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
+                        ),
                       ),
                       Text(
                         _formatDuration(totalDuration),
-                        style: regualr14Grey,
+                        style: const TextStyle(
+                          color: Colors.white54,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
+                        ),
                       ),
                     ],
                   ),
@@ -354,101 +344,115 @@ class _UniverseSignPlayerScreenState extends State<UniverseSignPlayerScreen> {
     );
   }
 
-  Widget _buildTooltipMessage() {
+  Widget _buildMinimalMessage(Color cardColor) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(
-        horizontal: fixPadding * 3,
-        vertical: fixPadding * 8,
-      ),
+      padding: const EdgeInsets.all(25),
       decoration: BoxDecoration(
-        color: const Color(0xFF08080C),
-        borderRadius: BorderRadius.circular(8),
+        color: cardColor,
+        borderRadius: BorderRadius.circular(25),
         border: Border.all(
-          color: const Color(0xFF2A2A35),
-          width: 1,
+          color: Colors.white.withValues(alpha: 0.05),
         ),
       ),
       child: Column(
         children: [
-          const Text(
-            '🔒 The message is encrypted',
-            style: TextStyle(
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFD700).withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.lock_outline_rounded,
               color: Color(0xFFFFD700),
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
+              size: 24,
             ),
-            textAlign: TextAlign.center,
           ),
-          heightBox(10),
-          Text(
-            'Only decoding reveals its meaning',
-            style: TextStyle(
-              color: whiteColor.withValues(alpha: 0.6),
-              fontSize: 14,
-              fontStyle: FontStyle.italic,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDecodeButton() {
-    return GestureDetector(
-      onTap: () async {
-        await SuperwallService().showPaywall(
-          placement: "subscribe_button",
-          onPurchased: () {
-            Navigator.push(
-              context,
-              PageTransition(
-                child: UniverseDecipherScreen(
-                  question: widget.question,
-                  category: widget.category,
-                ),
-                type: PageTransitionType.rightToLeft,
-                duration: const Duration(milliseconds: 300),
-              ),
-            );
-          },
-          onDeclined: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Subscribe to unlock universe signs'),
-                backgroundColor: Colors.orange,
-              ),
-            );
-          },
-        );
-      },
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFF7C6BAB), Color(0xFF6B5A91)],
-          ),
-          borderRadius: BorderRadius.circular(25),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF7B5CFA).withValues(alpha: 0.2),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: const Center(
-          child: Text(
-            'Decode the Sign',
+          heightBox(15),
+          const Text(
+            'The message is encrypted',
             style: TextStyle(
               color: whiteColor,
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          heightBox(8),
+          const Text(
+            'Only decoding reveals its meaning',
+            style: TextStyle(
+              color: Colors.white38,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          
+          const SizedBox(height: 25),
+          
+          // Decode Button inside the card
+          GestureDetector(
+            onTap: () async {
+              await SuperwallService().showPaywall(
+                placement: "subscribe_button",
+                onPurchased: () {
+                  Navigator.push(
+                    context,
+                    PageTransition(
+                      child: UniverseDecipherScreen(
+                        question: widget.question,
+                        category: widget.category,
+                      ),
+                      type: PageTransitionType.rightToLeft,
+                      duration: const Duration(milliseconds: 300),
+                    ),
+                  );
+                },
+                onDeclined: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Subscribe to unlock universe signs'),
+                      backgroundColor: Colors.orange,
+                    ),
+                  );
+                },
+              );
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 30),
+              decoration: BoxDecoration(
+                // Purple Gradient Button
+                gradient: const LinearGradient(
+                  colors: [
+                    Color(0xFF7B5CFA),
+                    Color(0xFF5D40D9),
+                  ],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
+                borderRadius: BorderRadius.circular(25),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF7B5CFA).withValues(alpha: 0.3),
+                    blurRadius: 15,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: const Text(
+                'Decode the Sign',
+                style: TextStyle(
+                  color: whiteColor,
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.5,
+                ),
+              ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
