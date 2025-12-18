@@ -79,6 +79,24 @@ class NotificationStorageService {
     await _getUserCollection('universe_messages').doc(docId).delete();
   }
 
+  /// Get universe message by ID
+  Future<UniverseMessageData?> getUniverseMessageById(String docId) async {
+    if (_userId == null) return null;
+    
+    final doc = await _getUserCollection('universe_messages').doc(docId).get();
+    if (doc.exists) {
+      return UniverseMessageData.fromFirestore(doc);
+    }
+    return null;
+  }
+
+  /// Update decipher result for universe message
+  Future<void> updateUniverseMessageDecipherResult(String docId, String decipherResult) async {
+    await _getUserCollection('universe_messages').doc(docId).update({
+      'decipherResult': decipherResult,
+    });
+  }
+
   // ==================== Natal Charts ====================
 
   Future<String> saveNatalChart({
@@ -494,6 +512,7 @@ class UniverseMessageData {
   final String? audioFilePath;
   final int audioDuration;
   final String? category;
+  final String? decipherResult;
   final bool isRead;
   final DateTime createdAt;
 
@@ -503,6 +522,7 @@ class UniverseMessageData {
     this.audioFilePath,
     required this.audioDuration,
     this.category,
+    this.decipherResult,
     required this.isRead,
     required this.createdAt,
   });
@@ -531,6 +551,7 @@ class UniverseMessageData {
       audioFilePath: data['audioFilePath'],
       audioDuration: data['audioDuration'] ?? 10,
       category: data['category'],
+      decipherResult: data['decipherResult'],
       isRead: data['isRead'] ?? false,
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
     );

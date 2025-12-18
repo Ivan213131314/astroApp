@@ -1,15 +1,19 @@
 import 'package:fl_astro_circle/services/ai_chat_service.dart';
+import 'package:fl_astro_circle/services/notification_storage_service.dart';
+import 'package:fl_astro_circle/services/universe_cache_service.dart';
 import 'package:fl_astro_circle/theme/theme.dart';
 import 'package:flutter/material.dart';
 
 class UniverseDecipherScreen extends StatefulWidget {
   final String question;
   final String? category;
+  final String? messageId;
 
   const UniverseDecipherScreen({
     super.key,
     required this.question,
     this.category,
+    this.messageId,
   });
 
   @override
@@ -19,6 +23,8 @@ class UniverseDecipherScreen extends StatefulWidget {
 class _UniverseDecipherScreenState extends State<UniverseDecipherScreen>
     with SingleTickerProviderStateMixin {
   final AiChatService _aiService = AiChatService();
+  final UniverseCacheService _cacheService = UniverseCacheService();
+  final NotificationStorageService _storageService = NotificationStorageService();
   
   late AnimationController _pulseController;
   
@@ -99,11 +105,47 @@ The cosmic energy surrounding your question is exceptionally positive. The unive
   }
 
   Future<void> _loadAiResponse() async {
+    // Try to load cached result first
+    if (widget.messageId != null) {
+      // 1. Check SharedPreferences cache (fastest)
+      final cachedResult = await _cacheService.getCachedResult(widget.messageId!);
+      if (cachedResult != null) {
+        if (mounted) {
+          setState(() {
+            _aiResponse = cachedResult;
+            _isLoading = false;
+          });
+        }
+        return;
+      }
+      
+      // 2. Check Firebase for saved result
+      final messageData = await _storageService.getUniverseMessageById(widget.messageId!);
+      if (messageData?.decipherResult != null) {
+        // Cache it locally for next time
+        await _cacheService.cacheResult(widget.messageId!, messageData!.decipherResult!);
+        if (mounted) {
+          setState(() {
+            _aiResponse = messageData.decipherResult;
+            _isLoading = false;
+          });
+        }
+        return;
+      }
+    }
+    
+    // 3. Generate new AI response
     try {
       final response = await _aiService.generateUniverseSign(
         question: widget.question,
         category: widget.category ?? 'path',
       );
+      
+      // Save to cache and Firebase if we have messageId
+      if (widget.messageId != null && response != null) {
+        await _cacheService.cacheResult(widget.messageId!, response);
+        await _storageService.updateUniverseMessageDecipherResult(widget.messageId!, response);
+      }
       
       if (mounted) {
         setState(() {
@@ -240,38 +282,44 @@ The cosmic energy surrounding your question is exceptionally positive. The unive
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Animated cosmic icon with category color
-          AnimatedBuilder(
-            animation: _pulseController,
-            builder: (context, child) {
-              final pulseValue = 0.8 + (_pulseController.value * 0.4);
-              return Container(
-                height: 100 * pulseValue,
-                width: 100 * pulseValue,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    colors: [
-                      categoryColor.withValues(alpha: 0.5),
-                      secondaryColor.withValues(alpha: 0.5),
-                    ],
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: categoryColor.withValues(alpha: 0.3 + (_pulseController.value * 0.3)),
-                      blurRadius: 20 + (_pulseController.value * 10),
-                      spreadRadius: 5 + (_pulseController.value * 5),
+          // Animated cosmic icon with category color - wrapped in fixed size to prevent text jumping
+          SizedBox(
+            height: 120,
+            width: 120,
+            child: Center(
+              child: AnimatedBuilder(
+                animation: _pulseController,
+                builder: (context, child) {
+                  final pulseValue = 0.8 + (_pulseController.value * 0.4);
+                  return Container(
+                    height: 100 * pulseValue,
+                    width: 100 * pulseValue,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                        colors: [
+                          categoryColor.withValues(alpha: 0.5),
+                          secondaryColor.withValues(alpha: 0.5),
+                        ],
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: categoryColor.withValues(alpha: 0.3 + (_pulseController.value * 0.3)),
+                          blurRadius: 20 + (_pulseController.value * 10),
+                          spreadRadius: 5 + (_pulseController.value * 5),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                child: Center(
-                  child: Text(
-                    _getCategoryEmoji(),
-                    style: const TextStyle(fontSize: 50),
-                  ),
-                ),
-              );
-            },
+                    child: Center(
+                      child: Text(
+                        _getCategoryEmoji(),
+                        style: const TextStyle(fontSize: 50),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
           ),
           const SizedBox(height: 30),
           Text(

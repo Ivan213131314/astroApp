@@ -404,6 +404,7 @@ class _UniverseSignPlayerScreenState extends State<UniverseSignPlayerScreen> {
                       child: UniverseDecipherScreen(
                         question: widget.question,
                         category: widget.category,
+                        messageId: widget.messageId,
                       ),
                       type: PageTransitionType.rightToLeft,
                       duration: const Duration(milliseconds: 300),
