@@ -94,17 +94,26 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   updateButton() {
     return InkWell(
       onTap: () async {
-        // Сохраняем фото если выбрано новое
-        if (_selectedImage != null) {
-          await _userService.saveLocalProfilePhoto(_selectedImage!);
+        // Сохраняем ссылку на Navigator до асинхронных операций
+        final navigator = Navigator.of(context);
+        
+        try {
+          // Сохраняем фото если выбрано новое
+          if (_selectedImage != null) {
+            await _userService.saveLocalProfilePhoto(_selectedImage!);
+          }
+          
+          // Сохраняем имя пользователя
+          if (nameController.text.isNotEmpty) {
+            await _userService.saveUserName(nameController.text);
+          }
+        } catch (e) {
+          // Логируем ошибку, но не прерываем навигацию
+          print('Error saving profile: $e');
         }
         
-        // Сохраняем имя пользователя
-        if (nameController.text.isNotEmpty) {
-          await _userService.saveUserName(nameController.text);
-        }
-        if (!mounted) return;
-        Navigator.pop(context);
+        // Возвращаемся на экран профиля
+        navigator.pop();
       },
       child: Container(
         width: double.maxFinite,
