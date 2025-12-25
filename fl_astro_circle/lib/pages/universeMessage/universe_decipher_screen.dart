@@ -3,6 +3,7 @@ import 'package:fl_astro_circle/services/notification_storage_service.dart';
 import 'package:fl_astro_circle/services/universe_cache_service.dart';
 import 'package:fl_astro_circle/theme/theme.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class UniverseDecipherScreen extends StatefulWidget {
   final String question;
@@ -21,14 +22,18 @@ class UniverseDecipherScreen extends StatefulWidget {
 }
 
 class _UniverseDecipherScreenState extends State<UniverseDecipherScreen>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   final AiChatService _aiService = AiChatService();
   final UniverseCacheService _cacheService = UniverseCacheService();
   final NotificationStorageService _storageService = NotificationStorageService();
   
   late AnimationController _pulseController;
+  late AnimationController _flashController;
+  late Animation<double> _flashAnimation;
   
   bool _isLoading = true;
+  bool _signCarried = false;
+  bool _showFlash = false;
   String? _aiResponse;
   String? _error;
 
@@ -95,13 +100,59 @@ The cosmic energy surrounding your question is exceptionally positive. The unive
       duration: const Duration(milliseconds: 1500),
       vsync: this,
     )..repeat(reverse: true);
+    
+    _flashController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+    _flashAnimation = CurvedAnimation(
+      parent: _flashController,
+      curve: Curves.easeOut,
+    );
+    _flashController.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        _saveSignCarriedState();
+        setState(() {
+          _showFlash = false;
+          _signCarried = true;
+        });
+      }
+    });
+    
+    _loadSignCarriedState();
     _loadAiResponse();
   }
 
   @override
   void dispose() {
     _pulseController.dispose();
+    _flashController.dispose();
     super.dispose();
+  }
+
+  /// Генерирует ключ для сегодняшнего дня (сбрасывается завтра)
+  String _getSignCarriedKey() {
+    final today = DateTime.now();
+    final dateKey = '${today.year}-${today.month}-${today.day}';
+    final messageKey = widget.messageId ?? widget.question.hashCode.toString();
+    return 'sign_carried_${dateKey}_$messageKey';
+  }
+
+  /// Загрузка состояния из SharedPreferences
+  Future<void> _loadSignCarriedState() async {
+    final prefs = await SharedPreferences.getInstance();
+    final carried = prefs.getBool(_getSignCarriedKey()) ?? false;
+    if (mounted && carried) {
+      setState(() {
+        _signCarried = true;
+      });
+    }
+  }
+
+  /// Сохранение состояния в SharedPreferences
+  Future<void> _saveSignCarriedState() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_getSignCarriedKey(), true);
   }
 
   Future<void> _loadAiResponse() async {
@@ -253,23 +304,72 @@ The cosmic energy surrounding your question is exceptionally positive. The unive
         ),
         centerTitle: true,
       ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              categoryColor.withValues(alpha: 0.4),
-              categoryColor.withValues(alpha: 0.15),
-              scaffoldBgColor,
-              scaffoldBgColor,
-            ],
-            stops: const [0.0, 0.2, 0.5, 1.0],
+      body: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  categoryColor.withValues(alpha: 0.4),
+                  categoryColor.withValues(alpha: 0.15),
+                  scaffoldBgColor,
+                  scaffoldBgColor,
+                ],
+                stops: const [0.0, 0.2, 0.5, 1.0],
+              ),
+            ),
+            child: SafeArea(
+              child: _isLoading ? _buildLoadingState() : _buildContent(),
+            ),
           ),
-        ),
-        child: SafeArea(
-          child: _isLoading ? _buildLoadingState() : _buildContent(),
-        ),
+          // Flash overlay animation
+          if (_showFlash)
+            AnimatedBuilder(
+              animation: _flashAnimation,
+              builder: (context, child) {
+                return Container(
+                  color: Colors.white.withValues(alpha: (1.0 - _flashAnimation.value) * 0.9),
+                  child: Center(
+                    child: Transform.scale(
+                      scale: 1.0 + (_flashAnimation.value * 2.0),
+                      child: Opacity(
+                        opacity: 1.0 - _flashAnimation.value,
+                        child: Container(
+                          width: 150,
+                          height: 150,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: RadialGradient(
+                              colors: [
+                                Colors.white,
+                                categoryColor.withValues(alpha: 0.8),
+                                categoryColor.withValues(alpha: 0.0),
+                              ],
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: categoryColor.withValues(alpha: 0.6),
+                                blurRadius: 60,
+                                spreadRadius: 30,
+                              ),
+                            ],
+                          ),
+                          child: Center(
+                            child: Text(
+                              _getCategoryEmoji(),
+                              style: const TextStyle(fontSize: 60),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+        ],
       ),
     );
   }
@@ -498,45 +598,90 @@ The cosmic energy surrounding your question is exceptionally positive. The unive
             heightSpace,
             heightSpace,
 
-            // Кнопка "Share" с цветом категории
-            GestureDetector(
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: const Text('Share feature coming soon!'),
-                    backgroundColor: categoryColor,
-                  ),
-                );
-              },
-              child: Container(
+            // Кнопка "Carry this sign today" / "This sign is now with you"
+            if (_signCarried)
+              // Текст после нажатия
+              Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: fixPadding * 1.5),
+                padding: const EdgeInsets.symmetric(
+                  vertical: fixPadding * 2,
+                  horizontal: fixPadding * 2,
+                ),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [categoryColor, secondaryColor],
+                  color: categoryColor.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: categoryColor.withValues(alpha: 0.3),
+                    width: 1,
                   ),
-                  borderRadius: BorderRadius.circular(30),
-                  boxShadow: [
-                    BoxShadow(
-                      color: categoryColor.withValues(alpha: 0.4),
-                      blurRadius: 15,
-                      offset: const Offset(0, 5),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      '✨',
+                      style: const TextStyle(fontSize: 32),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'This sign is now with you.',
+                      style: TextStyle(
+                        color: whiteColor.withValues(alpha: 0.9),
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Return tomorrow',
+                      style: TextStyle(
+                        color: categoryColor.withValues(alpha: 0.8),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
                   ],
                 ),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.share, color: whiteColor),
-                    widthSpace,
-                    Text(
-                      'Share Your Cosmic Message',
-                      style: bold16WhiteF4,
+              )
+            else
+              // Кнопка Carry this sign today
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _showFlash = true;
+                  });
+                  _flashController.forward(from: 0.0);
+                },
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: fixPadding * 1.5),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [categoryColor, secondaryColor],
                     ),
-                  ],
+                    borderRadius: BorderRadius.circular(30),
+                    boxShadow: [
+                      BoxShadow(
+                        color: categoryColor.withValues(alpha: 0.4),
+                        blurRadius: 15,
+                        offset: const Offset(0, 5),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.auto_awesome, color: whiteColor),
+                      widthSpace,
+                      const Text(
+                        'Carry this sign today',
+                        style: bold16WhiteF4,
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
 
             heightSpace,
             heightSpace,
@@ -546,3 +691,4 @@ The cosmic energy surrounding your question is exceptionally positive. The unive
     );
   }
 }
+

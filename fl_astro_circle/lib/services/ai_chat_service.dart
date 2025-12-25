@@ -348,32 +348,64 @@ OUTPUT: Pure text only, no formatting tags.''';
   }) async {
     final categoryInfo = _getUniverseSignCategoryInfo(category);
     
-    final prompt = '''Generate a mystical, cosmic response from the Universe for this inquiry.
+    // Получаем текущую дату
+    final now = DateTime.now();
+    final todayDate = '${now.day}.${now.month}.${now.year}';
+    
+    final prompt = '''Deliver a clear and beautiful cosmic sign for TODAY ($todayDate).
 
 CATEGORY: ${categoryInfo['name']} ${categoryInfo['emoji']}
-USER'S QUESTION: "$question"
+USER QUESTION: "$question"
 
-REQUIREMENTS:
-- Write a profound, mystical response as if the Universe itself is speaking
-- The response should feel deeply personal and meaningful
-- Include cosmic/astrological references appropriate for the ${categoryInfo['name']} category
-- Structure the response with:
-  1. An opening that acknowledges receiving their message (1 paragraph)
-  2. The main cosmic insight/answer (2-3 paragraphs)
-  3. Three specific signs they should watch for (numbered list)
-  4. A closing message of cosmic wisdom (1 paragraph)
-  5. End with 3 "cosmic metrics" using emojis (like "🌟 Cosmic Alignment: 87%")
+STRUCTURE AND FORMAT REQUIREMENTS:
 
+• Total length: 80–120 words max  
+• The text MUST be visually structured for easy reading  
+• Use short paragraphs, spacing, and subtle emphasis  
+• Make it feel like a personal sign, not a generic horoscope  
+
+STRUCTURE:
+
+1️⃣ OPENING — Recognition (2–3 short sentences)
+Acknowledge the user's current inner state or tension.
+Make it feel like the Universe noticed exactly what they are going through.
+
+Leave a blank line after this section.
+
+2️⃣ THE SIGN — Main Guidance (1–2 short paragraphs)
+Deliver ONE clear guiding message for today.
+Focus on direction and inner alignment, not fate or destiny.
+Tie it to the category focus (${categoryInfo['focus']}).
+This guidance should feel applicable within the next 24 hours.
+
+Leave a blank line between paragraphs.
+
+3️⃣ SIGNS TO NOTICE TODAY:
+Provide exactly 2 specific, realistic signs.
+Use a numbered list.
+The signs must be observable in real life (emotions, conversations, timing, choices).
+Avoid abstract symbolism.
+
+4️⃣ CLOSING — Grounding Message (1 short paragraph)
+Reassure the user.
+Encourage calm trust or a simple conscious action today.
+
+5️⃣ COSMIC INDICATORS (end of message):
+Include exactly 3 short indicators with emojis.
+Keep percentages realistic (65–90%).
+
+Example format:
+🌟 Alignment Today: 82%  
+💗 Emotional Clarity: 74%  
+🔮 Intuitive Signal: 88%  
+
+STYLE RULES:
 - Write in $language
-- Be mystical but not vague - give actionable insights
-- Make it feel like a personalized message from the cosmos
-- DO NOT include any special tokens or tags
-- Start directly with the response
-
-CATEGORY FOCUS:
-${categoryInfo['focus']}
-
-OUTPUT: Pure mystical text only.''';
+- Be mystical, but clear
+- Be poetic, but restrained
+- This is a SIGN, not a lecture
+- Start immediately with the message
+- Do not include dates, headers, or explanations''';
 
     final messages = <Map<String, String>>[
       {'role': 'system', 'content': '''You are the Voice of the Universe - a cosmic consciousness that speaks through the stars. 
