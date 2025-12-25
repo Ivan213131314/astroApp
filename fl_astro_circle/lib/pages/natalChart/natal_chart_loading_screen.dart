@@ -53,6 +53,7 @@ class _NatalChartLoadingScreenState extends State<NatalChartLoadingScreen>
   final List<_Satellite> _satellites = [];
   final List<_Planet> _planets = [];
   final Random _random = Random();
+  int _sparkleIdCounter = 0;
 
   double _displayProgress = 0.0;
 
@@ -178,6 +179,7 @@ class _NatalChartLoadingScreenState extends State<NatalChartLoadingScreen>
     if (_random.nextDouble() > 0.6) {
       setState(() {
         _sparkles.add(_Sparkle(
+          id: _sparkleIdCounter++,
           x: _random.nextDouble() * 340 - 170,
           y: _random.nextDouble() * 340 - 170,
           size: _random.nextDouble() * 3 + 1,
@@ -269,15 +271,15 @@ class _NatalChartLoadingScreenState extends State<NatalChartLoadingScreen>
             alignment: Alignment.center,
             children: [
               // Stars background
-              ..._sparkles.asMap().entries.map((entry) => Positioned(
-                    key: ValueKey('sparkle_${entry.key}_${entry.value.x.toStringAsFixed(2)}_${entry.value.y.toStringAsFixed(2)}'),
-                    left: 160 + entry.value.x,
-                    top: 160 + entry.value.y,
+              ..._sparkles.map((sparkle) => Positioned(
+                    key: ValueKey('sparkle_${sparkle.id}'),
+                    left: 160 + sparkle.x,
+                    top: 160 + sparkle.y,
                     child: Opacity(
-                      opacity: entry.value.opacity.clamp(0.0, 1.0),
+                      opacity: sparkle.opacity.clamp(0.0, 1.0),
                       child: Container(
-                        width: entry.value.size,
-                        height: entry.value.size,
+                        width: sparkle.size,
+                        height: sparkle.size,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: Colors.white,
@@ -551,12 +553,14 @@ class _NatalChartLoadingScreenState extends State<NatalChartLoadingScreen>
 }
 
 class _Sparkle {
+  final int id;
   double x;
   double y;
   double size;
   double opacity;
 
   _Sparkle({
+    required this.id,
     required this.x,
     required this.y,
     required this.size,

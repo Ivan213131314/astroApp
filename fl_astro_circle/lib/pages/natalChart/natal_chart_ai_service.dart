@@ -37,26 +37,23 @@ class NatalChartAiService {
   String _getCategoryDescription(NatalChartCategory category) {
     switch (category) {
       case NatalChartCategory.sunSign:
-        return '''Focus on:
-- Core identity and ego
-- Life purpose and direction
-- Fundamental character traits
-- How they express their willpower
-- Their creative essence''';
+        return '''- Core identity and ego structure
+- Life direction and inner motivation
+- How willpower is expressed and blocked
+- Psychological patterns behind control, desire, and fear
+- Creative and destructive tendencies of this placement''';
       case NatalChartCategory.moonSign:
-        return '''Focus on:
-- Emotional nature and reactions
+        return '''- Emotional nature and unconscious reactions
 - Inner world and subconscious patterns
-- Instinctive behaviors and needs
-- Relationship with nurturing and comfort
-- Hidden feelings and intuition''';
+- Instinctive behaviors, needs, and coping mechanisms
+- Relationship with nurturing, comfort, and emotional safety
+- Hidden feelings, intuition, and vulnerability''';
       case NatalChartCategory.risingSign:
-        return '''Focus on:
-- First impressions and appearance
-- How others perceive them
-- Approach to new situations
-- Physical mannerisms and style
-- The mask they show the world''';
+        return '''- First impressions and social persona
+- How others perceive them vs. who they really are
+- Approach to new situations and self-presentation
+- Physical mannerisms and unconscious body language
+- The mask they show the world and what it hides''';
     }
   }
 
@@ -73,29 +70,31 @@ class NatalChartAiService {
     final categoryName = _getCategoryName(category);
     final personInfo = _formatPersonInfo(name, birthDate, birthTime, location);
 
-    final prompt = '''Generate a SHORT, INTRIGUING teaser about a person's $categoryName in astrology.
+    final prompt = '''Generate a ONE-SENTENCE astrology teaser written in a provocative, tabloid-style tone.
 
 PERSON INFO:
 $personInfo
+PLACEMENT:
 $categoryName: $sign
 
 STRICT REQUIREMENTS:
-- Write exactly 1-2 short paragraphs (3-5 sentences total)
-- Use their name naturally in the text (if provided)
-- Be mysterious and captivating - make the reader WANT to know more
-- Hint at secrets, hidden traits, or surprising revelations about their $categoryName
-- End with a hook that creates curiosity
-- Write in $language
-- DO NOT include any special characters, tags, or markers
-- DO NOT start with greetings or introductions
-- Start directly with the content
+- Write EXACTLY ONE sentence.
+- Use simple, clear language (no complex structures).
+- The sentence must feel unfinished or unsettling.
+- Do NOT explain what is hidden.
+- Do NOT name traits directly.
+- Hint that something important is being hidden, suppressed, or avoided.
+- Suggest that this hidden aspect affects relationships, choices, or how others perceive them — without explaining how.
+- Create intrigue, tension, or quiet suspicion.
+- End the sentence so it feels like something is missing.
+- Write in $language.
+- No metaphors, no poetic overgrowth, no explanations.
+- Output plain text only.''';
 
-OUTPUT: Pure text only, no formatting tags.''';
-
-    return _sendMessage(prompt, maxTokens: 300);
+    return _sendMessage(prompt, maxTokens: 100);
   }
 
-  /// Генерация детального анализа (5-10 абзацев)
+  /// Генерация детального анализа (4 параграфа)
   Future<String> generateDetail({
     required NatalChartCategory category,
     required String sign,
@@ -104,35 +103,40 @@ OUTPUT: Pure text only, no formatting tags.''';
     String? birthDate,
     String? birthTime,
     String? location,
+    String? teaser,
   }) async {
     final categoryName = _getCategoryName(category);
     final categoryDescription = _getCategoryDescription(category);
     final personInfo = _formatPersonInfo(name, birthDate, birthTime, location);
+    final teaserSection = teaser != null && teaser.isNotEmpty 
+        ? '\nTEASER (emotional hook — must be fully resolved in the analysis):\n"$teaser"\n' 
+        : '';
 
-    final prompt = '''Provide a DETAILED, IN-DEPTH analysis of a person's $categoryName placement.
+    final prompt = '''Provide a PAYWALLED deep-dive psychological analysis of this natal chart placement.
 
 PERSON INFO:
 $personInfo
+PLACEMENT:
 $categoryName: $sign
-
+$teaserSection
 ANALYSIS FOCUS:
 $categoryDescription
 
 STRICT REQUIREMENTS:
-- Write 5-10 substantial paragraphs
-- Use their name naturally throughout (if provided)
-- Include specific planetary influences
-- Provide practical advice and wisdom
-- Use beautiful, poetic but accessible language
-- Make it feel personal and transformative
-- Write in $language
-- DO NOT include any special characters, tags, or markers
-- DO NOT start with greetings or introductions
-- Start directly with the analysis
+- Write exactly 4 short paragraphs.
+- Total length: 150–220 words.
+- Treat the TEASER as an unresolved psychological tension — your analysis must clearly explain and unpack it.
+- Paragraph 1: The core pattern — what this placement consistently creates in personality and behavior.
+- Paragraph 2: The hidden contradiction — where intentions and actions diverge, and why the person often doesn't notice it.
+- Paragraph 3: Real-life manifestations — exactly 3 concrete examples (relationships, work, decision-making, stress reactions).
+- Paragraph 4: Guidance — exactly 2 concrete actions for the next 7 days (specific, uncomfortable, actionable) + one closing sentence that feels personally addressed.
+- Use the person's name naturally 1–2 times (no more).
+- Be psychologically sharp and grounded; avoid generic spirituality, clichés, and destiny language.
+- Write in $language.
+- No greetings, no metaphors, no poetic abstraction.
+- Output plain text only.''';
 
-OUTPUT: Pure text only, no formatting tags.''';
-
-    return _sendMessage(prompt, maxTokens: 1500);
+    return _sendMessage(prompt, maxTokens: 500);
   }
 
   /// Генерация всех трех тизеров параллельно
@@ -204,7 +208,12 @@ OUTPUT: Pure text only, no formatting tags.''';
     final messages = <Map<String, String>>[
       {
         'role': 'system',
-        'content': 'You are a master astrologer. Output ONLY the requested analysis, no tags, no markers, no special characters. Never use [BOS], [EOS], <bot>, </bot> or similar tokens. Write naturally and personally.'
+        'content': '''You are a master astrologer who writes with calm authority and psychological precision.
+You must be specific, grounded, and personal — no generic mysticism, no filler, no rambling.
+
+Follow the user's structure requirements exactly.
+Output ONLY plain text. No tags, no markdown, no emojis, no bullet symbols beyond normal numbering (1., 2.).
+No greetings, no introductions.'''
       },
       {'role': 'user', 'content': prompt},
     ];

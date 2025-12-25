@@ -142,6 +142,7 @@ class _NatalChartDeepDetailScreenState extends State<NatalChartDeepDetailScreen>
         birthDate: _formatBirthDate(_dateOfBirth),
         birthTime: _timeOfBirth,
         location: _location,
+        teaser: _teaser,
       );
 
       if (!mounted) return;
