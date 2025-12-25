@@ -58,6 +58,8 @@ class NotificationStorageService {
           if (prev.length != next.length) return false;
           for (int i = 0; i < prev.length; i++) {
             if (prev[i].id != next[i].id) return false;
+            // Также проверяем isRead для обновления при markAsRead
+            if (prev[i].isRead != next[i].isRead) return false;
           }
           return true;
         });

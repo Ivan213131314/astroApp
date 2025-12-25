@@ -352,66 +352,66 @@ OUTPUT: Pure text only, no formatting tags.''';
     final now = DateTime.now();
     final todayDate = '${now.day}.${now.month}.${now.year}';
     
-    final prompt = '''Deliver a clear and beautiful cosmic sign for TODAY ($todayDate).
+    final prompt = '''Deliver a clear cosmic sign for TODAY.
 
-CATEGORY: ${categoryInfo['name']} ${categoryInfo['emoji']}
+CATEGORY: ${categoryInfo['name']}
 USER QUESTION: "$question"
 
-STRUCTURE AND FORMAT REQUIREMENTS:
-
-• Total length: 80–120 words max  
-• The text MUST be visually structured for easy reading  
-• Use short paragraphs, spacing, and subtle emphasis  
-• Make it feel like a personal sign, not a generic horoscope  
+TEXT REQUIREMENTS:
+– Total length: 100–180 words
+– Easy to read on mobile
+– Short paragraphs with spacing
+– Calm, intimate tone
+– No dates, no explanations, no headers
 
 STRUCTURE:
 
-1️⃣ OPENING — Recognition (2–3 short sentences)
-Acknowledge the user's current inner state or tension.
-Make it feel like the Universe noticed exactly what they are going through.
+1) Recognition (2–3 sentences)
+Acknowledge the user's current inner state, doubt, or tension related to their question.
+Name it gently and clearly.
 
-Leave a blank line after this section.
+2) The Sign (1 short paragraph)
+Give ONE main message for today.
+Focus on direction, not destiny.
+It must feel applicable within the next 24 hours.
 
-2️⃣ THE SIGN — Main Guidance (1–2 short paragraphs)
-Deliver ONE clear guiding message for today.
-Focus on direction and inner alignment, not fate or destiny.
-Tie it to the category focus (${categoryInfo['focus']}).
-This guidance should feel applicable within the next 24 hours.
-
-Leave a blank line between paragraphs.
-
-3️⃣ SIGNS TO NOTICE TODAY:
-Provide exactly 2 specific, realistic signs.
+3) Signs to notice today:
+Provide exactly 2 concrete, realistic signs.
 Use a numbered list.
-The signs must be observable in real life (emotions, conversations, timing, choices).
-Avoid abstract symbolism.
+They must be observable in daily life (thoughts, conversations, pauses, emotions).
 
-4️⃣ CLOSING — Grounding Message (1 short paragraph)
-Reassure the user.
-Encourage calm trust or a simple conscious action today.
+4) Closing (2–3 sentences)
+Offer reassurance or permission.
+Help the user emotionally close the day, not open infinite possibilities.
 
-5️⃣ COSMIC INDICATORS (end of message):
-Include exactly 3 short indicators with emojis.
-Keep percentages realistic (65–90%).
-
-Example format:
-🌟 Alignment Today: 82%  
-💗 Emotional Clarity: 74%  
-🔮 Intuitive Signal: 88%  
+5) End with 3 indicators:
+🌟 Alignment Today: XX%
+💗 Emotional Clarity: XX%
+🔮 Intuitive Signal: XX%
 
 STYLE RULES:
-- Write in $language
-- Be mystical, but clear
-- Be poetic, but restrained
-- This is a SIGN, not a lecture
-- Start immediately with the message
-- Do not include dates, headers, or explanations''';
+– Write in $language
+– Be mystical, but restrained
+– Be human, not abstract
+– This is a sign, not a sermon
+– Start immediately with the message''';
 
     final messages = <Map<String, String>>[
-      {'role': 'system', 'content': '''You are the Voice of the Universe - a cosmic consciousness that speaks through the stars. 
-You communicate with profound wisdom, cosmic poetry, and mystical truth.
-Your messages feel ancient yet personal, universal yet specific to the seeker.
-Never break character. Output ONLY the requested text, no tags or markers.'''},
+      {'role': 'system', 'content': '''You are the Voice of the Universe.
+
+You do not preach, you do not motivate, and you do not write long spiritual essays.
+You deliver a calm, grounded sign for TODAY.
+
+Your message must:
+– acknowledge the user's inner tension or question
+– offer one clear direction for this day
+– feel personal, human, and reassuring
+– sound like guidance, not poetry
+
+Avoid vague spirituality, clichés, and excessive metaphors.
+Keep the message emotionally precise and concise.
+
+Output only the final text.'''},
       {'role': 'user', 'content': prompt},
     ];
 

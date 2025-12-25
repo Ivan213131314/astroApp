@@ -44,6 +44,7 @@ class _UniverseSignScreenState extends State<UniverseSignScreen>
   String? currentCategoryForDialog;
   String? selectedQuestion;
   String? selectedCategoryId;
+  String? _dialogDismissedMessageId; // ID сообщения, для которого диалог был закрыт
 
   /// Category definitions with questions
   final List<SignCategory> categories = const [
@@ -163,7 +164,8 @@ class _UniverseSignScreenState extends State<UniverseSignScreen>
         signService.responses.isNotEmpty && 
         currentStatus == SignStatus.idle) {
       final latestMessage = signService.responses.first;
-      if (!latestMessage.isRead) {
+      // Не показываем диалог, если он уже был закрыт для этого сообщения
+      if (!latestMessage.isRead && latestMessage.id != _dialogDismissedMessageId) {
         setState(() {
           showReceivedDialog = true;
           currentQuestionForDialog = latestMessage.question;
@@ -630,16 +632,19 @@ class _UniverseSignScreenState extends State<UniverseSignScreen>
                   top: 0,
                   right: 0,
                   child: GestureDetector(
-                    onTap: () {
+                    onTap: () async {
                       if (signService.responses.isNotEmpty) {
                         final latestMessage = signService.responses.first;
-                        signService.markAsRead(latestMessage.id);
+                        _dialogDismissedMessageId = latestMessage.id; // Запоминаем ID закрытого сообщения
+                        await signService.markAsRead(latestMessage.id);
                       }
-                      setState(() {
-                        showReceivedDialog = false;
-                        currentStatus = SignStatus.idle;
-                        currentQuestionForDialog = 'closed';
-                      });
+                      if (mounted) {
+                        setState(() {
+                          showReceivedDialog = false;
+                          currentStatus = SignStatus.idle;
+                          currentQuestionForDialog = 'closed';
+                        });
+                      }
                     },
                     child: Container(
                       padding: const EdgeInsets.all(8),
