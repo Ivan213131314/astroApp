@@ -75,9 +75,18 @@ class NumerologyService {
     final formattedDate =
         '${birthDate.day.toString().padLeft(2, '0')}-${birthDate.month.toString().padLeft(2, '0')}-${birthDate.year}';
 
-    final prompt = '''You are an expert numerologist. Analyze the person with Life Path Number $luckyNumber (born $formattedDate).
+    final prompt = '''You are an expert numerologist.
 
-Provide a detailed numerology reading in $language with the following EXACT JSON structure:
+Write a VERY SHORT teaser sentence about a person based on their Life Path Number.
+
+PERSON INFO:
+Life Path Number: $luckyNumber
+Birth Date: $formattedDate
+
+GOAL:
+Create emotional tension and curiosity. The text must feel unfinished, slightly unsettling, and personal.
+
+Provide a numerology reading in $language with the following EXACT JSON structure:
 
 {
   "traits": {
@@ -88,16 +97,29 @@ Provide a detailed numerology reading in $language with the following EXACT JSON
     "hard_working": 0.80,
     "smart": 0.88
   },
-  "aboutCharacter": "2-3 paragraphs about character based on this number...",
-  "aboutBehavior": "2-3 paragraphs about behavior patterns...",
-  "aboutResponsibility": "2-3 paragraphs about responsibility and life purpose..."
+  "aboutCharacter": "ONE teaser sentence about character (max 15-18 words)...",
+  "aboutBehavior": "ONE teaser sentence about behavior (max 15-18 words)...",
+  "aboutResponsibility": "ONE teaser sentence about responsibility (max 15-18 words)..."
 }
 
-IMPORTANT:
+STRICT RULES:
+- Write ONLY 1 short sentence per field (max 15–18 words).
+- Use VERY simple, everyday language.
+- Do NOT explain traits or meanings.
+- Do NOT resolve the thought.
+- Do NOT give conclusions or advice.
+- Avoid spiritual clichés and poetic abstractions.
+- The sentence must hint at a hidden conflict, secret, or inner contradiction.
+- It should feel like something important is being hidden or ignored.
+- Slight discomfort or тревога is GOOD.
 - Trait values must be between 0.5 and 0.99
-- Make the analysis personal and insightful based on the Life Path Number $luckyNumber
-- Write about_character, about_behavior, about_responsibility in $language
-- Return ONLY valid JSON, no other text''';
+- Write in $language
+- Return ONLY valid JSON, no other text
+
+STYLE:
+- Yellow-press / teaser headline energy.
+- Sounds like: "Something about you doesn't add up…"
+- Ends with an open loop or implied danger.''';
 
     final messages = <Map<String, String>>[
       {
@@ -282,23 +304,57 @@ IMPORTANT:
     final categoryName = _getCategoryName(category);
     final categoryPrompt = _getCategoryDetailPrompt(category, luckyNumber);
 
-    final prompt = '''You are a master numerologist. Provide a DETAILED, IN-DEPTH analysis of $categoryName for Life Path Number $luckyNumber (born $birthDate).
+    final prompt = '''You are a psychologically sharp numerologist.
+Your task is to deliver a deep, personal numerology analysis that feels precise, revealing, and emotionally accurate.
+
+PERSON INFO:
+Birth Date: $birthDate
+Life Path Number: $luckyNumber
 
 ANALYSIS FOCUS:
-$categoryPrompt
+$categoryName
 
 STRICT REQUIREMENTS:
-- Write 5-8 substantial paragraphs
-- Include specific numerological influences based on this number
-- Provide practical advice and wisdom
-- Use beautiful, poetic but accessible language
-- Make it feel personal and transformative
-- Write in $language
-- DO NOT include any special characters, tags, or markers
-- DO NOT start with greetings or introductions
-- Start directly with the analysis
+- Write EXACTLY 4 short paragraphs.
+- Total length: 150–220 words.
+- Write in $language.
+- No greetings, no introductions, no metaphysical lectures.
+- Avoid generic phrases that could apply to anyone.
+- Avoid vague words such as: "often", "sometimes", "may", "can lead to".
+- Be direct, concrete, and psychologically specific.
 
-OUTPUT: Pure text only, no formatting tags.''';
+STRUCTURE (MANDATORY):
+Paragraph 1 — Core pattern
+Describe the dominant personality pattern created by this Life Path Number.
+Focus on behavior and internal drivers, not abstract traits.
+
+Paragraph 2 — Hidden tension
+Reveal an internal contradiction or pressure the person usually ignores or rationalizes.
+This paragraph should feel confronting, not comforting.
+
+Paragraph 3 — Real-life manifestations
+Describe EXACTLY 3 concrete situations:
+- relationships
+- work or ambition
+- stress or decision-making
+These must describe observable actions, not qualities.
+
+Paragraph 4 — Guidance
+Give EXACTLY 2 practical actions for the next 7 days.
+End with ONE short closing sentence that feels personal and final.
+
+STYLE RULES:
+- No emojis
+- No bullet points or lists
+- No spiritual clichés
+- No motivational or reassuring tone
+- Write as if you are stating an uncomfortable truth
+
+OUTPUT:
+Plain text only.
+No formatting.
+No tags.
+Start directly with the analysis.''';
 
     final messages = <Map<String, String>>[
       {
