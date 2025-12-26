@@ -53,6 +53,28 @@ class _CompatibilityBirthDateScreenState
     return DateTime(year, month + 1, 0).day;
   }
 
+  // Получаем дату по умолчанию для знака зодиака (середина периода знака)
+  DateTime _getDefaultDateForSign(String sign) {
+    const year = 1990;
+    final signDates = {
+      'Aries': DateTime(year, 4, 5),       // Mar 21 - Apr 19
+      'Taurus': DateTime(year, 5, 5),      // Apr 20 - May 20
+      'Gemini': DateTime(year, 6, 5),      // May 21 - Jun 20
+      'Cancer': DateTime(year, 7, 7),      // Jun 21 - Jul 22
+      'Leo': DateTime(year, 8, 7),         // Jul 23 - Aug 22
+      'Virgo': DateTime(year, 9, 7),       // Aug 23 - Sep 22
+      'Libra': DateTime(year, 10, 7),      // Sep 23 - Oct 22
+      'Scorpio': DateTime(year, 11, 7),    // Oct 23 - Nov 21
+      'Sagittarius': DateTime(year, 12, 7),// Nov 22 - Dec 21
+      'Capricorn': DateTime(year, 1, 7),   // Dec 22 - Jan 19
+      'Aquarius': DateTime(year, 2, 5),    // Jan 20 - Feb 18
+      'Pisces': DateTime(year, 3, 5),      // Feb 19 - Mar 20
+    };
+    return signDates[sign] ?? DateTime(year, 1, 1);
+  }
+
+  bool _initializedDates = false;
+
   @override
   void initState() {
     super.initState();
@@ -71,6 +93,29 @@ class _CompatibilityBirthDateScreenState
     final args = ModalRoute.of(context)?.settings.arguments;
     if (args != null && args is Map<String, dynamic>) {
       _args = args;
+      
+      // Инициализируем даты только один раз при первом открытии
+      if (!_initializedDates) {
+        _initializedDates = true;
+        
+        // Получаем знаки из аргументов и устанавливаем соответствующие даты
+        final argSign1 = args['sign1'] as String? ?? 'Capricorn';
+        final argSign2 = args['sign2'] as String? ?? 'Capricorn';
+        
+        _person1Date = _getDefaultDateForSign(argSign1);
+        _person2Date = _getDefaultDateForSign(argSign2);
+        
+        // Обновляем контроллеры пикеров
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _person1DayController.jumpToItem(_person1Date.day - 1);
+          _person1MonthController.jumpToItem(_person1Date.month - 1);
+          _person1YearController.jumpToItem(_person1Date.year - 1950);
+          
+          _person2DayController.jumpToItem(_person2Date.day - 1);
+          _person2MonthController.jumpToItem(_person2Date.month - 1);
+          _person2YearController.jumpToItem(_person2Date.year - 1950);
+        });
+      }
     }
   }
 
@@ -87,10 +132,49 @@ class _CompatibilityBirthDateScreenState
     super.dispose();
   }
 
-  String get sign1 => _args?['sign1'] ?? '';
-  String get sign1Image => _args?['sign1Image'] ?? 'assets/home/image-1.png';
-  String get sign2 => _args?['sign2'] ?? '';
-  String get sign2Image => _args?['sign2Image'] ?? 'assets/home/image-1.png';
+  // Динамический расчёт знака зодиака по дате
+  String _getZodiacSign(DateTime date) {
+    final month = date.month;
+    final day = date.day;
+    
+    if ((month == 3 && day >= 21) || (month == 4 && day <= 19)) return 'Aries';
+    if ((month == 4 && day >= 20) || (month == 5 && day <= 20)) return 'Taurus';
+    if ((month == 5 && day >= 21) || (month == 6 && day <= 20)) return 'Gemini';
+    if ((month == 6 && day >= 21) || (month == 7 && day <= 22)) return 'Cancer';
+    if ((month == 7 && day >= 23) || (month == 8 && day <= 22)) return 'Leo';
+    if ((month == 8 && day >= 23) || (month == 9 && day <= 22)) return 'Virgo';
+    if ((month == 9 && day >= 23) || (month == 10 && day <= 22)) return 'Libra';
+    if ((month == 10 && day >= 23) || (month == 11 && day <= 21)) return 'Scorpio';
+    if ((month == 11 && day >= 22) || (month == 12 && day <= 21)) return 'Sagittarius';
+    if ((month == 12 && day >= 22) || (month == 1 && day <= 19)) return 'Capricorn';
+    if ((month == 1 && day >= 20) || (month == 2 && day <= 18)) return 'Aquarius';
+    return 'Pisces';
+  }
+
+  // Получаем изображение знака зодиака
+  String _getZodiacImage(String sign) {
+    final signImages = {
+      'Aries': 'assets/home/image-1.png',
+      'Taurus': 'assets/home/image-2.png',
+      'Gemini': 'assets/home/image-3.png',
+      'Cancer': 'assets/home/image-4.png',
+      'Leo': 'assets/home/image-5.png',
+      'Virgo': 'assets/home/image-6.png',
+      'Libra': 'assets/home/image-7.png',
+      'Scorpio': 'assets/home/image-8.png',
+      'Sagittarius': 'assets/home/image-9.png',
+      'Capricorn': 'assets/home/image-10.png',
+      'Aquarius': 'assets/home/image-11.png',
+      'Pisces': 'assets/home/image-12.png',
+    };
+    return signImages[sign] ?? 'assets/home/image-1.png';
+  }
+
+  // Динамические геттеры - знак определяется на основе выбранной даты
+  String get sign1 => _getZodiacSign(_person1Date);
+  String get sign1Image => _getZodiacImage(sign1);
+  String get sign2 => _getZodiacSign(_person2Date);
+  String get sign2Image => _getZodiacImage(sign2);
 
   // ===== Локальный кэш через SharedPreferences =====
   
@@ -413,49 +497,49 @@ class _CompatibilityBirthDateScreenState
             Column(
               children: [
                 Expanded(
-                  child: ListView(
+                  child: Padding(
                     padding: const EdgeInsets.all(fixPadding * 2.0),
-                    physics: const BouncingScrollPhysics(),
-                    children: [
-                      _signsRow(size),
-                      heightSpace,
-                      heightSpace,
-                      _subtitleText(),
-                      heightSpace,
-                      heightSpace,
-                      heightSpace,
-                      _personDateSection(
-                        title: getTranslation(
-                            context, 'compatibility_birth_date.person1_date'),
-                        signImage: sign1Image,
-                        signName: sign1,
-                        date: _person1Date,
-                        nameController: _person1NameController,
-                        dayController: _person1DayController,
-                        monthController: _person1MonthController,
-                        yearController: _person1YearController,
-                        onDateChanged: (date) {
-                          setState(() => _person1Date = date);
-                        },
-                      ),
-                      heightSpace,
-                      heightSpace,
-                      heightSpace,
-                      _personDateSection(
-                        title: getTranslation(
-                            context, 'compatibility_birth_date.person2_date'),
-                        signImage: sign2Image,
-                        signName: sign2,
-                        date: _person2Date,
-                        nameController: _person2NameController,
-                        dayController: _person2DayController,
-                        monthController: _person2MonthController,
-                        yearController: _person2YearController,
-                        onDateChanged: (date) {
-                          setState(() => _person2Date = date);
-                        },
-                      ),
-                    ],
+                    child: Column(
+                      children: [
+                        _signsRow(size),
+                        heightSpace,
+                        Expanded(
+                          child: _personDateSection(
+                            title: getTranslation(
+                                context, 'compatibility_birth_date.person1_date'),
+                            signImage: sign1Image,
+                            signName: sign1,
+                            date: _person1Date,
+                            nameController: _person1NameController,
+                            dayController: _person1DayController,
+                            monthController: _person1MonthController,
+                            yearController: _person1YearController,
+                            onDateChanged: (date) {
+                              setState(() => _person1Date = date);
+                            },
+                            expandDatePicker: true,
+                          ),
+                        ),
+                        heightSpace,
+                        Expanded(
+                          child: _personDateSection(
+                            title: getTranslation(
+                                context, 'compatibility_birth_date.person2_date'),
+                            signImage: sign2Image,
+                            signName: sign2,
+                            date: _person2Date,
+                            nameController: _person2NameController,
+                            dayController: _person2DayController,
+                            monthController: _person2MonthController,
+                            yearController: _person2YearController,
+                            onDateChanged: (date) {
+                              setState(() => _person2Date = date);
+                            },
+                            expandDatePicker: true,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 _calculateButton(),
@@ -566,7 +650,17 @@ class _CompatibilityBirthDateScreenState
     required FixedExtentScrollController monthController,
     required FixedExtentScrollController yearController,
     required Function(DateTime) onDateChanged,
+    bool expandDatePicker = false,
   }) {
+    final datePickerWidget = _datePicker(
+      date: date,
+      dayController: dayController,
+      monthController: monthController,
+      yearController: yearController,
+      onDateChanged: onDateChanged,
+      expand: expandDatePicker,
+    );
+
     return Container(
       padding: const EdgeInsets.all(fixPadding * 1.5),
       decoration: BoxDecoration(
@@ -629,13 +723,10 @@ class _CompatibilityBirthDateScreenState
             ),
           ),
           heightSpace,
-          _datePicker(
-            date: date,
-            dayController: dayController,
-            monthController: monthController,
-            yearController: yearController,
-            onDateChanged: onDateChanged,
-          ),
+          if (expandDatePicker)
+            Expanded(child: datePickerWidget)
+          else
+            datePickerWidget,
         ],
       ),
     );
@@ -647,116 +738,123 @@ class _CompatibilityBirthDateScreenState
     required FixedExtentScrollController monthController,
     required FixedExtentScrollController yearController,
     required Function(DateTime) onDateChanged,
+    bool expand = false,
   }) {
     final daysInMonth = _getDaysInMonth(date.year, date.month);
 
+    final pickerRow = Row(
+      children: [
+        Expanded(
+          child: CupertinoPicker(
+            scrollController: dayController,
+            itemExtent: 36,
+            selectionOverlay: Container(
+              decoration: BoxDecoration(
+                border: Border(
+                  top: BorderSide(
+                      color: primaryColor.withValues(alpha: 0.3), width: 1),
+                  bottom: BorderSide(
+                      color: primaryColor.withValues(alpha: 0.3), width: 1),
+                ),
+              ),
+            ),
+            onSelectedItemChanged: (index) {
+              final newDay = index + 1;
+              onDateChanged(DateTime(date.year, date.month, newDay));
+            },
+            children: List.generate(daysInMonth, (index) {
+              return Center(
+                child: Text(
+                  '${index + 1}',
+                  style: const TextStyle(
+                    color: whiteColor,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              );
+            }),
+          ),
+        ),
+        Expanded(
+          flex: 2,
+          child: CupertinoPicker(
+            scrollController: monthController,
+            itemExtent: 36,
+            selectionOverlay: Container(
+              decoration: BoxDecoration(
+                border: Border(
+                  top: BorderSide(
+                      color: primaryColor.withValues(alpha: 0.3), width: 1),
+                  bottom: BorderSide(
+                      color: primaryColor.withValues(alpha: 0.3), width: 1),
+                ),
+              ),
+            ),
+            onSelectedItemChanged: (index) {
+              final newMonth = index + 1;
+              final newDaysInMonth = _getDaysInMonth(date.year, newMonth);
+              final newDay = date.day > newDaysInMonth ? newDaysInMonth : date.day;
+              onDateChanged(DateTime(date.year, newMonth, newDay));
+            },
+            children: _months.map((month) {
+              return Center(
+                child: Text(
+                  month,
+                  style: const TextStyle(
+                    color: whiteColor,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+        Expanded(
+          child: CupertinoPicker(
+            scrollController: yearController,
+            itemExtent: 36,
+            selectionOverlay: Container(
+              decoration: BoxDecoration(
+                border: Border(
+                  top: BorderSide(
+                      color: primaryColor.withValues(alpha: 0.3), width: 1),
+                  bottom: BorderSide(
+                      color: primaryColor.withValues(alpha: 0.3), width: 1),
+                ),
+              ),
+            ),
+            onSelectedItemChanged: (index) {
+              final newYear = 1950 + index;
+              final newDaysInMonth = _getDaysInMonth(newYear, date.month);
+              final newDay = date.day > newDaysInMonth ? newDaysInMonth : date.day;
+              onDateChanged(DateTime(newYear, date.month, newDay));
+            },
+            children: List.generate(76, (index) {
+              return Center(
+                child: Text(
+                  '${1950 + index}',
+                  style: const TextStyle(
+                    color: whiteColor,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              );
+            }),
+          ),
+        ),
+      ],
+    );
+
+    if (expand) {
+      return pickerRow;
+    }
+    
     return SizedBox(
       height: 100,
-      child: Row(
-        children: [
-          Expanded(
-            child: CupertinoPicker(
-              scrollController: dayController,
-              itemExtent: 36,
-              selectionOverlay: Container(
-                decoration: BoxDecoration(
-                  border: Border(
-                    top: BorderSide(
-                        color: primaryColor.withValues(alpha: 0.3), width: 1),
-                    bottom: BorderSide(
-                        color: primaryColor.withValues(alpha: 0.3), width: 1),
-                  ),
-                ),
-              ),
-              onSelectedItemChanged: (index) {
-                final newDay = index + 1;
-                onDateChanged(DateTime(date.year, date.month, newDay));
-              },
-              children: List.generate(daysInMonth, (index) {
-                return Center(
-                  child: Text(
-                    '${index + 1}',
-                    style: const TextStyle(
-                      color: whiteColor,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                );
-              }),
-            ),
-          ),
-          Expanded(
-            flex: 2,
-            child: CupertinoPicker(
-              scrollController: monthController,
-              itemExtent: 36,
-              selectionOverlay: Container(
-                decoration: BoxDecoration(
-                  border: Border(
-                    top: BorderSide(
-                        color: primaryColor.withValues(alpha: 0.3), width: 1),
-                    bottom: BorderSide(
-                        color: primaryColor.withValues(alpha: 0.3), width: 1),
-                  ),
-                ),
-              ),
-              onSelectedItemChanged: (index) {
-                final newMonth = index + 1;
-                final newDaysInMonth = _getDaysInMonth(date.year, newMonth);
-                final newDay = date.day > newDaysInMonth ? newDaysInMonth : date.day;
-                onDateChanged(DateTime(date.year, newMonth, newDay));
-              },
-              children: _months.map((month) {
-                return Center(
-                  child: Text(
-                    month,
-                    style: const TextStyle(
-                      color: whiteColor,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-          Expanded(
-            child: CupertinoPicker(
-              scrollController: yearController,
-              itemExtent: 36,
-              selectionOverlay: Container(
-                decoration: BoxDecoration(
-                  border: Border(
-                    top: BorderSide(
-                        color: primaryColor.withValues(alpha: 0.3), width: 1),
-                    bottom: BorderSide(
-                        color: primaryColor.withValues(alpha: 0.3), width: 1),
-                  ),
-                ),
-              ),
-              onSelectedItemChanged: (index) {
-                final newYear = 1950 + index;
-                final newDaysInMonth = _getDaysInMonth(newYear, date.month);
-                final newDay = date.day > newDaysInMonth ? newDaysInMonth : date.day;
-                onDateChanged(DateTime(newYear, date.month, newDay));
-              },
-              children: List.generate(76, (index) {
-                return Center(
-                  child: Text(
-                    '${1950 + index}',
-                    style: const TextStyle(
-                      color: whiteColor,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                );
-              }),
-            ),
-          ),
-        ],
-      ),
+      child: pickerRow,
     );
   }
 
