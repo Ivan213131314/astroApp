@@ -9,9 +9,14 @@ import 'localization/localization_const.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:superwallkit_flutter/superwallkit_flutter.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Загружаем переменные окружения
+  await dotenv.load(fileName: ".env");
+  
   await Firebase.initializeApp();
   
   // Включаем Firestore persistence для мгновенной загрузки из кэша

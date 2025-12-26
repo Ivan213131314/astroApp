@@ -215,29 +215,31 @@ class _CompatibilityLoadingScreenState extends State<CompatibilityLoadingScreen>
           return Stack(
             alignment: Alignment.center,
             children: [
-              // Sparkles
-              ..._sparkles.map((sparkle) => Positioned(
-                    left: 150 + sparkle.x,
-                    top: 125 + sparkle.y,
-                    child: Opacity(
-                      opacity: sparkle.opacity.clamp(0.0, 1.0),
-                      child: Container(
-                        width: sparkle.size,
-                        height: sparkle.size,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white,
-                          boxShadow: [
-                            BoxShadow(
-                              color: primaryColor.withValues(alpha: 0.8),
-                              blurRadius: 8,
-                              spreadRadius: 2,
-                            ),
-                          ],
-                        ),
+              // Sparkles с уникальными ключами
+              for (int i = 0; i < _sparkles.length; i++)
+                Positioned(
+                  key: ValueKey('sparkle_$i'),
+                  left: 150 + _sparkles[i].x,
+                  top: 125 + _sparkles[i].y,
+                  child: Opacity(
+                    opacity: _sparkles[i].opacity.clamp(0.0, 1.0),
+                    child: Container(
+                      width: _sparkles[i].size,
+                      height: _sparkles[i].size,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white,
+                        boxShadow: [
+                          BoxShadow(
+                            color: primaryColor.withValues(alpha: 0.8),
+                            blurRadius: 8,
+                            spreadRadius: 2,
+                          ),
+                        ],
                       ),
                     ),
-                  )),
+                  ),
+                ),
 
               // Orbital path
               CustomPaint(
