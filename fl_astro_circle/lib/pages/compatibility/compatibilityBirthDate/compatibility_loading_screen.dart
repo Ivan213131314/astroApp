@@ -47,6 +47,7 @@ class _CompatibilityLoadingScreenState extends State<CompatibilityLoadingScreen>
 
   final List<_Sparkle> _sparkles = [];
   final Random _random = Random();
+  int _sparkleIdCounter = 0; // Счётчик для уникальных ID
   
   double _displayProgress = 0.0;
 
@@ -138,6 +139,7 @@ class _CompatibilityLoadingScreenState extends State<CompatibilityLoadingScreen>
     if (_random.nextDouble() > 0.7) {
       setState(() {
         _sparkles.add(_Sparkle(
+          id: _sparkleIdCounter++,
           x: _random.nextDouble() * 300 - 150,
           y: _random.nextDouble() * 300 - 150,
           size: _random.nextDouble() * 4 + 2,
@@ -215,17 +217,17 @@ class _CompatibilityLoadingScreenState extends State<CompatibilityLoadingScreen>
           return Stack(
             alignment: Alignment.center,
             children: [
-              // Sparkles с уникальными ключами
-              for (int i = 0; i < _sparkles.length; i++)
+              // Sparkles с уникальными ключами по ID
+              for (final sparkle in _sparkles)
                 Positioned(
-                  key: ValueKey('sparkle_$i'),
-                  left: 150 + _sparkles[i].x,
-                  top: 125 + _sparkles[i].y,
+                  key: ValueKey('sparkle_${sparkle.id}'),
+                  left: 150 + sparkle.x,
+                  top: 125 + sparkle.y,
                   child: Opacity(
-                    opacity: _sparkles[i].opacity.clamp(0.0, 1.0),
+                    opacity: sparkle.opacity.clamp(0.0, 1.0),
                     child: Container(
-                      width: _sparkles[i].size,
-                      height: _sparkles[i].size,
+                      width: sparkle.size,
+                      height: sparkle.size,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: Colors.white,
@@ -362,18 +364,14 @@ class _CompatibilityLoadingScreenState extends State<CompatibilityLoadingScreen>
   Widget _buildDynamicText() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 40),
-      child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 500),
-        child: Text(
-          _dynamicTexts[_currentTextIndex],
-          key: ValueKey(_currentTextIndex),
-          style: const TextStyle(
-            color: greyColor,
-            fontSize: 14,
-            fontWeight: FontWeight.w400,
-          ),
-          textAlign: TextAlign.center,
+      child: Text(
+        _dynamicTexts[_currentTextIndex],
+        style: const TextStyle(
+          color: greyColor,
+          fontSize: 14,
+          fontWeight: FontWeight.w400,
         ),
+        textAlign: TextAlign.center,
       ),
     );
   }
@@ -408,12 +406,14 @@ class _CompatibilityLoadingScreenState extends State<CompatibilityLoadingScreen>
 }
 
 class _Sparkle {
+  final int id; // Уникальный ID для ключа
   double x;
   double y;
   double size;
   double opacity;
 
   _Sparkle({
+    required this.id,
     required this.x,
     required this.y,
     required this.size,
