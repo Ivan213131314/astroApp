@@ -153,6 +153,7 @@ class _CompatibilityDeepDetailScreenState
         sign2: _sign2!,
         category: _category!,
         language: language,
+        teaser: _teaser ?? '',
         name1: _name1,
         name2: _name2,
         birthDate1: _formatBirthDateFromIso(_birthDate1),

@@ -203,24 +203,30 @@ Provide an insightful and transformative reading of this person's astrological p
     final person1Info = _formatPersonInfo(name1, sign1, birthDate1);
     final person2Info = _formatPersonInfo(name2, sign2, birthDate2);
     
-    final prompt = '''Generate a SHORT, INTRIGUING teaser about $categoryName compatibility.
+    final prompt = '''Generate a VERY SHORT, emotionally charged compatibility teaser for $categoryName.
 
 PERSONS:
 - Person 1: $person1Info
 - Person 2: $person2Info
 
 STRICT REQUIREMENTS:
-- Write exactly 1-2 short paragraphs (3-5 sentences total)
-- Use their names naturally in the text (if provided)
-- Be mysterious and captivating - make the reader WANT to know more
-- Hint at secrets, hidden dynamics, or surprising revelations
-- End with a hook that creates curiosity
+- Write EXACTLY 1–2 short sentences (no more).
+- Use very simple, everyday language.
+- Use their names naturally (if provided).
+- Do NOT explain reasons or dynamics.
 - Write in $language
-- DO NOT include any special characters, tags, or markers
-- DO NOT start with greetings or introductions
-- Start directly with the content
+- Do NOT mention zodiac mechanics or astrology terms.
+- Focus on tension, risk, or something unsettling beneath the surface.
+- The text must feel unfinished, like something important is being withheld.
+- Prefer questions or ominous statements.
+- Make it slightly alarming or uncomfortable.
+- End with uncertainty or a question.
+- No greetings.
+- No metaphors.
+- No long descriptions.
 
-OUTPUT: Pure text only, no formatting tags.''';
+OUTPUT:
+Pure text only. No formatting. No emojis. No symbols.''';
 
     final messages = <Map<String, String>>[
       {'role': 'system', 'content': 'You are a mystical astrologer. Output ONLY the requested text, no tags, no markers, no special characters. Never use [BOS], [EOS], <bot>, </bot> or similar tokens.'},
@@ -230,54 +236,81 @@ OUTPUT: Pure text only, no formatting tags.''';
     return _sendRawMessage(messages, maxTokens: 250);
   }
 
-  /// Генерация детального анализа совместимости (5-10 абзацев)
+  /// Генерация детального анализа совместимости (4 абзаца, 160-230 слов)
   Future<String> generateCompatibilityDetail({
     required String sign1,
     required String sign2,
     required CompatibilityCategory category,
     required String language,
+    required String teaser,
     String? name1,
     String? name2,
     String? birthDate1,
     String? birthDate2,
   }) async {
     final categoryName = _getCategoryName(category);
-    final categoryPrompt = _getCategoryDetailPrompt(category);
     
     // Формируем информацию о людях
     final person1Info = _formatPersonInfo(name1, sign1, birthDate1);
     final person2Info = _formatPersonInfo(name2, sign2, birthDate2);
     
-    final prompt = '''Provide a DETAILED, IN-DEPTH analysis of $categoryName compatibility.
+    final prompt = '''Write a paid, in-depth compatibility reading for $categoryName.
 
 PERSONS:
 - Person 1: $person1Info
 - Person 2: $person2Info
 
-ANALYSIS FOCUS:
-$categoryPrompt
+TEASER (use this as the emotional trigger):
+"$teaser"
 
 STRICT REQUIREMENTS:
-- Write 5-10 substantial paragraphs
-- Use their names naturally throughout (if provided)
-- Include specific planetary influences based on their signs
-- Provide practical advice and wisdom
-- Use beautiful, poetic but accessible language
-- Make it feel personal and transformative
-- Write in $language
-- DO NOT include any special characters, tags, or markers
-- DO NOT start with greetings or introductions
-- Start directly with the analysis
+- Write EXACTLY 4 short paragraphs.
+- Total length: 160–230 words.
+- Use very simple, everyday language.
+- No metaphors, no spiritual lectures, no astrology terms.
+- Use their names naturally 1–2 times total (if provided).
+- Be emotionally sharp and slightly alarming at first.
+- Make the reader feel tension, doubt, or risk in the beginning.
+- Resolve the tension by the end, offering calm and clarity.
+- Everything must feel realistic and psychological, not mystical.
 
-OUTPUT: Pure text only, no formatting tags.''';
+PARAGRAPH STRUCTURE:
+1) Amplify the anxiety from the teaser.
+   Make it feel like something is wrong, fragile, or risky.
+   Create the sense that this connection could quietly fall apart.
+
+2) Name the core problem.
+   One clear issue, flaw, or pattern that creates this tension.
+   Keep it blunt and uncomfortable.
+
+3) Reframe.
+   Explain that this problem is common and manageable.
+   Reduce fear. Show that it does NOT mean disaster.
+
+4) Calm resolution.
+   Explain that things can be stable and safe IF a specific condition is met.
+   End with reassurance, control, and a grounded takeaway.
+
+ENDING RULE:
+- The final sentence must contain a conditional reassurance:
+  "Everything will be fine if..."
+  "This works only when..."
+  "Nothing breaks unless..."
+
+Write in $language.
+Output plain text only.
+No emojis.
+No formatting.
+No headings.''';
 
     final messages = <Map<String, String>>[
-      {'role': 'system', 'content': 'You are a master astrologer. Output ONLY the requested analysis, no tags, no markers, no special characters. Never use [BOS], [EOS], <bot>, </bot> or similar tokens. Write naturally and personally.'},
+      {'role': 'system', 'content': 'You are an astrologer speaking in a simple, direct, emotionally engaging way. Output ONLY the requested analysis, no tags, no markers, no special characters. Never use [BOS], [EOS], <bot>, </bot> or similar tokens. Write naturally and personally.'},
       {'role': 'user', 'content': prompt},
     ];
 
-    return _sendRawMessage(messages, maxTokens: 1500);
+    return _sendRawMessage(messages, maxTokens: 800);
   }
+
 
   String _formatPersonInfo(String? name, String sign, String? birthDate) {
     final parts = <String>[];
