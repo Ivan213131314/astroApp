@@ -307,7 +307,7 @@ class _PlamReaderLoadingScreenState extends State<PlamReaderLoadingScreen>
         duration: const Duration(milliseconds: 500),
         child: Text(
           _dynamicTexts[_currentTextIndex],
-          key: ValueKey(_currentTextIndex),
+          key: ValueKey(_dynamicTexts[_currentTextIndex]),
           style: const TextStyle(
             color: greyColor,
             fontSize: 14,

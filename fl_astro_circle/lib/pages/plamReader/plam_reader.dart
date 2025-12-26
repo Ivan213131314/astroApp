@@ -37,7 +37,7 @@ class _PlamReaderScreenState extends State<PlamReaderScreen> {
           ),
           height5Space,
           const Text(
-            "Lorem ipsum dolor sit amet consectetur. In vitae in volutpat eu lectus. Eget aliquet pharetra nunc lacus. Mauris atlaoreet quam. Cursus risus nisl nulla et magna ",
+            "Discover your destiny through the ancient art of palmistry. The lines on your palm hold secrets about your character, love, health and future. Take a photo of your hand and receive a personalized analysis",
             style: regualr14Grey,
             textAlign: TextAlign.center,
           ),

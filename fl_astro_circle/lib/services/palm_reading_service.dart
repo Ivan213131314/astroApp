@@ -63,29 +63,52 @@ class PalmReadingService {
       final base64Image = base64Encode(bytes);
       final imageUrl = 'data:image/jpeg;base64,$base64Image';
 
-      // Промпт для AI
-      final prompt = '''Analyze this photo. First, determine if it shows a human palm/hand suitable for palmistry reading.
+final prompt = '''Analyze this photo. First, check if it clearly shows a real human palm suitable for palm reading.
 
-IMPORTANT: Respond with ONLY a valid JSON object, no additional text or formatting.
+IMPORTANT:
+- You are NOT a doctor, NOT a scientist, NOT an astrologer.
+- You speak like a simple palm reader using everyday language.
+- Your tone should feel slightly alarming, intriguing, and predictive.
+- Do NOT explain palmistry rules or theory.
+- Do NOT use complex, spiritual, or academic words.
+- Speak directly to the person, as if warning or preparing them.
 
-If this is NOT a clear photo of a palm/hand, set "isValidPalmPhoto" to false.
-If this IS a photo of a palm/hand, analyze these four main lines:
-1. Life Line - longevity, vitality, life path
-2. Heart Line - emotions, relationships, love
-3. Money Line - wealth, career success, financial luck  
-4. Health Line - physical and mental wellbeing
+Respond with ONLY a valid JSON object. No extra text.
 
-FORMAT YOUR RESPONSE EXACTLY LIKE THIS (valid JSON only):
+If the image is NOT a clear photo of a human palm/hand, set "isValidPalmPhoto" to false and use the fallback text.
+
+If the image IS a valid palm photo, describe these four lines in a simple, predictive way:
+
+1. Life Line — what is coming in their life soon, changes, pressure, turning points  
+2. Heart Line — emotional risks, relationships, something unsaid or unresolved  
+3. Money Line — money stress, chances, risk of loss or sudden opportunity  
+4. Health Line — tiredness, overload, warning signs (NO medical advice)
+
+STYLE REQUIREMENTS FOR EACH LINE:
+- 2–5  sentences only for each category, 150-250 words in total
+- Very simple words
+- Everyday language, no mysticism terms
+- Talk in second person ("you")
+- Include a sense of:
+  • something about to happen  
+  • warning OR opportunity  
+  • "be careful", "pay attention", "don't ignore this"
+- Avoid exact dates or facts
+- Make it feel like a hint, not a full explanation
+
+FORMAT (EXACT JSON):
+
 {
   "isValidPalmPhoto": true or false,
-  "lifeLine": "Detailed analysis of life line in $language (3-4 sentences)" or "Not applicable",
-  "heartLine": "Detailed analysis of heart line in $language (3-4 sentences)" or "Not applicable",
-  "moneyLine": "Detailed analysis of money line in $language (3-4 sentences)" or "Not applicable",
-  "healthLine": "Detailed analysis of health line in $language (3-4 sentences)" or "Not applicable"
+  "lifeLine": "Text in $language" or "Please take a photo of your palm. The image you sent is not a hand.",
+  "heartLine": "Text in $language" or "Please take a photo of your palm. The image you sent is not a hand.",
+  "moneyLine": "Text in $language" or "Please take a photo of your palm. The image you sent is not a hand.",
+  "healthLine": "Text in $language" or "Please take a photo of your palm. The image you sent is not a hand."
 }
 
-If isValidPalmPhoto is false, set all line readings to "Not applicable".
-DO NOT include any text before or after the JSON. ONLY output valid JSON.''';
+If isValidPalmPhoto is false:
+- Set all four lines to the fallback text exactly.
+- Do NOT add explanations.''';
 
       // Формируем запрос с vision support
       final messages = [
