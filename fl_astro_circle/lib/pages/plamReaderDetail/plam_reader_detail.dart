@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:typed_data';
+import 'dart:ui';
 import 'package:fl_astro_circle/localization/localization_const.dart';
 import 'package:fl_astro_circle/services/palm_reading_service.dart';
 import 'package:flutter/material.dart';
-import 'package:readmore/readmore.dart';
 
 import '../../theme/theme.dart';
 
@@ -118,19 +118,81 @@ class _PlamReaderDetailScreenState extends State<PlamReaderDetailScreen> {
           color: primaryColor,
         ),
         heightSpace,
-        ReadMoreText(
-          content,
-          style: regualr14Grey,
-          moreStyle: regualr14Primary,
-          lessStyle: regualr14Primary,
-          trimLines: 8,
-          trimMode: TrimMode.Line,
-          trimExpandedText:
-              getTranslation(context, 'plam_reader_detail.show_less'),
-          trimCollapsedText:
-              getTranslation(context, 'plam_reader_detail.read_more'),
-        )
+        // Paywall: градиент с первой строки, blur со второй, замок по центру
+        _buildPaywallContent(content),
       ],
+    );
+  }
+
+  Widget _buildPaywallContent(String content) {
+    return GestureDetector(
+      onTap: () {
+        // TODO: Логика покупок будет добавлена позже
+      },
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Первая строка с градиентом (видно частично)
+              ShaderMask(
+                shaderCallback: (Rect bounds) {
+                  return LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.white,
+                      Colors.white.withOpacity(0.3),
+                    ],
+                    stops: const [0.0, 1.0],
+                  ).createShader(bounds);
+                },
+                blendMode: BlendMode.dstIn,
+                child: Text(
+                  content,
+                  style: regualr14Grey,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(height: 4),
+              // Вторая+ строки с blur + сильный градиент
+              ImageFiltered(
+                imageFilter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
+                child: ShaderMask(
+                  shaderCallback: (Rect bounds) {
+                    return LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.white.withOpacity(0.2),
+                        Colors.transparent,
+                      ],
+                      stops: const [0.0, 0.5],
+                    ).createShader(bounds);
+                  },
+                  blendMode: BlendMode.dstIn,
+                  child: Text(
+                    content,
+                    style: regualr14Grey,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          // Иконка замочка по центру
+          Positioned(
+            child: Icon(
+              Icons.lock,
+              color: primaryColor,
+              size: 28,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
