@@ -231,46 +231,48 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         ),
       ),
       body: CosmicBackground(
-        child: Column(
+        child: Stack(
           children: [
             // Main scrollable content
-            Expanded(
-              child: ListView(
-                physics: const BouncingScrollPhysics(),
-                padding: EdgeInsets.only(bottom: _isExploreExpanded ? 20 : 80),
-                children: [
-                  askUniverseHero(size),
-                  heightSpace,
-                  heightSpace,
-                  titleWidget(getTranslation(context, 'home.horoscope'), () {
-                    Navigator.pushNamed(context, '/horoscope');
-                  }),
-                  heightSpace,
-                  horoscopeListContent(),
-                  heightSpace,
-                  // Expandable content with animation
-                  SizeTransition(
-                    sizeFactor: _expandAnimation,
-                    axisAlignment: -1.0,
-                    child: Column(
-                      children: [
-                        heightSpace,
-                        otherServicesTitle(),
-                        servicesGridContent(),
-                        heightSpace,
-                        heightSpace,
-                        // talkToAstrologerBlock(), // Temporarily hidden
-                        heightSpace,
-                      ],
-                    ),
+            ListView(
+              physics: const BouncingScrollPhysics(),
+              padding: EdgeInsets.only(bottom: _isExploreExpanded ? 180 : 80),
+              children: [
+                askUniverseHero(size),
+                heightSpace,
+                heightSpace,
+                titleWidget(getTranslation(context, 'home.horoscope'), () {
+                  Navigator.pushNamed(context, '/horoscope');
+                }),
+                heightSpace,
+                horoscopeListContent(),
+                heightSpace,
+                // Expandable content with animation
+                SizeTransition(
+                  sizeFactor: _expandAnimation,
+                  axisAlignment: -1.0,
+                  child: Column(
+                    children: [
+                      heightSpace,
+                      otherServicesTitle(),
+                      servicesGridContent(),
+                      heightSpace,
+                      heightSpace,
+                      // talkToAstrologerBlock(), // Temporarily hidden
+                      heightSpace,
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-            // Fixed bottom "Explore More" button
-            Container(
-              padding: const EdgeInsets.only(bottom: 115, top: 10),
-              child: _buildExploreMoreButton(),
+            // Fixed bottom "Explore More" button - truly positioned over content
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 115,
+              child: Center(
+                child: _buildExploreMoreButton(),
+              ),
             ),
           ],
         ),
