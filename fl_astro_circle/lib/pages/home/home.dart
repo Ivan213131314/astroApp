@@ -148,7 +148,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     }
   ];
 
-  final otherServicesList = [
+  final List<Map<String, Object>> otherServicesList = [
     {
       "image": "assets/home/natal_chart_premium.png",
       "title": "Netal chart",
@@ -173,13 +173,14 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       "detail": "Check heartline,loveline and moneyline",
       "route": '/plamReader'
     },
-    {
-      "image": "assets/home/service6.png",
-      "title": "Ask Universe",
-      "detail": "Send your question to the universe via NASA satellites",
-      "route": '/universeMessage',
-      "locked": true
-    }
+    // Ask Universe temporarily hidden - files preserved
+    // {
+    //   "image": "assets/home/service6.png",
+    //   "title": "Ask Universe",
+    //   "detail": "Send your question to the universe via NASA satellites",
+    //   "route": '/universeMessage',
+    //   "locked": true
+    // }
   ];
 
   @override
