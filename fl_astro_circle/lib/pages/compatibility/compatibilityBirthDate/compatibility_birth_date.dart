@@ -497,13 +497,14 @@ class _CompatibilityBirthDateScreenState
             Column(
               children: [
                 Expanded(
-                  child: Padding(
+                  child: SingleChildScrollView(
                     padding: const EdgeInsets.all(fixPadding * 2.0),
                     child: Column(
                       children: [
                         _signsRow(size),
                         heightSpace,
-                        Expanded(
+                        SizedBox(
+                          height: 220,
                           child: _personDateSection(
                             title: getTranslation(
                                 context, 'compatibility_birth_date.person1_date'),
@@ -521,7 +522,8 @@ class _CompatibilityBirthDateScreenState
                           ),
                         ),
                         heightSpace,
-                        Expanded(
+                        SizedBox(
+                          height: 220,
                           child: _personDateSection(
                             title: getTranslation(
                                 context, 'compatibility_birth_date.person2_date'),

@@ -641,126 +641,137 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       onTap: () {
          Navigator.pushNamed(context, '/universeSign');
       },
-      child: Container(
-        height: 180, // Reduced height
-        margin: const EdgeInsets.only(
-            left: fixPadding * 2.0, right: fixPadding * 2.0, top: 20, bottom: fixPadding),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(25.0),
-          boxShadow: [
-            BoxShadow(
-              color: primaryColor.withOpacity(0.3),
-              blurRadius: 20,
-              spreadRadius: -5,
-              offset: const Offset(0, 10),
-            ),
-          ],
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(
+          minHeight: 160,
         ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(25.0),
-          child: Stack(
-            children: [
-              // Background Image
-              Opacity(
-                opacity: 0.5,
-                child: Container(
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage("assets/home/universe_card_bg.png"),
-                      fit: BoxFit.cover,
+        child: Container(
+          margin: const EdgeInsets.only(
+              left: fixPadding * 2.0, right: fixPadding * 2.0, top: 20, bottom: fixPadding),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(25.0),
+            boxShadow: [
+              BoxShadow(
+                color: primaryColor.withOpacity(0.3),
+                blurRadius: 20,
+                spreadRadius: -5,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(25.0),
+            child: Stack(
+              children: [
+                // Background Image
+                Positioned.fill(
+                  child: Opacity(
+                    opacity: 0.5,
+                    child: Container(
+                      decoration: const BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage("assets/home/universe_card_bg.png"),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
-              // Gradient overlay for better text contrast
-              Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.transparent,
-                      Colors.black.withOpacity(0.6),
+                // Gradient overlay for better text contrast
+                Positioned.fill(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          Colors.black.withOpacity(0.6),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                // Glass overlay
+                Positioned.fill(
+                  child: BackdropFilter(
+                    filter: ui.ImageFilter.blur(sigmaX: 0.0, sigmaY: 0.0),
+                    child: Container(
+                       color: whiteColor.withOpacity(0.0),
+                    ),
+                  ),
+                ),
+                // Animated Content 
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 18.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        "Universe Sign for Today",
+                        style: TextStyle(
+                          fontFamily: 'Cinzel',
+                          fontSize: size.width < 380 ? 22 : 26, // Адаптивный размер шрифта
+                          fontWeight: FontWeight.w300,
+                          color: whiteColor,
+                          shadows: const [
+                            Shadow(
+                              color: Colors.black26,
+                              blurRadius: 10,
+                              offset: Offset(0, 4),
+                            )
+                          ]
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        "Your daily sign from the Universe",
+                        style: medium14White.copyWith(color: whiteColor.withOpacity(0.8)),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 12),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFFFFD700), Color(0xFFFFA500)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(30),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFFFFD700).withOpacity(0.4),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: const [
+                            Text(
+                              "Send Intention",
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Roboto', 
+                              ),
+                            ),
+                            SizedBox(width: 8),
+                            Icon(Icons.send_rounded, color: Colors.black, size: 16),
+                          ],
+                        ),
+                      )
                     ],
                   ),
                 ),
-              ),
-              // Glass overlay
-              BackdropFilter(
-                filter: ui.ImageFilter.blur(sigmaX: 0.0, sigmaY: 0.0), // Removed blur to show details
-                child: Container(
-                   color: whiteColor.withOpacity(0.0),
-                ),
-              ),
-              // Animated Content 
-              Padding(
-                padding: const EdgeInsets.all(25.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-
-                    const Text(
-                      "Universe Sign for Today",
-                      style: TextStyle(
-                        fontFamily: 'Cinzel', // Ensure font availability or use default serif
-                        fontSize: 28,
-                        fontWeight: FontWeight.w300,
-                        color: whiteColor,
-                        shadows: [
-                          Shadow(
-                            color: Colors.black26,
-                            blurRadius: 10,
-                            offset: Offset(0, 4),
-                          )
-                        ]
-                      ),
-                    ),
-                    const SizedBox(height: 5),
-                    Text(
-                      "Your daily sign from the Universe",
-                      style: medium14White.copyWith(color: whiteColor.withOpacity(0.8)),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 15),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFFFFD700), Color(0xFFFFA500)], // Gold to Orange
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(30),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFFFFD700).withOpacity(0.4),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: const [
-                          Text(
-                            "Send Intention",
-                            style: TextStyle(
-                              color: Colors.black, // Dark text on gold
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'Roboto', 
-                            ),
-                          ),
-                          SizedBox(width: 8),
-                          Icon(Icons.send_rounded, color: Colors.black, size: 16),
-                        ],
-                      ),
-                    )
-                  ],
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
