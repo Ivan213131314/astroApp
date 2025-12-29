@@ -1,5 +1,6 @@
 import 'package:fl_astro_circle/theme/theme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_places_flutter/google_places_flutter.dart';
 import 'package:google_places_flutter/model/prediction.dart';
 
@@ -156,7 +157,9 @@ class _PlaceOfBirthScreenState extends State<PlaceOfBirthScreen> {
           placeController.selection = TextSelection.fromPosition(
             TextPosition(offset: placeController.text.length),
           );
-          placeFocusNode.unfocus();
+          // Скрываем клавиатуру после выбора места - надёжный способ для iOS
+          FocusScope.of(context).unfocus();
+          SystemChannels.textInput.invokeMethod('TextInput.hide');
           setState(() {
             selectedPlaceId = prediction.placeId;
           });
@@ -205,6 +208,9 @@ class _PlaceOfBirthScreenState extends State<PlaceOfBirthScreen> {
     return InkWell(
       onTap: placeController.text.isNotEmpty
           ? () {
+              // Скрываем клавиатуру перед переходом - надёжный способ для iOS
+              FocusScope.of(context).unfocus();
+              SystemChannels.textInput.invokeMethod('TextInput.hide');
               Navigator.pushNamed(context, '/onboardingHoroscopesQuestion');
             }
           : null,
