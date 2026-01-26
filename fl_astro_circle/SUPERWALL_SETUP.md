@@ -116,6 +116,14 @@ await SuperwallService().restorePurchases();
    - Показывается при нажатии на кнопку Subscribe
    - После покупки показывается уведомление и закрывается экран
 
+3. **Universe Message** (`lib/pages/universeMessage/universe_message.dart`):
+   - Placement: `subscribe_button`
+   - Показывается при нажатии на кнопку "Decipher Message" в диалоге получения ответа
+
+4. **Universe Sign** (`lib/pages/universeSign/universe_sign.dart` & `universe_sign_player_screen.dart`):
+   - Placement: `subscribe_button`
+   - Показывается при нажатии на "Decode the Sign" (в диалоге или на экране плеера)
+
 ## Тестирование:
 
 ### На Android эмуляторе:

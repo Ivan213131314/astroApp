@@ -6,7 +6,7 @@ class DebugConfig {
 
   /// Skip Superwall paywall and simulate successful purchase
   /// Set to false for production!
-  static const bool skipPaywall = true;
+  static const bool skipPaywall = false;
 
   /// Enable debug logging
   static const bool enableLogging = true;

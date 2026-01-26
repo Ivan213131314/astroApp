@@ -587,17 +587,31 @@ class _UniverseSignScreenState extends State<UniverseSignScreen>
                       heightSpace,
                       heightSpace,
                       GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            PageTransition(
-                              child: UniverseSignPlayerScreen(
-                                question: currentQuestionForDialog ?? '',
-                                category: currentCategoryForDialog,
-                              ),
-                              type: PageTransitionType.rightToLeft,
-                              duration: const Duration(milliseconds: 300),
-                            ),
+                        onTap: () async {
+                          // Показать paywall перед переходом к расшифровке
+                          await SuperwallService().showPaywall(
+                            placement: "subscribe_button",
+                            onPurchased: () {
+                              Navigator.push(
+                                context,
+                                PageTransition(
+                                  child: UniverseSignPlayerScreen(
+                                    question: currentQuestionForDialog ?? '',
+                                    category: currentCategoryForDialog,
+                                  ),
+                                  type: PageTransitionType.rightToLeft,
+                                  duration: const Duration(milliseconds: 300),
+                                ),
+                              );
+                            },
+                            onDeclined: () {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Subscribe to unlock universe signs'),
+                                  backgroundColor: Colors.orange,
+                                ),
+                              );
+                            },
                           );
                         },
                         child: Container(
@@ -614,7 +628,7 @@ class _UniverseSignScreenState extends State<UniverseSignScreen>
                           ),
                           child: const Center(
                             child: Text(
-                              'Open Sign',
+                              'Decode the Sign',
                               style: TextStyle(
                                 color: whiteColor,
                                 fontSize: 16,
