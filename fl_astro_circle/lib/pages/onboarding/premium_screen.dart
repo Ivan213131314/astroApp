@@ -37,20 +37,20 @@ class _PremiumScreenState extends State<PremiumScreen> {
   final List<_PlanOption> _plans = const [
     _PlanOption(
       title: 'Weekly',
-      price: '\$9.99',
+      price: '\$7.99',
       billedAs: 'BILLED\nWEEKLY',
       note: 'Auto-renewable',
     ),
     _PlanOption(
       title: 'Yearly',
-      price: '\$89.99',
+      price: '\$37.89',
       billedAs: 'BILLED\nANNUALLY',
       note: 'Auto-renewable',
       isPopular: true,
     ),
     _PlanOption(
       title: 'Monthly',
-      price: '\$29.99',
+      price: '\$39.99',
       billedAs: 'BILLED\nMONTHLY',
       note: 'Auto-renewable',
     ),
@@ -297,8 +297,9 @@ class _PremiumScreenState extends State<PremiumScreen> {
   Widget _buildCtaButton() {
     return InkWell(
       borderRadius: BorderRadius.circular(24),
-      onTap: () => Navigator.pushNamed(context, '/onboardingAlmostThere'),
-      child: Ink(
+      onTap: () {},
+      child: Container(
+        width: double.infinity,
         height: 82,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(24),
@@ -318,16 +319,15 @@ class _PremiumScreenState extends State<PremiumScreen> {
             ),
           ],
         ),
-        child: const Center(
-          child: Text(
-            'Continue',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Color(0xFF140D20),
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 1.8,
-            ),
+        alignment: Alignment.center,
+        child: const Text(
+          'Continue',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Color(0xFF140D20),
+            fontSize: 20,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 1.8,
           ),
         ),
       ),
