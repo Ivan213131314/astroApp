@@ -223,6 +223,21 @@ class _MyAppState extends State<MyApp> {
           child: const AlmostThereScreen(),
           type: PageTransitionType.rightToLeft,
         );
+      case '/termsOfService':
+        return PageTransition(
+          child: const TermsOfServiceScreen(),
+          type: PageTransitionType.rightToLeft,
+        );
+      case '/privacyPolicy':
+        return PageTransition(
+          child: const PrivacyPolicyScreen(),
+          type: PageTransitionType.rightToLeft,
+        );
+      case '/subscriptionTerms':
+        return PageTransition(
+          child: const SubscriptionTermsScreen(),
+          type: PageTransitionType.rightToLeft,
+        );
       case '/authChoice':
         return PageTransition(
           child: const AuthChoiceScreen(),
