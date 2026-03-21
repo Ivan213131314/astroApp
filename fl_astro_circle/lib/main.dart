@@ -10,6 +10,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:superwallkit_flutter/superwallkit_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:fl_astro_circle/config/debug_config.dart';
+import 'package:fl_astro_circle/services/superwall_diagnostics_delegate.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,7 +27,26 @@ void main() async {
       const Settings(persistenceEnabled: true);
   
   // Инициализация Superwall
-  Superwall.configure('pk_zZA_dWvZ0yUQUDpWQsBVO');
+  final superwallOptions = SuperwallOptions();
+  if (DebugConfig.enableSuperwallDiagnostics) {
+    // superwallkit_flutter 2.4.4 does not expose a public testMode/testModeAlways
+    // flag in SuperwallOptions, so in debug builds we enable the maximum
+    // diagnostics surface the Flutter wrapper provides.
+    superwallOptions.logging.level = LogLevel.debug;
+    superwallOptions.logging.scopes = {LogScope.all};
+  }
+  Superwall.configure(
+    'pk_zZA_dWvZ0yUQUDpWQsBVO',
+    options: superwallOptions,
+  );
+
+  if (DebugConfig.enableSuperwallDiagnostics) {
+    DebugConfig.log(
+      'Superwall debug diagnostics enabled. '
+      'Explicit testModeAlways is not exposed by superwallkit_flutter 2.4.4.',
+    );
+    Superwall.shared.setDelegate(const SuperwallDiagnosticsDelegate());
+  }
   
   // Установить начальный статус подписки (неподписан)
   // Это нужно чтобы Superwall не ждал таймаута

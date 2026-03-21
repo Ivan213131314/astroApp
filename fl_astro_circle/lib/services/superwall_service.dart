@@ -1,21 +1,19 @@
-import 'package:superwallkit_flutter/superwallkit_flutter.dart';
 import 'package:fl_astro_circle/config/debug_config.dart';
+import 'package:superwallkit_flutter/superwallkit_flutter.dart';
 
 class SuperwallService {
   static final SuperwallService _instance = SuperwallService._internal();
   factory SuperwallService() => _instance;
   SuperwallService._internal();
 
-  // Показать paywall с обработкой результата
   Future<void> showPaywall({
     required String placement,
     Function? onPurchased,
     Function? onDeclined,
     Function? onRestored,
   }) async {
-    // DEBUG: Skip paywall and simulate purchase
     if (DebugConfig.skipPaywall) {
-      DebugConfig.log('Skipping paywall - simulating purchase');
+      DebugConfig.log('Skipping paywall and simulating purchase.');
       await Superwall.shared.setSubscriptionStatus(
         SubscriptionStatusActive(entitlements: {Entitlement(id: 'debug_test')}),
       );
@@ -25,17 +23,18 @@ class SuperwallService {
       return;
     }
 
+    await _logPresentationPreflight(placement);
+
     final handler = PaywallPresentationHandler();
 
-    // Обработка закрытия paywall
     handler.onDismiss((paywallInfo, paywallResult) async {
-      String name = (paywallInfo.name) ?? 'Unknown';
-      print("Paywall закрыт: $name");
+      _logPaywallInfo('Paywall dismissed', placement, paywallInfo);
 
       switch (paywallResult) {
         case PurchasedPaywallResult(productId: var id):
-          print('Покупка выполнена! ID продукта: $id');
-          // Обновить статус подписки на активный
+          DebugConfig.log(
+            'Purchase completed for placement="$placement". productId=$id',
+          );
           await Superwall.shared.setSubscriptionStatus(
             SubscriptionStatusActive(entitlements: {Entitlement(id: id)}),
           );
@@ -44,14 +43,13 @@ class SuperwallService {
           }
           break;
         case DeclinedPaywallResult():
-          print('Пользователь отклонил покупку');
+          DebugConfig.log('Purchase declined for placement="$placement".');
           if (onDeclined != null) {
             onDeclined();
           }
           break;
         case RestoredPaywallResult():
-          print('Покупки восстановлены');
-          // Обновить статус подписки на активный
+          DebugConfig.log('Purchases restored for placement="$placement".');
           await Superwall.shared.setSubscriptionStatus(
             SubscriptionStatusActive(entitlements: {}),
           );
@@ -62,70 +60,169 @@ class SuperwallService {
       }
     });
 
-    // Обработка показа paywall
     handler.onPresent((paywallInfo) async {
-      String name = (paywallInfo.name) ?? 'Unknown';
-      print("Paywall показан: $name");
-    });
+      _logPaywallInfo('Paywall presented', placement, paywallInfo);
 
-    // Обработка ошибок
-    handler.onError((error) {
-      print("Ошибка Paywall: $error");
-      // При ошибке загрузки paywall - показать сообщение
-      // В реальном приложении можно показать fallback экран подписки
-    });
+      if (paywallInfo.productIds == null || paywallInfo.productIds!.isEmpty) {
+        DebugConfig.log(
+          'Paywall presented without productIds for placement="$placement".',
+        );
+      }
 
-    // Обработка пропуска paywall
-    handler.onSkip((skipReason) {
-      if (skipReason is PaywallSkippedReasonHoldout) {
-        print("Paywall пропущен: пользователь в контрольной группе (Holdout)");
-      } else if (skipReason is PaywallSkippedReasonNoAudienceMatch) {
-        print("Paywall пропущен: нет совпадения с аудиторией");
-      } else if (skipReason is PaywallSkippedReasonPlacementNotFound) {
-        print("Paywall пропущен: Placement не найден в Dashboard");
-      } else {
-        print("Paywall пропущен: $skipReason");
+      if (paywallInfo.productsLoadFailTime?.isNotEmpty ?? false) {
+        DebugConfig.log(
+          'Paywall products failed to load for placement="$placement". '
+          'failTime=${paywallInfo.productsLoadFailTime}, '
+          'duration=${paywallInfo.productsLoadDuration}',
+        );
       }
     });
 
-    // Регистрация placement
-    await Superwall.shared.registerPlacement(
-      placement,
-      handler: handler,
-    );
+    handler.onError((error) async {
+      DebugConfig.log(
+        'Paywall presentation error for placement="$placement": $error',
+      );
+
+      final latestPaywallInfo = await Superwall.shared.getLatestPaywallInfo();
+      if (latestPaywallInfo != null) {
+        _logPaywallInfo(
+          'Latest paywall snapshot after error',
+          placement,
+          latestPaywallInfo,
+        );
+      } else {
+        DebugConfig.log(
+          'No latest paywall info available after error for placement="$placement".',
+        );
+      }
+    });
+
+    handler.onSkip((skipReason) {
+      DebugConfig.log(
+        'Paywall skipped for placement="$placement": '
+        '${_describeSkipReason(skipReason)}',
+      );
+    });
+
+    try {
+      await Superwall.shared.registerPlacement(
+        placement,
+        handler: handler,
+      );
+    } catch (e, stackTrace) {
+      DebugConfig.log(
+        'registerPlacement failed for placement="$placement": $e\n$stackTrace',
+      );
+      rethrow;
+    }
   }
 
-  // Проверить статус подписки
+  Future<void> _logPresentationPreflight(String placement) async {
+    try {
+      final configurationStatus = await Superwall.shared.getConfigurationStatus();
+      final subscriptionStatus = await Superwall.shared.getSubscriptionStatus();
+      final presentationResult =
+          await Superwall.shared.getPresentationResult(placement);
+
+      DebugConfig.log(
+        'Superwall preflight for placement="$placement": '
+        'configurationStatus=$configurationStatus, '
+        'subscriptionStatus=$subscriptionStatus, '
+        'presentationResult=${_describePresentationResult(presentationResult)}',
+      );
+    } catch (e, stackTrace) {
+      DebugConfig.log(
+        'Unable to fetch Superwall preflight diagnostics for '
+        'placement="$placement": $e\n$stackTrace',
+      );
+    }
+  }
+
+  String _describePresentationResult(PresentationResult result) {
+    if (result is PlacementNotFoundPresentationResult) {
+      return 'placementNotFound';
+    }
+    if (result is NoAudienceMatchPresentationResult) {
+      return 'noAudienceMatch';
+    }
+    if (result is HoldoutPresentationResult) {
+      return 'holdout(experimentId=${result.experiment.id}, '
+          'groupId=${result.experiment.groupId})';
+    }
+    if (result is PaywallPresentationResult) {
+      return 'paywall(experimentId=${result.experiment.id}, '
+          'groupId=${result.experiment.groupId})';
+    }
+    if (result is PaywallNotAvailablePresentationResult) {
+      return 'paywallNotAvailable';
+    }
+    return result.runtimeType.toString();
+  }
+
+  String _describeSkipReason(PaywallSkippedReason skipReason) {
+    if (skipReason is PaywallSkippedReasonHoldout) {
+      return 'holdout';
+    }
+    if (skipReason is PaywallSkippedReasonNoAudienceMatch) {
+      return 'noAudienceMatch';
+    }
+    if (skipReason is PaywallSkippedReasonPlacementNotFound) {
+      return 'placementNotFound';
+    }
+    return skipReason.runtimeType.toString();
+  }
+
+  void _logPaywallInfo(String prefix, String placement, PaywallInfo paywallInfo) {
+    final details = <String>[
+      'placement="$placement"',
+      if (paywallInfo.name?.isNotEmpty ?? false) 'name=${paywallInfo.name}',
+      if (paywallInfo.identifier?.isNotEmpty ?? false)
+        'identifier=${paywallInfo.identifier}',
+      if (paywallInfo.presentedByPlacementWithName?.isNotEmpty ?? false)
+        'presentedByPlacement=${paywallInfo.presentedByPlacementWithName}',
+      if (paywallInfo.productIds != null) 'productIds=${paywallInfo.productIds}',
+      if (paywallInfo.products != null)
+        'productsLoaded=${paywallInfo.products!.length}',
+      if (paywallInfo.productsLoadCompleteTime?.isNotEmpty ?? false)
+        'productsLoadCompleteTime=${paywallInfo.productsLoadCompleteTime}',
+      if (paywallInfo.productsLoadFailTime?.isNotEmpty ?? false)
+        'productsLoadFailTime=${paywallInfo.productsLoadFailTime}',
+      if (paywallInfo.productsLoadDuration != null)
+        'productsLoadDuration=${paywallInfo.productsLoadDuration}',
+      if (paywallInfo.responseLoadFailTime?.isNotEmpty ?? false)
+        'responseLoadFailTime=${paywallInfo.responseLoadFailTime}',
+      if (paywallInfo.webViewLoadFailTime?.isNotEmpty ?? false)
+        'webViewLoadFailTime=${paywallInfo.webViewLoadFailTime}',
+    ];
+
+    DebugConfig.log('$prefix: ${details.join(', ')}');
+  }
+
   Future<bool> isUserSubscribed() async {
     try {
-      // Получаем текущий статус подписки через Stream
       final status = await Superwall.shared.subscriptionStatus.first;
-      // SubscriptionStatus это enum с вариантами: active, inactive, unknown
       return status is SubscriptionStatusActive;
     } catch (e) {
-      print("Ошибка проверки подписки: $e");
+      DebugConfig.log('Subscription status check failed: $e');
       return false;
     }
   }
 
-  // Установить пользовательские атрибуты
   Future<void> setUserAttributes(Map<String, Object> attributes) async {
     try {
       await Superwall.shared.setUserAttributes(attributes);
-      print("Атрибуты пользователя установлены: $attributes");
+      DebugConfig.log('User attributes updated: $attributes');
     } catch (e) {
-      print("Ошибка установки атрибутов: $e");
+      DebugConfig.log('Unable to set user attributes: $e');
     }
   }
 
-  // Восстановить покупки
   Future<void> restorePurchases() async {
     try {
       await Superwall.shared.restorePurchases();
-      print("Покупки восстановлены");
+      DebugConfig.log('restorePurchases completed.');
     } catch (e) {
-      print("Ошибка восстановления покупок: $e");
+      DebugConfig.log('restorePurchases failed: $e');
     }
   }
 }
-
