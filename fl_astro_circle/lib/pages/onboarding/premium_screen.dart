@@ -9,7 +9,7 @@ class PremiumScreen extends StatefulWidget {
 }
 
 class _PremiumScreenState extends State<PremiumScreen> {
-  final PageController _pageController = PageController(viewportFraction: 0.86);
+  final PageController _pageController = PageController(viewportFraction: 0.84);
 
   final List<_PaywallFeature> _features = const [
     _PaywallFeature(
@@ -39,20 +39,20 @@ class _PremiumScreenState extends State<PremiumScreen> {
       title: 'Weekly',
       price: '\$7.99',
       billedAs: 'BILLED\nWEEKLY',
-      note: 'Auto-renewable',
+      note: 'AUTO-RENEWABLE',
     ),
     _PlanOption(
       title: 'Yearly',
-      price: '\$37.89',
+      price: '\$37.99',
       billedAs: 'BILLED\nANNUALLY',
-      note: 'Auto-renewable',
+      note: 'AUTO-RENEWABLE',
       isPopular: true,
     ),
     _PlanOption(
-      title: 'Monthly',
+      title: '3 Month',
       price: '\$39.99',
-      billedAs: 'BILLED\nMONTHLY',
-      note: 'Auto-renewable',
+      billedAs: 'BILLED EVERY 3\nMONTH',
+      note: 'AUTO-RENEWABLE',
     ),
   ];
 
@@ -69,19 +69,21 @@ class _PremiumScreenState extends State<PremiumScreen> {
   Widget build(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
     final horizontalPadding = size.width < 360 ? 16.0 : 20.0;
+    final titleSize = size.width < 360 ? 30.0 : 34.0;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF09051A),
+      backgroundColor: const Color(0xFF090515),
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
-            end: Alignment.bottomCenter,
+            end: Alignment.bottomRight,
             colors: [
-              Color(0xFF120B34),
-              Color(0xFF09051A),
-              Color(0xFF140B33),
+              Color(0xFF130A33),
+              Color(0xFF090515),
+              Color(0xFF12091F),
             ],
+            stops: [0.0, 0.55, 1.0],
           ),
         ),
         child: SafeArea(
@@ -98,94 +100,66 @@ class _PremiumScreenState extends State<PremiumScreen> {
                       horizontalPadding,
                       10,
                       horizontalPadding,
-                      24,
+                      18,
                     ),
                     child: ConstrainedBox(
                       constraints: BoxConstraints(
-                        minHeight: constraints.maxHeight - 34,
+                        minHeight: constraints.maxHeight - 28,
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           _buildTopBar(),
-                          const SizedBox(height: 20),
+                          SizedBox(height: size.height < 780 ? 24 : 36),
                           Text(
-                            'Unlock Cosmic\nWisdom',
+                            'Unlock\nAstro Circle',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: whiteColor,
-                              fontSize: size.width < 360 ? 30 : 34,
+                              fontSize: titleSize,
                               fontWeight: FontWeight.w800,
-                              height: 1.04,
-                              letterSpacing: -1.2,
+                              height: 1.05,
+                              letterSpacing: -1.3,
                             ),
                           ),
-                          const SizedBox(height: 20),
+                          SizedBox(height: size.height < 780 ? 26 : 34),
                           _buildFeatureCarousel(size),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 18),
                           _buildFeatureIndicators(),
-                          const SizedBox(height: 22),
+                          const SizedBox(height: 34),
                           _buildPlanRow(),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 34),
                           _buildCtaButton(),
-                          const SizedBox(height: 14),
+                          const SizedBox(height: 28),
                           _buildTrustRow(),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 10),
                           const Text(
-                            'Subscription is optional and auto-renewable.',
+                            'subscription is optional and auto-renewable. Cancel anytime.',
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              color: Color(0xFF7B7793),
-                              fontSize: 14,
+                              color: Color(0xFF726D88),
+                              fontSize: 13,
                               fontWeight: FontWeight.w500,
-                              height: 1.4,
+                              height: 1.45,
                             ),
                           ),
-                          const SizedBox(height: 18),
-                          Center(
-                            child: TextButton(
-                              onPressed: () {},
-                              style: TextButton.styleFrom(
-                                foregroundColor: whiteColor,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 8,
-                                ),
-                              ),
-                              child: const Text(
-                                'Restore Purchase',
-                                style: TextStyle(
-                                  decoration: TextDecoration.underline,
-                                  decorationThickness: 1.5,
-                                  color: whiteColor,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w500,
-                                ),
+                          const SizedBox(height: 38),
+                          TextButton(
+                            onPressed: () {},
+                            style: TextButton.styleFrom(
+                              foregroundColor: whiteColor,
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                            ),
+                            child: const Text(
+                              'Restore Purchase',
+                              style: TextStyle(
+                                color: whiteColor,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                decoration: TextDecoration.underline,
+                                decorationColor: Color(0xCCFFFFFF),
                               ),
                             ),
-                          ),
-                          const SizedBox(height: 20),
-                          Row(
-                            children: const [
-                              Expanded(
-                                child: _FooterLink(
-                                  label: 'Terms of\nService',
-                                  routeName: '/termsOfService',
-                                ),
-                              ),
-                              Expanded(
-                                child: _FooterLink(
-                                  label: 'Privacy\nPolicy',
-                                  routeName: '/privacyPolicy',
-                                ),
-                              ),
-                              Expanded(
-                                child: _FooterLink(
-                                  label: 'Subscription\nTerms',
-                                  routeName: '/subscriptionTerms',
-                                ),
-                              ),
-                            ],
                           ),
                         ],
                       ),
@@ -210,8 +184,8 @@ class _PremiumScreenState extends State<PremiumScreen> {
           padding: EdgeInsets.only(top: 4, right: 10, bottom: 4),
           child: Icon(
             Icons.arrow_back_ios_new_rounded,
-            color: Color(0xFFD3D0E1),
-            size: 24,
+            color: Color(0xFFD4D1E2),
+            size: 22,
           ),
         ),
       ),
@@ -219,13 +193,14 @@ class _PremiumScreenState extends State<PremiumScreen> {
   }
 
   Widget _buildFeatureCarousel(Size size) {
-    final height = size.width < 360 ? 138.0 : 156.0;
+    final height = size.width < 360 ? 170.0 : 184.0;
 
     return SizedBox(
       height: height,
       child: PageView.builder(
         controller: _pageController,
         itemCount: _features.length,
+        padEnds: false,
         onPageChanged: (index) {
           setState(() {
             _selectedFeatureIndex = index;
@@ -234,7 +209,9 @@ class _PremiumScreenState extends State<PremiumScreen> {
         itemBuilder: (context, index) {
           final feature = _features[index];
           return Padding(
-            padding: const EdgeInsets.only(right: 12),
+            padding: EdgeInsets.only(
+              right: index == _features.length - 1 ? 0 : 12,
+            ),
             child: _FeatureCard(feature: feature),
           );
         },
@@ -252,10 +229,10 @@ class _PremiumScreenState extends State<PremiumScreen> {
           return AnimatedContainer(
             duration: const Duration(milliseconds: 220),
             margin: const EdgeInsets.symmetric(horizontal: 4),
-            width: isSelected ? 12 : 8,
-            height: isSelected ? 12 : 8,
+            width: isSelected ? 10 : 7,
+            height: isSelected ? 10 : 7,
             decoration: BoxDecoration(
-              color: isSelected ? whiteColor : const Color(0xFF4B4962),
+              color: isSelected ? whiteColor : const Color(0xFF5A576B),
               shape: BoxShape.circle,
             ),
           );
@@ -275,8 +252,8 @@ class _PremiumScreenState extends State<PremiumScreen> {
           return Expanded(
             child: Padding(
               padding: EdgeInsets.only(
-                left: index == 0 ? 0 : 6,
-                right: index == _plans.length - 1 ? 0 : 6,
+                left: index == 0 ? 0 : 7,
+                right: index == _plans.length - 1 ? 0 : 7,
               ),
               child: _PlanCard(
                 plan: plan,
@@ -296,38 +273,39 @@ class _PremiumScreenState extends State<PremiumScreen> {
 
   Widget _buildCtaButton() {
     return InkWell(
-      borderRadius: BorderRadius.circular(24),
+      borderRadius: BorderRadius.circular(34),
       onTap: () {},
       child: Container(
         width: double.infinity,
-        height: 82,
+        height: 80,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(34),
           gradient: const LinearGradient(
             begin: Alignment.centerLeft,
             end: Alignment.centerRight,
             colors: [
-              Color(0xFFF7BC1D),
+              Color(0xFFF7B700),
               Color(0xFFFF8F08),
             ],
           ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFFFFA30D).withValues(alpha: 0.30),
+              color: const Color(0xFFFFB000).withValues(alpha: 0.32),
               blurRadius: 28,
-              spreadRadius: 2,
+              spreadRadius: 3,
+              offset: const Offset(0, 12),
             ),
           ],
         ),
         alignment: Alignment.center,
         child: const Text(
-          'Continue',
+          'START MY JOURNEY',
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: Color(0xFF140D20),
-            fontSize: 20,
+            color: Color(0xFF0A1020),
+            fontSize: 18,
             fontWeight: FontWeight.w800,
-            letterSpacing: 1.8,
+            letterSpacing: 2.0,
           ),
         ),
       ),
@@ -339,20 +317,17 @@ class _PremiumScreenState extends State<PremiumScreen> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Icon(
-          Icons.verified_rounded,
-          color: Color(0xFF41D46F),
-          size: 20,
+          Icons.check_circle_rounded,
+          color: Color(0xFF36D36E),
+          size: 18,
         ),
-        SizedBox(width: 10),
-        Flexible(
-          child: Text(
-            'Secured by Visa App Store',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Color(0xFFE4E2ED),
-              fontSize: 15,
-              fontWeight: FontWeight.w500,
-            ),
+        SizedBox(width: 8),
+        Text(
+          'Secured with App Store.',
+          style: TextStyle(
+            color: Color(0xFFD8D5E6),
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
           ),
         ),
       ],
@@ -368,7 +343,7 @@ class _FeatureCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(28),
+      borderRadius: BorderRadius.circular(20),
       child: Stack(
         fit: StackFit.expand,
         children: [
@@ -382,16 +357,16 @@ class _FeatureCard extends StatelessWidget {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Colors.black.withValues(alpha: 0.18),
-                  Colors.black.withValues(alpha: 0.35),
-                  Colors.black.withValues(alpha: 0.72),
+                  Colors.black.withValues(alpha: 0.22),
+                  Colors.black.withValues(alpha: 0.40),
+                  Colors.black.withValues(alpha: 0.68),
                 ],
               ),
             ),
           ),
           Container(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(28),
+              borderRadius: BorderRadius.circular(20),
               border: Border.all(
                 color: Colors.white.withValues(alpha: 0.10),
                 width: 1.2,
@@ -399,9 +374,9 @@ class _FeatureCard extends StatelessWidget {
             ),
           ),
           Positioned(
-            left: 28,
-            right: 28,
-            bottom: 24,
+            left: 20,
+            right: 20,
+            bottom: 18,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -413,14 +388,14 @@ class _FeatureCard extends StatelessWidget {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 4),
                 Text(
                   feature.subtitle,
                   style: const TextStyle(
-                    color: Color(0xFFE1DFEA),
-                    fontSize: 13,
+                    color: Color(0xFFD8D5E6),
+                    fontSize: 12,
                     fontWeight: FontWeight.w500,
-                    height: 1.3,
+                    height: 1.25,
                   ),
                 ),
               ],
@@ -447,13 +422,10 @@ class _PlanCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final compact = constraints.maxWidth < 100;
+        final compact = constraints.maxWidth < 110;
         final borderColor = isSelected
-            ? const Color(0xFFAA52FF)
-            : Colors.white.withValues(alpha: 0.12);
-        final backgroundColor = isSelected
-            ? const Color(0xFF1D173D)
-            : Colors.white.withValues(alpha: 0.03);
+            ? const Color(0xFFA654FF)
+            : Colors.white.withValues(alpha: 0.10);
 
         return Stack(
           clipBehavior: Clip.none,
@@ -464,86 +436,91 @@ class _PlanCard extends StatelessWidget {
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 220),
                 curve: Curves.easeOut,
-                height: compact ? 162 : 176,
+                height: compact ? 156 : 164,
                 padding: EdgeInsets.fromLTRB(
-                  compact ? 8 : 10,
-                  plan.isPopular ? (compact ? 18 : 20) : (compact ? 12 : 14),
-                  compact ? 8 : 10,
                   compact ? 10 : 12,
+                  plan.isPopular ? 20 : 16,
+                  compact ? 10 : 12,
+                  compact ? 12 : 14,
                 ),
                 decoration: BoxDecoration(
-                  color: backgroundColor,
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: BorderRadius.circular(22),
+                  gradient: isSelected
+                      ? const LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Color(0xFF25184F),
+                            Color(0xFF17122E),
+                          ],
+                        )
+                      : LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.white.withValues(alpha: 0.04),
+                            Colors.white.withValues(alpha: 0.02),
+                          ],
+                        ),
                   border: Border.all(
                     color: borderColor,
-                    width: isSelected ? 2.5 : 1.3,
+                    width: isSelected ? 2.0 : 1.0,
                   ),
                   boxShadow: isSelected
                       ? [
                           BoxShadow(
-                            color: const Color(
-                              0xFFAA52FF,
-                            ).withValues(alpha: 0.28),
-                            blurRadius: 22,
-                            spreadRadius: 0,
+                            color: const Color(0xFF8E44FF).withValues(alpha: 0.22),
+                            blurRadius: 18,
+                            spreadRadius: 1,
                           ),
                         ]
                       : null,
                 ),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
                       plan.title.toUpperCase(),
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: const Color(0xFFAFACC2),
-                        fontSize: compact ? 10 : 11,
+                        color: const Color(0xFFA8A4BD),
+                        fontSize: compact ? 11 : 12,
                         fontWeight: FontWeight.w700,
-                        letterSpacing: compact ? 1.4 : 1.8,
+                        letterSpacing: 0.5,
                       ),
                     ),
-                    SizedBox(height: compact ? 8 : 12),
-                    Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: Text(
-                              plan.price,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: whiteColor,
-                                fontSize: compact ? 18 : 22,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: compact ? 8 : 10),
-                          Text(
-                            plan.billedAs,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: const Color(0xFFB8B5C9),
-                              fontSize: compact ? 8.5 : 10,
-                              fontWeight: FontWeight.w500,
-                              letterSpacing: 0.2,
-                              height: 1.15,
-                            ),
-                          ),
-                        ],
+                    const SizedBox(height: 14),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        plan.price,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: whiteColor,
+                          fontSize: compact ? 24 : 26,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
                     ),
+                    const SizedBox(height: 12),
                     Text(
-                      plan.note.toUpperCase(),
-                      maxLines: 1,
-                      overflow: TextOverflow.fade,
-                      softWrap: false,
+                      plan.billedAs,
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: isSelected ? whiteColor : const Color(0xFF6E6B84),
-                        fontSize: compact ? 8.5 : 10,
+                        color: const Color(0xFF8F8AA8),
+                        fontSize: compact ? 11 : 12,
+                        fontWeight: FontWeight.w500,
+                        height: 1.3,
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      plan.note,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: isSelected
+                            ? const Color(0xFFE7E3F5)
+                            : const Color(0xFF74708A),
+                        fontSize: compact ? 9.5 : 10,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -555,71 +532,51 @@ class _PlanCard extends StatelessWidget {
               Positioned(
                 top: -12,
                 child: Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: compact ? 16 : 22,
-                    vertical: compact ? 7 : 8,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 6,
                   ),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(999),
                     gradient: const LinearGradient(
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
                       colors: [
-                        Color(0xFFFF5C53),
-                        Color(0xFFFF7A1B),
+                        Color(0xFFFF5B55),
+                        Color(0xFFFF8A1D),
                       ],
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFFFF6C3A).withValues(alpha: 0.28),
-                        blurRadius: 18,
+                        color: const Color(0xFFFF7140).withValues(alpha: 0.28),
+                        blurRadius: 16,
                       ),
                     ],
                   ),
-                  child: Text(
-                    'MOST POPULAR',
-                    style: TextStyle(
-                      color: whiteColor,
-                      fontSize: compact ? 10 : 12,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0.4,
-                    ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      Text(
+                        'MOST POPULAR',
+                        style: TextStyle(
+                          color: whiteColor,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      SizedBox(width: 4),
+                      Icon(
+                        Icons.local_fire_department_rounded,
+                        color: Color(0xFFFFE1B0),
+                        size: 13,
+                      ),
+                    ],
                   ),
                 ),
               ),
           ],
         );
       },
-    );
-  }
-}
-
-class _FooterLink extends StatelessWidget {
-  const _FooterLink({
-    required this.label,
-    required this.routeName,
-  });
-
-  final String label;
-  final String routeName;
-
-  @override
-  Widget build(BuildContext context) {
-    return TextButton(
-      onPressed: () => Navigator.pushNamed(context, routeName),
-      style: TextButton.styleFrom(
-        foregroundColor: const Color(0xFF85829A),
-        padding: const EdgeInsets.symmetric(vertical: 8),
-      ),
-      child: Text(
-        label,
-        textAlign: TextAlign.center,
-        style: const TextStyle(
-          color: Color(0xFF85829A),
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-          letterSpacing: 0.3,
-          height: 1.5,
-        ),
-      ),
     );
   }
 }
@@ -632,36 +589,35 @@ class _PaywallBackground extends StatelessWidget {
     return Stack(
       children: [
         Positioned(
-          top: -90,
-          left: -40,
-          child: _Glow(
-            size: 230,
-            color: const Color(0xFF6B3EF7).withValues(alpha: 0.18),
-          ),
-        ),
-        Positioned(
-          top: 320,
-          right: -40,
-          child: _Glow(
-            size: 160,
-            color: const Color(0xFF1190FF).withValues(alpha: 0.10),
-          ),
-        ),
-        Positioned(
-          bottom: 80,
+          top: -120,
           left: -70,
           child: _Glow(
-            size: 220,
-            color: const Color(0xFFFFA114).withValues(alpha: 0.08),
+            size: 260,
+            color: const Color(0xFF5B2DE4).withValues(alpha: 0.18),
           ),
         ),
-        const _BackgroundDot(top: 118, left: 102, size: 3),
-        const _BackgroundDot(top: 366, right: 126, size: 8),
-        const _BackgroundDot(top: 522, left: 166, size: 3),
-        const _BackgroundDot(top: 604, right: 62, size: 6),
-        const _BackgroundDot(top: 782, left: 82, size: 3),
-        const _BackgroundDot(top: 912, right: 94, size: 3),
-        const _BackgroundDot(bottom: 128, left: 132, size: 4),
+        Positioned(
+          top: 170,
+          right: -40,
+          child: _Glow(
+            size: 170,
+            color: const Color(0xFF8CC3FF).withValues(alpha: 0.06),
+          ),
+        ),
+        Positioned(
+          bottom: -30,
+          right: -10,
+          child: _Glow(
+            size: 220,
+            color: const Color(0xFF3B1B8A).withValues(alpha: 0.18),
+          ),
+        ),
+        const _BackgroundDot(top: 104, left: 72, size: 3),
+        const _BackgroundDot(top: 260, right: 54, size: 4),
+        const _BackgroundDot(top: 468, left: 146, size: 3),
+        const _BackgroundDot(top: 676, right: 70, size: 5),
+        const _BackgroundDot(top: 882, left: 100, size: 2),
+        const _BackgroundDot(top: 516, right: 30, size: 2),
       ],
     );
   }
@@ -693,7 +649,7 @@ class _BackgroundDot extends StatelessWidget {
         width: size,
         height: size,
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.85),
+          color: Colors.white.withValues(alpha: 0.72),
           shape: BoxShape.circle,
         ),
       ),
