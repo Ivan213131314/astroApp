@@ -1,7 +1,5 @@
-import 'package:fl_astro_circle/pages/screens.dart';
 import 'package:fl_astro_circle/pages/universeSign/universe_sign_player_screen.dart';
 import 'package:fl_astro_circle/services/universe_sign_service.dart';
-import 'package:fl_astro_circle/services/superwall_service.dart';
 import 'package:fl_astro_circle/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';

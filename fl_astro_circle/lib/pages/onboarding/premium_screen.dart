@@ -1,6 +1,5 @@
 import 'package:fl_astro_circle/theme/theme.dart';
 import 'package:flutter/material.dart';
-import 'package:fl_astro_circle/services/superwall_service.dart';
 
 class PremiumScreen extends StatefulWidget {
   const PremiumScreen({super.key});
@@ -190,19 +189,8 @@ class _PremiumScreenState extends State<PremiumScreen> {
 
   Widget nextButton() {
     return InkWell(
-      onTap: () async {
-        // Показать Superwall paywall
-        await SuperwallService().showPaywall(
-          placement: "onboarding_premium", // Название placement из Superwall Dashboard
-          onPurchased: () {
-            // После успешной покупки переходим дальше
-            Navigator.pushNamed(context, '/onboardingAlmostThere');
-          },
-          onDeclined: () {
-            // Пользователь отклонил, но можно пропустить
-            Navigator.pushNamed(context, '/onboardingAlmostThere');
-          },
-        );
+      onTap: () {
+        Navigator.pushNamed(context, '/onboardingAlmostThere');
       },
       child: Container(
         width: double.maxFinite,

@@ -2,7 +2,6 @@ import 'dart:math';
 import 'package:fl_astro_circle/localization/localization_const.dart';
 import 'package:fl_astro_circle/services/notification_storage_service.dart';
 import 'package:fl_astro_circle/services/cosmic_audio_generator.dart';
-import 'package:fl_astro_circle/services/superwall_service.dart';
 import 'package:fl_astro_circle/pages/universeSign/universe_sign_player_screen.dart';
 import 'package:fl_astro_circle/theme/theme.dart';
 import 'package:flutter/material.dart';

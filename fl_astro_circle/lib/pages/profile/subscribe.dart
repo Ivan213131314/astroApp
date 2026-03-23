@@ -2,7 +2,6 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:fl_astro_circle/localization/localization_const.dart';
 import 'package:fl_astro_circle/widget/column_builder.dart';
 import 'package:flutter/material.dart';
-import 'package:fl_astro_circle/services/superwall_service.dart';
 
 import '../../theme/theme.dart';
 
@@ -89,6 +88,16 @@ class _SubscribeScreenState extends State<SubscribeScreen> {
     );
   }
 
+  void _showPurchasesUnavailable() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Purchases are temporarily unavailable while we switch providers.',
+        ),
+      ),
+    );
+  }
+
   contentText() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: fixPadding * 5.0),
@@ -141,25 +150,8 @@ class _SubscribeScreenState extends State<SubscribeScreen> {
                 ),
               ),
               InkWell(
-                onTap: () async {
-                  // Показать Superwall paywall
-                  await SuperwallService().showPaywall(
-                    placement: "subscribe_button", // Название placement из Superwall Dashboard
-                    onPurchased: () {
-                      // После успешной покупки
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Подписка успешно оформлена!'),
-                          backgroundColor: Colors.green,
-                        ),
-                      );
-                      Navigator.pop(context);
-                    },
-                    onDeclined: () {
-                      // Пользователь отклонил покупку
-                      print("Покупка отклонена");
-                    },
-                  );
+                onTap: () {
+                  _showPurchasesUnavailable();
                 },
                 child: Container(
                   padding: const EdgeInsets.symmetric(

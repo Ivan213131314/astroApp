@@ -1440,12 +1440,6 @@ PODS:
     - FlutterMacOS
   - sign_in_with_apple (0.0.1):
     - Flutter
-  - Superscript (0.2.8)
-  - SuperwallKit (4.7.0):
-    - Superscript (= 0.2.8)
-  - superwallkit_flutter (0.0.1):
-    - Flutter
-    - SuperwallKit (= 4.7.0)
 
 DEPENDENCIES:
   - audio_session (from `.symlinks/plugins/audio_session/ios`)
@@ -1461,7 +1455,6 @@ DEPENDENCIES:
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
   - sign_in_with_apple (from `.symlinks/plugins/sign_in_with_apple/ios`)
-  - superwallkit_flutter (from `.symlinks/plugins/superwallkit_flutter/ios`)
 
 SPEC REPOS:
   trunk:
@@ -1491,8 +1484,6 @@ SPEC REPOS:
     - nanopb
     - PromisesObjC
     - RecaptchaInterop
-    - Superscript
-    - SuperwallKit
 
 EXTERNAL SOURCES:
   audio_session:
@@ -1521,9 +1512,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
   sign_in_with_apple:
     :path: ".symlinks/plugins/sign_in_with_apple/ios"
-  superwallkit_flutter:
-    :path: ".symlinks/plugins/superwallkit_flutter/ios"
-
 SPEC CHECKSUMS:
   abseil: a05cc83bf02079535e17169a73c5be5ba47f714b
   AppAuth: d4f13a8fe0baf391b2108511793e4b479691fb73
@@ -1564,9 +1552,6 @@ SPEC CHECKSUMS:
   RecaptchaInterop: 11e0b637842dfb48308d242afc3f448062325aba
   shared_preferences_foundation: 9e1978ff2562383bd5676f64ec4e9aa8fa06a6f7
   sign_in_with_apple: c5dcc141574c8c54d5ac99dd2163c0c72ad22418
-  Superscript: 82dbb40f502823160e75503ebc1b6bac756a503d
-  SuperwallKit: 239843161a144ad08af40906ec0307779abd7d12
-  superwallkit_flutter: 1a8f16ff97d3a3be52be3f6585279cd82209feb2
 
 PODFILE CHECKSUM: 15544e3a9e96a9e5ee86cfc9d3d83947e229bc17
 

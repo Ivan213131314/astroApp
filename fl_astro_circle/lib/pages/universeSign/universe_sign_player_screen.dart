@@ -1,7 +1,6 @@
 import 'package:fl_astro_circle/pages/universeMessage/universe_decipher_screen.dart';
 import 'package:fl_astro_circle/services/cosmic_audio_generator.dart';
 import 'package:fl_astro_circle/services/notification_storage_service.dart';
-import 'package:fl_astro_circle/services/superwall_service.dart';
 import 'package:fl_astro_circle/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
@@ -136,8 +135,6 @@ class _UniverseSignPlayerScreenState extends State<UniverseSignPlayerScreen> {
     final bgColor = const Color(0xFF130B29); // Deep space purple
     final cardColor = const Color(0xFF221642); // Lighter purple for cards
     final accentColor = _getCategoryColor(); // Vivid category color
-    final primaryAccent = const Color(0xFF7B5CFA); // App's primary purple
-
     return Scaffold(
       backgroundColor: bgColor,
       extendBodyBehindAppBar: true,
@@ -394,31 +391,18 @@ class _UniverseSignPlayerScreenState extends State<UniverseSignPlayerScreen> {
           
           // Decode Button inside the card
           GestureDetector(
-            onTap: () async {
-              await SuperwallService().showPaywall(
-                placement: "subscribe_button",
-                onPurchased: () {
-                  Navigator.push(
-                    context,
-                    PageTransition(
-                      child: UniverseDecipherScreen(
-                        question: widget.question,
-                        category: widget.category,
-                        messageId: widget.messageId,
-                      ),
-                      type: PageTransitionType.rightToLeft,
-                      duration: const Duration(milliseconds: 300),
-                    ),
-                  );
-                },
-                onDeclined: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Subscribe to unlock universe signs'),
-                      backgroundColor: Colors.orange,
-                    ),
-                  );
-                },
+            onTap: () {
+              Navigator.push(
+                context,
+                PageTransition(
+                  child: UniverseDecipherScreen(
+                    question: widget.question,
+                    category: widget.category,
+                    messageId: widget.messageId,
+                  ),
+                  type: PageTransitionType.rightToLeft,
+                  duration: const Duration(milliseconds: 300),
+                ),
               );
             },
             child: Container(

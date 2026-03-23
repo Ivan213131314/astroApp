@@ -1,12 +1,8 @@
-import 'dart:async';
 import 'package:fl_astro_circle/pages/screens.dart';
 import 'package:fl_astro_circle/pages/universeMessage/universe_decipher_screen.dart';
 import 'package:fl_astro_circle/services/universe_message_service.dart';
-import 'package:fl_astro_circle/services/superwall_service.dart';
 import 'package:fl_astro_circle/theme/theme.dart';
 import 'package:flutter/material.dart';
-import 'package:line_awesome_flutter/line_awesome_flutter.dart';
-import 'package:badges/badges.dart' as badges;
 import 'package:page_transition/page_transition.dart';
 
 class UniverseMessageScreen extends StatefulWidget {
@@ -520,28 +516,28 @@ class _UniverseMessageScreenState extends State<UniverseMessageScreen>
                         heightSpace,
                         GestureDetector(
                           onTap: () async {
-                            await SuperwallService().showPaywall(
-                              placement: "subscribe_button",
-                              onPurchased: () {
-                                Navigator.push(
-                                  context,
-                                  PageTransition(
-                                    child: UniverseDecipherScreen(
-                                      question: messageController.text,
-                                    ),
-                                    type: PageTransitionType.rightToLeft,
-                                    duration: const Duration(milliseconds: 300),
-                                  ),
-                                );
-                              },
-                              onDeclined: () {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Subscribe to unlock universe messages'),
-                                    backgroundColor: Colors.orange,
-                                  ),
-                                );
-                              },
+                            final question =
+                                currentQuestionForDialog ?? messageController.text;
+                            if (messageService.responses.isNotEmpty) {
+                              final latestMessage = messageService.responses.first;
+                              await messageService.markAsRead(latestMessage.id);
+                            }
+                            if (!mounted) {
+                              return;
+                            }
+                            setState(() {
+                              showReceivedDialog = false;
+                              currentStatus = MessageStatus.idle;
+                            });
+                            Navigator.push(
+                              context,
+                              PageTransition(
+                                child: UniverseDecipherScreen(
+                                  question: question,
+                                ),
+                                type: PageTransitionType.rightToLeft,
+                                duration: const Duration(milliseconds: 300),
+                              ),
                             );
                           },
                           child: Container(

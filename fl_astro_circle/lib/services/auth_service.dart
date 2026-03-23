@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:math';
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
+import 'package:fl_astro_circle/services/revenuecat_service.dart';
 import 'package:fl_astro_circle/services/user_service.dart';
 
 class AuthService {
@@ -32,7 +33,13 @@ class AuthService {
         idToken: googleAuth.idToken,
       );
 
-      return await _auth.signInWithCredential(credential);
+      final userCredential = await _auth.signInWithCredential(credential);
+
+      if (userCredential.user != null) {
+        await RevenueCatService.instance.logIn(userCredential.user!);
+      }
+
+      return userCredential;
     } catch (e) {
       throw Exception('Google sign in failed: $e');
     }
@@ -56,7 +63,13 @@ class AuthService {
         rawNonce: rawNonce,
       );
 
-      return await _auth.signInWithCredential(oauthCredential);
+      final userCredential = await _auth.signInWithCredential(oauthCredential);
+
+      if (userCredential.user != null) {
+        await RevenueCatService.instance.logIn(userCredential.user!);
+      }
+
+      return userCredential;
     } catch (e) {
       throw Exception('Apple sign in failed: $e');
     }
@@ -71,6 +84,9 @@ class AuthService {
         email: email,
         password: password,
       );
+      if (userCredential.user != null) {
+        await RevenueCatService.instance.logIn(userCredential.user!);
+      }
       
       // Отправляем письмо с подтверждением после регистрации
       await userCredential.user?.sendEmailVerification();
@@ -86,10 +102,14 @@ class AuthService {
     required String password,
   }) async {
     try {
-      return await _auth.signInWithEmailAndPassword(
+      final userCredential = await _auth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
+      if (userCredential.user != null) {
+        await RevenueCatService.instance.logIn(userCredential.user!);
+      }
+      return userCredential;
     } catch (e) {
       throw Exception('Email sign in failed: $e');
     }
@@ -135,6 +155,7 @@ class AuthService {
       _auth.signOut(),
       _googleSignIn.signOut(),
     ]);
+    await RevenueCatService.instance.logOut();
     
     // Очищаем данные пользователя из кэша
     final userService = UserService();
@@ -162,4 +183,3 @@ class AuthService {
     return digest.toString();
   }
 }
-
