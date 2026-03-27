@@ -1,5 +1,7 @@
 import 'package:fl_astro_circle/theme/theme.dart';
+import 'package:fl_astro_circle/services/revenuecat_service.dart';
 import 'package:flutter/material.dart';
+import 'package:purchases_ui_flutter/purchases_ui_flutter.dart';
 
 class PremiumScreen extends StatefulWidget {
   const PremiumScreen({super.key});
@@ -9,6 +11,52 @@ class PremiumScreen extends StatefulWidget {
 }
 
 class _PremiumScreenState extends State<PremiumScreen> {
+  final RevenueCatService _revenueCatService = RevenueCatService.instance;
+  bool _isOpeningPaywall = false;
+
+  Future<void> _continueOnboarding() async {
+    if (_isOpeningPaywall) {
+      return;
+    }
+
+    setState(() {
+      _isOpeningPaywall = true;
+    });
+
+    PaywallResult? result;
+
+    try {
+      result = await _revenueCatService.presentPaywall();
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              _revenueCatService.lastError ??
+                  'Unable to open subscription options right now.',
+            ),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isOpeningPaywall = false;
+        });
+      }
+    }
+
+    if (!mounted) {
+      return;
+    }
+
+    if (result == PaywallResult.error) {
+      return;
+    }
+
+    Navigator.pushNamed(context, '/onboardingAlmostThere');
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -189,9 +237,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
 
   Widget nextButton() {
     return InkWell(
-      onTap: () {
-        Navigator.pushNamed(context, '/onboardingAlmostThere');
-      },
+      onTap: _continueOnboarding,
       child: Container(
         width: double.maxFinite,
         padding: const EdgeInsets.symmetric(
@@ -209,17 +255,25 @@ class _PremiumScreenState extends State<PremiumScreen> {
           ],
         ),
         alignment: Alignment.center,
-        child: const Text(
-          'NEXT',
-          style: TextStyle(
-            color: whiteColor,
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 1.2,
-          ),
-        ),
+        child: _isOpeningPaywall
+            ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(whiteColor),
+                ),
+              )
+            : const Text(
+                'NEXT',
+                style: TextStyle(
+                  color: whiteColor,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1.2,
+                ),
+              ),
       ),
     );
   }
 }
-

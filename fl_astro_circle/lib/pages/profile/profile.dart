@@ -1,6 +1,7 @@
 import 'package:fl_astro_circle/localization/localization_const.dart';
 import 'package:fl_astro_circle/theme/theme.dart';
 import 'package:fl_astro_circle/services/auth_service.dart';
+import 'package:fl_astro_circle/services/revenuecat_service.dart';
 import 'package:fl_astro_circle/services/user_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +18,7 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final AuthService _authService = AuthService();
+  final RevenueCatService _revenueCatService = RevenueCatService.instance;
   final UserService _userService = UserService();
   String userName = 'User';
   String? _userPhotoPath;
@@ -25,6 +27,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     _loadUserData();
+    _syncSubscriptionState();
+  }
+
+  Future<void> _syncSubscriptionState() async {
+    try {
+      await _revenueCatService.initialize();
+      await _revenueCatService.refreshCustomerInfo();
+    } catch (_) {
+      // RevenueCat errors are surfaced on subscription entry screens.
+    }
   }
   
   Future<void> _loadUserData() async {
@@ -43,6 +55,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       });
     }
   }
+
+  @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     return Scaffold(
@@ -62,6 +76,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         padding: const EdgeInsets.only(bottom: fixPadding * 2.0),
         children: [
           userDetail(size),
+          heightSpace,
+          _subscriptionListTile(),
           heightSpace,
           // Пункт меню "Astrologers" убран
           // iconListTile(CupertinoIcons.person_3,
@@ -165,10 +181,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         await prefs.setBool('onboarding_completed', false);
                         
                         if (mounted) {
-                          Navigator.pushNamedAndRemoveUntil(
-                            context, 
-                            '/onboarding', 
-                            (route) => false
+                          Navigator.of(this.context).pushNamedAndRemoveUntil(
+                            '/onboarding',
+                            (route) => false,
                           );
                         }
                       },
@@ -220,6 +235,50 @@ class _ProfileScreenState extends State<ProfileScreen> {
         title,
         style: medium16WhiteF4,
       ),
+    );
+  }
+
+  Widget _subscriptionListTile() {
+    return AnimatedBuilder(
+      animation: _revenueCatService,
+      builder: (context, _) {
+        final hasPremium = _revenueCatService.hasAstroCirclePro;
+
+        return ListTile(
+          onTap: () {
+            Navigator.pushNamed(context, '/subscribe');
+          },
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: fixPadding * 2.0),
+          leading: Container(
+            height: 30,
+            width: 30,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              color: primaryColor.withValues(alpha: 0.16),
+            ),
+            child: const Icon(
+              Icons.workspace_premium,
+              color: primaryColor,
+              size: 18,
+            ),
+          ),
+          minLeadingWidth: 0,
+          title: const Text(
+            'AstroCircle Premium',
+            style: medium16WhiteF4,
+          ),
+          subtitle: Text(
+            hasPremium ? 'Premium active' : 'Open RevenueCat paywall',
+            style: medium14Grey,
+          ),
+          trailing: Icon(
+            hasPremium ? Icons.chevron_right : Icons.lock_open_rounded,
+            color: whiteF4Color,
+            size: 22,
+          ),
+        );
+      },
     );
   }
 
