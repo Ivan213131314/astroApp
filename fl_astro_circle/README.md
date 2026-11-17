@@ -1,16 +1,11 @@
-# fl_astro_circle
+# Astro Circle
 
-A new Flutter project.
+Мобильное приложение об астрологии, совместимости и самопознании на Flutter.
 
-## Getting Started
+Описание возможностей, требования, запуск и настройка сервисов находятся в [основном README репозитория](../README.md).
 
-This project is a starting point for a Flutter application.
+Дополнительные инструкции:
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- [Настройка Firebase](FIREBASE_SETUP.md)
+- [Развёртывание Cloud Functions](FIREBASE_FUNCTIONS_DEPLOYMENT.md)
+- [Настройка Superwall](SUPERWALL_SETUP.md)
